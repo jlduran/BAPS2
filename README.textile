@@ -481,12 +481,9 @@ h3. GUI Gotchas
 
 I was caught by these:
 
-* On my web browser (Firefox on an Ubuntu laptop) I sometimes can't
-  see buttons like New and Save on the bottom of the Users Page. To
-  see them I decreased my font size using Ctrl--.
+** On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl -.
 
-* If you get a busy tone when you try to dial make sure you have
-  selected a Dialplan (e.g. Dialplan1 above) for that phone.
+** If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
 h2. BAPS TODO
 
