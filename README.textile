@@ -1,6 +1,6 @@
-h2. Blackfin Asterisk Package System (BAPs)
+h1. Blackfin Asterisk Package System (BAPs)
 
-h3. Introduction
+h2. Introduction
 
 Package based Build system for Blackfin Asterisk.  Key differences
 compared to buildroot based systems like Astfin and uCasterisk:
@@ -8,7 +8,7 @@ compared to buildroot based systems like Astfin and uCasterisk:
 * End users do not need to compile any software, they just
 install them on a running Blackfin system, for example:
 
-    root:~> ipkg install asterisk
+      root:~> ipkg install asterisk
 
 will grab the latest Asterisk package from a web site and install it
 on a Blackfin based hardware platform.  Use is not limited to Asterisk, it
