@@ -262,9 +262,13 @@ some quirks, here is a link that explains them (all one line):
 h2. Directories
 
 - ipkg := completed packages are placed here
+
 - include := from OpenWRT kamikaze, contains useful stuff for building packages
+
 - scripts := Useful scripts from OpenWRT kamikaze
+
 - patch := patches for all packages
+
 - files := start up scripts for packages, get copied to /etc/init.d on target
 
 h2. G729 Codec Installation
