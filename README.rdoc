@@ -21,8 +21,8 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem)
 there is a growing list of packages:
 
-Name::  Description
-X::     X
+Name:  Description
+X:     X
 
 == Getting Started
 
@@ -242,11 +242,11 @@ some quirks, here is a link that explains them (all one line):
 
 == Directories
 
-ipkg::      - completed packages are placed here
-+include+:: - from OpenWRT kamikaze, contains useful stuff for building packages
-+scripts+:: - useful scripts from OpenWRT kamikaze
-+patch+::   - patches for all packages
-+files+::   - start up scripts for packages, get copied to /etc/init.d on target
+ipkg - completed packages are placed here
+include - from OpenWRT kamikaze, contains useful stuff for building packages
+scripts - useful scripts from OpenWRT kamikaze
+patch - patches for all packages
+files - start up scripts for packages, get copied to /etc/init.d on target
 
 == G729 Codec Installation
 
