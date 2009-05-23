@@ -47,12 +47,8 @@ Packages
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem)
 there is a growing list of packages:
 
-[frame="all",grid="all"]
-`15`20~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name,Description
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-include::packages.csv[]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|_. Name|_. Description|
+| | |
 
 [[started]]
 Getting Started
