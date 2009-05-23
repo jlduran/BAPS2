@@ -30,7 +30,7 @@ The installation of the BAPs uImage is still a little complex (apologies). It re
 
 However once the uImage is install life gets much easier!
 
-This process will *erase your IP04 root file system* so please backup anything you really need (like your asterisk conf files).
+This process will <b>erase your IP04 root file system</b> so please backup anything you really need (like your asterisk conf files).
 
 1. Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 
@@ -90,18 +90,19 @@ After installation many packages include documentation in the /usr/doc
 directory of the IP04.  These are small files designed to capture
 Blackfin or IP04 specific information, for example simple tests and
 notes on differences from other versions of the same package.  The
-documentation files can also be browsed from
-http://svn.astfin.org/software/baps/trunk/doc[BAPS SVN].
+documentation files can also be browsed from BAPS2 git[http://svn.astfin.org/software/baps/trunk/doc].
 
 == HOWTO - Developer
 
-1. svn co http://svn.astfin.org/software/baps/trunk baps
+1. Clone BAPS2
+     $ git clone git://github.com/jlduran/BAPS2.git
+     $ cd BAPS2
 
 2. You need this toolchain:
 
-   [baps]$ wget http://blackfin.uclinux.org/gf/download/frsrelease/ \
+   [BAPS2]$ wget http://blackfin.uclinux.org/gf/download/frsrelease/ \
            348/3347/blackfin-toolchain-07r1.1-3.i386.tar.gz
-   [baps]$ tar xzf blackfin-toolchain-07r1.1-3.i386.tar.gz
+   [BAPS2]$ tar xzf blackfin-toolchain-07r1.1-3.i386.tar.gz
 
 If you untar the toolchain in baps directory then it will be included
 in your path automatically.  If you untar it somewhere else make sure
@@ -111,8 +112,8 @@ the bin directories in this toolchain are in your path.
 uClinux-dist to support compiling of other packages.  You need to make
 uClinux before making any other packages.
 
-   [baps]$ make -f uClinux.mk uClinux
-   [baps]$ cp uClinux-dist/images/uImage /tftpboot/uImage
+   [BAPS2]$ make -f uClinux.mk uClinux
+   [BAPS2]$ cp uClinux-dist/images/uImage /tftpboot/uImage
 
 You can then try booting from your uImage via tftp, in u-boot:
 
