@@ -11,7 +11,7 @@ compared to buildroot based systems like Astfin and uCasterisk:
 * End users do not need to compile any software, they just
 install them on a running Blackfin system, for example:
 
-    root:~> ipkg install asterisk
+  @root:~> ipkg install asterisk@
 
 will grab the latest Asterisk package from a web site and install it
 on a Blackfin based hardware platform.  Use is not limited to Asterisk, it
