@@ -5,29 +5,29 @@
 Package based Build system for Blackfin Asterisk.  Key differences
 compared to buildroot based systems like Astfin and uCasterisk:
 
-+ End users do not need to compile any software, they just
+End users do not need to compile any software, they just
 install them on a running Blackfin system, for example:
-+
+
    root:~> ipkg install asterisk
-+
+
 will grab the latest Asterisk package from a web site and install it
 on a Blackfin based hardware platform.  Use is not limited to Asterisk, it
 could be used to manage any Blackfin software, including the kernel.
 The use of ipkg is very common on the OpenWRT project, and similar
 package based systems are common on x86 Linux, e.g. apt-get, debs,
 rpms.
-+
+
 Note that software is installed at run time rather than build time.
 Packages (via ipkg) are used to install applications like Asterisk,
 rather than placing everything in a uImage.  The target hardware is
 initially booted with a basic kernel and root file system, then
 packages are installed as required.  We assume availability of
 persistent (non ram) based file system like yaffs or jffs2.
-+
+
 The goal is to make installing software on the Blackfin much easier
 for end-users, more like an x86 experience.
 
-+ Compared to buildroot systems BAPS has a flat directory structure to
+Compared to buildroot systems BAPS has a flat directory structure to
 ease development (less wear on your tab key).  It is designed to allow
 modular compilation of packages, e.g. you can compile a single
 application without building the entire uImage.  Faster and less
@@ -37,9 +37,7 @@ easy navigation of the source tree.  There is less chance of breaking
 the build system due to decoupling of modules (kernel, root fs, are
 separate from Asterisk).
 
-[[packages]]
-Packages
---------
+== Packages
 
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem)
 there is a growing list of packages:
@@ -51,9 +49,7 @@ Name,Description
 include::packages.csv[]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[[started]]
-Getting Started
----------------
+== Getting Started
 
 The installation of the BAPs uImage is still a little complex
 (apologies).  It requires working with u-boot using the RS232 console
@@ -128,9 +124,7 @@ Now we can install some packages using ipkg:
    $root:~> ipkg install zaptel-spi asterisk native-sounds
    $root:~> reboot
 
-[[doco]]
-Documentation
--------------
+== Documentation
 
 After installation many packages include documentation in the /usr/doc
 directory of the IP04.  These are small files designed to capture
@@ -139,9 +133,7 @@ notes on differences from other versions of the same package.  The
 documentation files can also be browsed from
 http://svn.astfin.org/software/baps/trunk/doc[BAPS SVN].
 
-[[howto_developer]]
-HOWTO - Developer
------------------
+== HOWTO - Developer
 
 1/ svn co http://svn.astfin.org/software/baps/trunk baps
 
@@ -193,9 +185,7 @@ Try installing a simple ipkgs:
    root:~> /etc/init.d/hello enable
    root:~> ls -l /etc/rc.d/
 
-[[howto_ipkg]]
-HOWTO - IPKG
-------------
+== HOWTO - IPKG
 
 To build the ipkg:
 
@@ -236,9 +226,7 @@ If you get complaints about MD5 mismatch, then:
 
    [ip04]$ rm /usr/lib/ipkg/lists/snapshots
 
-[[howto_uclinux]]
-HOWTO - uClinux Changes
------------------------
+== HOWTO - uClinux Changes
 
 Say you have changed a busybox option, or modified some files in
 uClinux-dist.  To capture the changes to patches in SVN:
@@ -292,9 +280,7 @@ some quirks, here is a link that explains them (all one line):
 
 6/ On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
-[[directories]]
-Directories
------------
+== Directories
 
 ipkg    - completed packages are placed here
 
@@ -308,9 +294,7 @@ patch   - patches for all packages
 files   - start up scripts for packages, get copied to /etc/init.d on
           target
 
-[[g729]]
-G729 Codec Installation
------------------------
+== G729 Codec Installation
 
 Analog Devices has developed an optimised g729 library for the
 Blackfin that can run on the IP04.  Note that you require a license
@@ -356,18 +340,14 @@ Now rcp libg729.so from libbfgdots to /lib on your IP04. When Asterisk
 boots it should load the g729 codec.  Check the codec is installed
 with 'show translate' at the Asterisk CLI.
 
-[[credits]]
-Credits
--------
+== Credits
 
 Thanks to: Jeff Knighton, Alex Tao, Ming C (Vincent) Li, Mike Taht,
 Keith Huang, Mark Hindess, Nick Basil and Michael O'Conner for
 contributing.  Thanks Bruce and Jan at Voiptel for the great work on
 the GUI.
 
-[[Voiptel]]
-VoipTel GUI Installation
-------------------------
+== VoipTel GUI Installation
 
 Bruce and Jan at
 http://voiptel.no/content/view/23/42/lang,en/[Voiptel] have recently
@@ -444,9 +424,7 @@ different addresses:
 * Make the necessary changes, click Save and reboot
 * Change your own IP address back
 
-[[Voiptel_ug]]
-VoipTel GUI User Guide
-----------------------
+== VoipTel GUI User Guide
 
 Well, not really a user guide!  Just some basic notes to get started:
 
@@ -524,28 +502,26 @@ I was caught by these:
 * If you get a busy tone when you try to dial make sure you have
   selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
-[[todo]]
-BAPS TODO
----------
+== BAPS TODO
 
 Some tasks that need doing....:
 
-+ Work out a way to install uImage.ip08 without u-boot, i.e. from a
+* Work out a way to install uImage.ip08 without u-boot, i.e. from a
 uClinux root prompt.  This will take much of the pain away, kernels
 can then be treated like packages.
 
-+ Can we install kernels (uImage) using a package and no u-boot/RS232?
+* Can we install kernels (uImage) using a package and no u-boot/RS232?
 
-+ Should we separate kernel from baseline root file system install?
+* Should we separate kernel from baseline root file system install?
 
-+ BAPS uImages for BF537 and BF533
+* BAPS uImages for BF537 and BF533
 
-+ A way to build all packages needed for development, like ip08.mk,
+* A way to build all packages needed for development, like ip08.mk,
 or maybe set up dependencies in existing Makefile, e.g. so that
 libssl.mk is called when making asterisk.  Not sure about the best way
 to go here - the idea behind BAPs is to modularise compilation so I am
 sensitive to having many dependencies and all the extra output that
 would generate on the command line.
 
-+ Fix the Maintainer Field in packages (e.g. specific entries for each
+* Fix the Maintainer Field in packages (e.g. specific entries for each
 package).
