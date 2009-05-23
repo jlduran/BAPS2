@@ -490,38 +490,20 @@ ip04*CLI> zap show channels
       4            numberplan-cust            default
 ------------------------------------------------------------------------------
 
-GUI Gotchas
-~~~~~~~~~~~
+=== GUI Gotchas
 
 I was caught by these:
 
-* On my web browser (Firefox on an Ubuntu laptop) I sometimes can't
-  see buttons like New and Save on the bottom of the Users Page. To
-  see them I decreased my font size using Ctrl--.
-
-* If you get a busy tone when you try to dial make sure you have
-  selected a Dialplan (e.g. Dialplan1 above) for that phone.
+* On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl--.
+* If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
 == BAPS TODO
 
-Some tasks that need doing....:
+Some tasks that need doing:
 
-* Work out a way to install uImage.ip08 without u-boot, i.e. from a
-uClinux root prompt.  This will take much of the pain away, kernels
-can then be treated like packages.
-
+* Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
 * Can we install kernels (uImage) using a package and no u-boot/RS232?
-
 * Should we separate kernel from baseline root file system install?
-
 * BAPS uImages for BF537 and BF533
-
-* A way to build all packages needed for development, like ip08.mk,
-or maybe set up dependencies in existing Makefile, e.g. so that
-libssl.mk is called when making asterisk.  Not sure about the best way
-to go here - the idea behind BAPs is to modularise compilation so I am
-sensitive to having many dependencies and all the extra output that
-would generate on the command line.
-
-* Fix the Maintainer Field in packages (e.g. specific entries for each
-package).
+* A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
+* Fix the Maintainer Field in packages (e.g. specific entries for each package).
