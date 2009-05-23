@@ -259,25 +259,15 @@ some quirks, here is a link that explains them (all one line):
 
 6/ On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
-[[directories]]
-Directories
------------
+h2. Directories
 
-ipkg    - completed packages are placed here
+- ipkg := completed packages are placed here
+- include := from OpenWRT kamikaze, contains useful stuff for building packages
+- scripts := Useful scripts from OpenWRT kamikaze
+- patch := patches for all packages
+- files := start up scripts for packages, get copied to /etc/init.d on target
 
-include - from OpenWRT kamikaze, contains useful stuff for building
-          packages.
-
-scripts - Useful scripts from OpenWRT kamikaze
-
-patch   - patches for all packages
-
-files   - start up scripts for packages, get copied to /etc/init.d on
-          target
-
-[[g729]]
-G729 Codec Installation
------------------------
+h2. G729 Codec Installation
 
 Analog Devices has developed an optimised g729 library for the
 Blackfin that can run on the IP04.  Note that you require a license
@@ -481,9 +471,9 @@ h3. GUI Gotchas
 
 I was caught by these:
 
-** On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl -.
+  * On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl -.
 
-** If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
+  * If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
 h2. BAPS TODO
 
