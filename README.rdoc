@@ -7,7 +7,8 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 1. End users do not need to compile any software, they just install them on a running Blackfin system, for example:
 
    root:~> ipkg install asterisk
-will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
+
++will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
 Note that software is installed at run time rather than build time.
 Packages (via ipkg) are used to install applications like Asterisk,
 rather than placing everything in a uImage. The target hardware is
@@ -475,11 +476,11 @@ I was caught by these:
 
 == BAPS TODO
 
-Some tasks that need doing:
+Some tasks that need doing....:
 
-* Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
-* Can we install kernels (uImage) using a package and no u-boot/RS232?
-* Should we separate kernel from baseline root file system install?
-* BAPS uImages for BF537 and BF533
-* A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
-* Fix the Maintainer Field in packages (e.g. specific entries for each package).
+1. Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
+2. Can we install kernels (uImage) using a package and no u-boot/RS232?
+3. Should we separate kernel from baseline root file system install?
+4. BAPS uImages for BF537 and BF533
+5. A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
+6. Fix the Maintainer Field in packages (e.g. specific entries for each package).
