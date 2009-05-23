@@ -451,8 +451,7 @@ Well, not really a user guide!  Just some basic notes to get started:
 * Check out the CLI to see what the GUI is up
   to.  This is what I found after setting up two analog (6004 and 6016),
   and one SIP (6015) extensions:
-+
-------------------------------------------------------------------------------
+
 ip04*CLI> show dialplan default
 
 [ Context 'default' created by 'pbx_config' ]
@@ -477,7 +476,6 @@ ip04*CLI> zap show channels
       2            default                    default
       3            numberplan-cust            default
       4            numberplan-cust            default
-------------------------------------------------------------------------------
 
 h3. GUI Gotchas
 
@@ -495,13 +493,8 @@ h2. BAPS TODO
 Some tasks that need doing...:
 
 # Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt. This will take much of the pain away, kernels can then be treated like packages.
-
 # Can we install kernels (uImage) using a package and no u-boot/RS232?
-
 # Should we separate kernel from baseline root file system install?
-
 # BAPS uImages for BF537 and BF533
-
 # A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularize compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
-
 # Fix the Maintainer Field in packages (e.g. specific entries for each package).
