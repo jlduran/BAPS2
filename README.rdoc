@@ -250,15 +250,13 @@ some quirks, here is a link that explains them (all one line):
 
 ipkg    - completed packages are placed here
 
-include - from OpenWRT kamikaze, contains useful stuff for building
-          packages.
+include - from OpenWRT kamikaze, contains useful stuff for building packages.
 
 scripts - Useful scripts from OpenWRT kamikaze
 
 patch   - patches for all packages
 
-files   - start up scripts for packages, get copied to /etc/init.d on
-          target
+files   - start up scripts for packages, get copied to /etc/init.d on target
 
 == G729 Codec Installation
 
@@ -269,33 +267,30 @@ from Sipro to run this g729 codec legally.
 Here are the instructions for building and installing the g729 codec.
 Familiarity with compiling Blackfin code for the IP04 is assumed.
 
-1. Make sure the 2007 toolchain is installed as per the <<developer,Developer
-How To>> above.  You path should include these directories:
+1. Make sure the 2007 toolchain is installed as per the Developer How To[] above.  You path should include these directories:
 
-  /path/to/baps/opt/uClinux/bfin-linux-uclibc/bin
-  /path/to/baps/opt/uClinux/bfin-uclinux/bin
+     /path/to/baps/opt/uClinux/bfin-linux-uclibc/bin
+     /path/to/baps/opt/uClinux/bfin-uclinux/bin
 
 2. Change the processor type in uClinux-dist/linux-2.6.x/.config to BF533:
 
-  # CONFIG_BF532 is not set
-  CONFIG_BF533=y
+     # CONFIG_BF532 is not set
+     CONFIG_BF533=y
 
-Rebuild the uImage.  You can test it by booting the uImage from ram:
+   Rebuild the uImage.  You can test it by booting the uImage from ram:
 
-  ip04>tftp 0x1000000 uImage;bootm
+     ip04>tftp 0x1000000 uImage;bootm
   
-Check that it boots as a BF533.
+   Check that it boots as a BF533.
 
-Now flash this new uImage.  It is possible to install this new
-kernel without erasing your root file system if you **just** erase
-the first 0x300000 of flash.
+   Now flash this new uImage. It is possible to install this new kernel without erasing your root file system if you *just* erase the first 0x300000 of flash.
 
-  ip04>set autostart
-  ip04>set serverip your.tftp.server
-  ip04>tftp 0x1000000 uImage_bf533
-  ip04>nand erase clean 0x0 0x300000
-  ip04>nand erase 0x0 0x300000
-  ip04>nand write 0x1000000 0x0 0x300000
+     ip04>set autostart
+     ip04>set serverip your.tftp.server
+     ip04>tftp 0x1000000 uImage_bf533
+     ip04>nand erase clean 0x0 0x300000
+     ip04>nand erase 0x0 0x300000
+     ip04>nand write 0x1000000 0x0 0x300000
 
 3. Check out and build libbfgdots:
 
