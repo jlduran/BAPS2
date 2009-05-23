@@ -8,7 +8,7 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 
    root:~> ipkg install asterisk
 
-  will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
+will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
   Note that software is installed at run time rather than build time.
   Packages (via ipkg) are used to install applications like Asterisk, rather than placing everything in a uImage. The target hardware is initially booted with a basic kernel and root file system, then packages are installed as required. We assume availability of persistent (non ram) based file system like yaffs or jffs2.
   The goal is to make installing software on the Blackfin much easier for end-users, more like an x86 experience.
@@ -436,37 +436,39 @@ Well, not really a user guide!  Just some basic notes to get started:
   to.  This is what I found after setting up two analog (6004 and 6016),
   and one SIP (6015) extensions:
 
-  ip04*CLI> show dialplan default
-  
-  [ Context 'default' created by 'pbx_config' ]
-    '.' =>            1. Goto(${EXTEN})                             [pbx_config]
-    '6004' =>         hint: Zap/4                                   [pbx_config]
-                      1. Macro(stdexten|6004|${HINT})               [pbx_config]
-    '6015' =>         hint: SIP/6015                                [pbx_config]
-                      1. Macro(stdexten|6015|${HINT})               [pbx_config]
-    '6016' =>         hint: Zap/3                                   [pbx_config]
-                      1. Macro(stdexten|6016|${HINT})               [pbx_config]
-  
-  ip04*CLI> sip show peers
-  
-  Name/username              Host            Dyn Nat ACL Port     Status 
-  6015/6015                  192.168.1.23     D          5060     Unmonitored 
-  
-  ip04*CLI> zap show channels
-  
-     Chan Extension  Context         Language   MOH Interpret
-   pseudo                                       default
-        1            default                    default
-        2            default                    default
-        3            numberplan-cust            default
-        4            numberplan-cust            default
+<tt>
+ip04*CLI> show dialplan default
+
+[ Context 'default' created by 'pbx_config' ]
+  '.' =>            1. Goto(${EXTEN})                             [pbx_config]
+  '6004' =>         hint: Zap/4                                   [pbx_config]
+                    1. Macro(stdexten|6004|${HINT})               [pbx_config]
+  '6015' =>         hint: SIP/6015                                [pbx_config]
+                    1. Macro(stdexten|6015|${HINT})               [pbx_config]
+  '6016' =>         hint: Zap/3                                   [pbx_config]
+                    1. Macro(stdexten|6016|${HINT})               [pbx_config]
+
+ip04*CLI> sip show peers
+
+Name/username              Host            Dyn Nat ACL Port     Status 
+6015/6015                  192.168.1.23     D          5060     Unmonitored 
+
+ip04*CLI> zap show channels
+
+   Chan Extension  Context         Language   MOH Interpret
+ pseudo                                       default
+      1            default                    default
+      2            default                    default
+      3            numberplan-cust            default
+      4            numberplan-cust            default
+</tt>
 
 === GUI Gotchas
 
 I was caught by these:
 
-  * On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl-.
-  * If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
+* On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl-.
+* If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
 == BAPS TODO
 
