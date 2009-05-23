@@ -239,15 +239,15 @@ some quirks, here is a link that explains them (all one line):
 
 == Directories
 
-[ipkg]    - completed packages are placed here
+[ipkg]    completed packages are placed here
 
-[include] - from OpenWRT kamikaze, contains useful stuff for building packages.
+[include] from OpenWRT kamikaze, contains useful stuff for building packages
 
-[scripts] - Useful scripts from OpenWRT kamikaze
+[scripts] useful scripts from OpenWRT kamikaze
 
-[patch]   - patches for all packages
+[patch]   patches for all packages
 
-[files]   - start up scripts for packages, get copied to /etc/init.d on target
+files::   start up scripts for packages, get copied to /etc/init.d on target
 
 == G729 Codec Installation
 
