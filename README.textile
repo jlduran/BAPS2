@@ -7,7 +7,7 @@ Package based Build system for Blackfin Asterisk.  Key differences compared to b
 * End users do not need to compile any software, they just install them on a running Blackfin system, for example:
 
 <pre>
-  root:~> ipkg install asterisk
+    root:~> ipkg install asterisk
 </pre>
 
 will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform.  Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
