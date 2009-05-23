@@ -1,0 +1,418 @@
+<!--
+ * VoIPtel-GUI	-	an Asterisk configuration interface
+ *
+ * Shows Asterisk Log messages
+ *
+ * Based on Asterisk-GUI, Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Mark Spencer <markster@digium.com>
+ * Pari Nannapaneni <pari@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+ *
+-->
+<script src="scripts/prototype.js"></script>
+<script src="scripts/astman.js"></script>
+<script src="scripts/tooltip.js"></script>
+<link href="stylesheets/schwing.css" media="all" rel="Stylesheet" type="text/css" />
+
+<style type="text/css">
+td {text-align: center}
+</style>
+
+<script>
+var loginfofile = "loginfo.html";
+var filesizehtmlfile = "filesize.html";
+var htmlloc = "/var/lib/asterisk/static-http/config/";
+//var loc = "/mnt/mmc/cdr-custom/Master.csv";
+//var pathonly = "/mnt/mmc/cdr-custom/";
+var alreadyasked = false;
+var loc = "/var/log/asterisk/cdr-csv/Master.csv";
+var pathonly = "/var/log/asterisk/cdr-csv/";
+
+function thisday_log(){
+//	_$('bg_transparent').style.display="none" ;
+	_$('error_nodata').style.display="none" ;
+	_$('status_message').style.display = "" ;
+	var _ld = _$('log_day').value; 
+	var _lm = _$('log_month').value; 
+	var _ly = _$('log_year').value; 
+	if( _ld < 10 ){ _ld = "0" + _ld; }
+	
+	parent.astmanEngine.run_tool(asterisk_guiListFiles + " " + pathonly, callback = function() { 
+	var opt = { method: 'get', asynchronous: true,
+		onComplete: function(originalRequest){
+			var logfiles = originalRequest.responseText.split("\n") ;
+			var file_name;
+			var logfiles_clean = new Array;
+			var logfiles_tocheck = new Array;
+			for( var i = 0 ; i < logfiles.length ; i++ ){
+				if( typeof logfiles[i] == "undefined"  || logfiles[i] == "" ){
+					continue;
+				}
+				logfiles[i] = logfiles[i].replace(/^\s*|\s*$/g,'') ;
+				if( logfiles[i] == "" ){ continue; }
+				if( logfiles[i] == "Master.csv" ){ continue; }
+			//	if( logfiles[i].substr( 17, 4 ) != ".csv") { continue; }
+				file_name = logfiles[i].stripTags() ;
+				logfiles_clean.push(file_name);
+			}
+			for( var i = 0 ; i < logfiles_clean.length ; i++ ){
+				var logfile_clean_split = logfiles_clean[i].split(".");
+				var logfile_daterange = logfile_clean_split[0];
+				var logfile_daterange_split = logfile_daterange.split("-");
+				var logfile_datefrom = logfile_daterange_split[0];
+				var logfile_dateto = logfile_daterange_split[1];
+				var selected_date = _ly.toString() + _lm.toString() + _ld.toString();
+				selected_date = selected_date * 1;
+				if( selected_date >= logfile_datefrom && selected_date <= logfile_dateto ){
+					logfiles_tocheck.push(logfiles_clean[i]);
+				}
+			}
+			var tmp_command = "echo '#!/bin/bash' > /tmp/tmpcmd.sh; echo 'echo \'\' > /var/lib/asterisk/static-http/config/today_log.html; ' >> /tmp/tmpcmd.sh;";
+			parent.astmanEngine.run_tool( tmp_command , onSuccess = function() { 
+				for( var i = 0 ; i < logfiles_tocheck.length ; i++ ){
+					var tmp_cmdpart = "echo '/bin/sh /etc/voiptel-gui/parse.sh " + pathonly + logfiles_tocheck[i] + " " + _ly + " " + _lm + " " + _ld + " >> /var/lib/asterisk/static-http/config/today_log.html; ' >> /tmp/tmpcmd.sh; " ;
+					parent.astmanEngine.run_tool( tmp_cmdpart , onSuccess = function() {} );
+				}
+				var tmp_cmdlatestpart = "echo '/bin/sh /etc/voiptel-gui/parse.sh " + loc + " " + _ly + " " + _lm + " " + _ld + " >> /var/lib/asterisk/static-http/config/today_log.html; ' >> /tmp/tmpcmd.sh; ";
+				parent.astmanEngine.run_tool( tmp_cmdlatestpart , onSuccess = function() {
+					var tmp_runtmpscript = "/bin/sh /tmp/tmpcmd.sh";
+					parent.astmanEngine.run_tool( tmp_runtmpscript , onSuccess = function() { _$('status_message').style.display='none'; load_todayslog(); } );
+				} );
+			} );
+		},
+		onFailure: function(t) { alert("Config Error: " + t.status + ": " + t.statusText); }
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request(asterisk_guiSysInfo_output , opt);
+	});
+	
+//	var tmp_command = "/bin/sh /etc/voiptel-gui/parse.sh " + loc + " | /bin/grep -e '" + _ly + "-" + _lm + "-" + _ld + "' > /var/lib/asterisk/static-http/config/today_log.html" ;
+
+//	var tmp_command = "/bin/sh /etc/voiptel-gui/parse.sh " + loc + " " + _ly + " " + _lm + " " + _ld + " > /var/lib/asterisk/static-http/config/today_log.html" ;
+//	parent.astmanEngine.run_tool( tmp_command , onSuccess = function() { _$('status_message').style.display='none'; load_todayslog(); } );
+	
+/*	var _ld = _$('log_day').value; 
+	if(  _ld < 10 ){ var space = "  "; }else{ var space = " ";  }	
+	var tmp_command = "/bin/grep -e '" + _$('log_month').value + space + _ld 
+						+ " ' " + loc + " > /var/lib/asterisk/static-http/config/today_log.html" ;
+	parent.astmanEngine.run_tool( tmp_command , onSuccess = function() { _$('status_message').style.display='none'; load_todayslog(); } );
+*/
+}
+
+function load_todayslog(){
+//	_$('bg_transparent').style.display="none" ;
+	_$('error_nodata').style.display="none" ;
+	_$('status_message').style.display= "" ;	
+	
+	var opt = {
+		method: 'get',
+		asynchronous: true,
+		onComplete: function(originalRequest){
+			_$('status_message').style.display = 'none' ;
+//			_$('todaylog').innerHTML = (originalRequest.responseText) ? "<PRE>"+originalRequest.responseText.escapeHTML() +"</PRE>" : "No log messages found on this Day. <BR><BR> Make sure a VoIPtel SD/MMC card is inserted before turning the PBX on, as no logging will occur without it." ;
+			if( originalRequest.responseText && originalRequest.responseText != "\n" ){ 
+				cleartable("cdrtable");
+				var cdrinput = originalRequest.responseText.split("<BREAK>"); 
+				cdrinput = cdrinput.reverse();
+				for( var i = 1; i < cdrinput.length; i++ ){
+					var entryline = cdrinput[i].split(",");
+					cdrinput[i] = entryline;
+					var cid = cdrinput[i][0];
+					var dest = cdrinput[i][1]; 
+					var start = cdrinput[i][2];
+					var answ = cdrinput[i][3];
+					var end = cdrinput[i][4];
+					var dur = cdrinput[i][5];
+					var disp = cdrinput[i][6];
+										
+					addRow("cdrtable",cid,dest,start,answ,end,dur,disp,i);
+//					_$('bg_transparent').style.display="none" ;
+					_$('error_nodata').style.display="none" ;
+				}
+			}else{
+//				_$('bg_transparent').style.display="" ;
+				_$('error_nodata').style.display="" ;
+				cleartable("cdrtable");
+			}
+		},
+		onFailure: function(t) {
+			_$('status_message').style.display = 'none' ;
+			gui_alert("Config Error: " + t.status + ": " + t.statusText);
+		}
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request("./today_log.html", opt);
+	return true;
+}
+
+
+function localajaxinit(){
+	var adjust_toScreen = function(){
+		var i = ASTGUI.displayHeight();
+		_$('todaylog').style.height = (i - 50); 
+	}
+	ASTGUI.events.add( window , 'resize', adjust_toScreen);
+	top._$('mainscreen').width= 798;
+	setWindowTitle("Call Logs");
+	// call the tool (sysinfo)
+	var date = new Date() ; 
+	var year = date.getFullYear();
+	showdiv_statusmessage();
+	_$('log_month').selectedIndex = date.getMonth() ;
+	_$('log_day').selectedIndex = date.getDate()  - 1 ;
+	_$('log_year').selectedIndex = year - 1980;
+	_$('status_message').style.display="block";
+	_$('message_text').innerHTML = "Loading system Information ...";
+	parent.loadscreen(this);
+//	load_todayslog();
+	thisday_log();
+//	getfilesize();
+}
+
+function free_mem(){
+	top._$('mainscreen').width= 540;
+	if( navigator.userAgent.indexOf("MSIE") == -1 ){ return true; }
+	try{
+		purge( document.body );
+	} catch(e){ }
+}
+
+function addRow(id,cid,dest,start,answ,end,dur,disp,i){
+    var tbody = document.getElementById(id).getElementsByTagName("TBODY")[0];
+    var row = document.createElement("TR")
+    var td1 = document.createElement("TD")
+	var td2 = document.createElement("TD")
+	var td3 = document.createElement("TD")
+	var td4 = document.createElement("TD")
+	var td5 = document.createElement("TD")
+	var td6 = document.createElement("TD")
+	var td7 = document.createElement("TD")
+    td1.appendChild (document.createTextNode(cid))
+    td2.appendChild (document.createTextNode(dest))
+	td3.appendChild (document.createTextNode(start))
+	td4.appendChild (document.createTextNode(answ))
+	td5.appendChild (document.createTextNode(end))
+	td6.appendChild (document.createTextNode(dur))
+	td7.appendChild (document.createTextNode(disp))
+	
+    row.appendChild(td1);
+    row.appendChild(td2);
+	row.appendChild(td3);
+	row.appendChild(td4);
+	row.appendChild(td5);
+	row.appendChild(td6);
+	row.appendChild(td7);
+	
+	row.style.backgroundColor=( i % 2 == 0 )?"#FFFFFF":"#F6F6F6";
+//	if( i == 0 ){ row.style.backgroundColor="#FFFF00"; }
+	
+    tbody.appendChild(row);
+  }
+
+function cleartable(id){
+	var tbody = document.getElementById(id).getElementsByTagName("TBODY")[0];
+	for( var i=0; i < tbody.rows.length; ){ tbody.deleteRow(i); }
+}
+/*
+function logrotate(){
+	_$('msg_rotating').style.display="" ;
+	_$('fg_transparent').style.display="" ;
+	
+	var cmd_getloginfo = "cat " + loc + " > " + htmlloc + loginfofile;
+	parent.astmanEngine.run_tool( cmd_getloginfo , onSuccess = getloginfohtml() );
+}
+
+function getloginfohtml(){
+	var opt = {
+		method: 'get',
+		asynchronous: true,
+		onComplete: function(originalRequest){
+			var loginfo = originalRequest.responseText;
+			var loginfosplit = loginfo.split("\n");
+			var logdates = new Array;
+			var smallestval = 999999999;
+			var largestval = 0;
+			for( var i=0; i < loginfosplit.length; i++ ){
+				if( loginfosplit[i] != "" ){
+					var loginfolinesplit = loginfosplit[i].split(",");
+					var loglinedateandtime = loginfolinesplit[2].split(" ");
+					logdates.push(loglinedateandtime[0].replace(/\"/,""));
+				}
+			}
+			for( var i=0; i < logdates.length; i++ ){
+				var tmpval = logdates[i].replace(/-/g,"") * 1;
+				if( tmpval < smallestval ){
+					smallestval = tmpval;
+				}else if( tmpval > largestval ){
+					largestval = tmpval;
+				}
+			}
+			var cmd_renamelog = "sh /etc/voiptel-gui/archive.sh " + loc + " " + pathonly + smallestval + "-" + largestval + ".csv";
+			parent.astmanEngine.run_tool( cmd_renamelog , onSuccess = function(){
+				_$('msg_rotating').style.display="none"; 
+				_$('fg_transparent').style.display="none"; 
+				parent.gui_feedback("Logs archived successfully","blue","4000"); 
+				getfilesize();
+			});
+		},
+		onFailure: function(t) {
+			_$('msg_rotating').style.display="none"; 
+			_$('fg_transparent').style.display="none";
+			gui_alert("Error: " + t.status + ": " + t.statusText);
+		}
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request(loginfofile , opt);
+	return true;
+}
+
+function getfilesize(){
+	var cmd_getfilesize = "du -h " + loc + " > " + htmlloc + filesizehtmlfile;
+	parent.astmanEngine.run_tool( cmd_getfilesize , onSuccess = getfilesizehtml() );
+}
+
+function getfilesizehtml(){
+	var opt = {
+		method: 'get',
+		asynchronous: true,
+		onComplete: function(originalRequest){
+			var filesizehtml = originalRequest.responseText;
+			var filesizehtmlsplit = filesizehtml.split("\t");
+			var filesize = filesizehtmlsplit[0];
+			_$('filesize').innerHTML = filesize;
+			var filesizesplit = filesize.split(".");
+			var decimal_and_unit = filesizesplit[1];
+			var munit = decimal_and_unit.charAt( decimal_and_unit.length - 1 );
+			if( filesizesplit[0] > 500 && filesizesplit[0] < 1000 && munit == "k" && alreadyasked == false ){
+				_$('logsize_msg').innerHTML = "The log file has grown beyond the recommended file size.<BR>You may experience longer loading times, and it is therefore recommended that you archive your current logs.<BR>This will have no effect on accessing them later on.<BR><BR>Do you wish to archive now?";
+				_$('dialog_logsize').style.display="";
+				alreadyasked = true;
+			}else if( munit == "M" && alreadyasked == false ){
+				_$('logsize_msg').innerHTML = "WARNING!!<BR><BR>The log file is becoming saturated. It is highly recommended that you archive your current logs. This will have no effect on accessing them later on.<BR><BR>Do you wish to archive now?";
+				_$('dialog_logsize').style.display="";
+				alreadyasked = true;
+			}
+		},
+		onFailure: function(t) {
+			gui_alert("Error: " + t.status + ": " + t.statusText);
+		}
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request(filesizehtmlfile , opt);
+	return true;
+}
+
+function archivenow(){
+	_$('dialog_logsize').style.display="none";
+	logrotate();
+}
+
+function archivelater(){
+	_$('dialog_logsize').style.display="none";
+}
+*/
+</script>
+<body id="foo" onload="localajaxinit()" bgcolor="#FFFFFF"  onunload="free_mem()">
+<div style="font-size : 12px; padding : 3px 6px 3px 6px; border-style : solid none solid none; border-top-color : #BDC7E7; border-bottom-color : #182052; border-width : 1px 0px 1px 0px; background-color : #A81D0A; color : #ffffff;">
+	<span style="margin-left: 4px;font-weight:bold;">Asterisk Call Logs</span>
+	<span style="cursor: pointer; cursor: hand;" onclick="window.location.href=window.location.href;" >&nbsp;<img src="images/refresh.png" title=" Refresh " border=0 >&nbsp;</span>
+	<span>
+		<select id="log_month" class="input8">
+			<option value="01">Jan</option>
+			<option value="02">Feb</option>
+			<option value="03">Mar</option>
+			<option value="04">Apr</option>
+			<option value="05">May</option>
+			<option value="06">Jun</option>
+			<option value="07">Jul</option>
+			<option value="08">Aug</option>
+			<option value="09">Sep</option>
+			<option value="10">Oct</option>
+			<option value="11">Nov</option>
+			<option value="12">Dec</option>
+		</select>
+		<select id="log_day"  class="input8"><script> for(var i=1; i < 32; i++){ document.write( '<option value="' + i + '">' + i + '</option>' ); }</script></select>
+		<select id="log_year"  class="input8"><script> var date = new Date(); var yearplusone = date.getYear() + 1901; for(var i=1980; i < yearplusone; i++){ document.write( '<option value="' + i + '">' + i + '</option>' ); }</script></select>
+		<input type="button" value="Go" onclick="thisday_log();"  class="input8">
+		&nbsp;&nbsp;<span style="color:#FFF; font-weight:bold;">Note: All times are UTC!</span>
+<!--		<span style="padding:0 70px">&nbsp;</span>
+		<span style="font-weight:bold; ">Log size:</span>
+		&nbsp;<span id="filesize" style="background-color:#FFF; color:#000; border:1px solid black; padding:0 5px; "></span>
+		&nbsp;<input type="button" value="Archive logs" onclick="logrotate();"  class="input8"> -->
+	</span>
+</div>
+<div style="padding : 3px 20px 2px 6px; border-style : solid none solid none; border-top-color : #BDC7E7; border-bottom-color : #182052; border-width : 1px 0px 1px 0px; background-color : #EFEFEF; color : #000000;">
+<TABLE FRAME=VOID CELLSPACING=0 COLS=7 RULES=NONE BORDER=0 ALIGN=CENTER>
+	<TBODY>
+		<TR>
+			<TD WIDTH=77>Caller ID</TD>
+			<TD WIDTH=91>Destination</TD>
+			<TD WIDTH=113>Call Start</TD>
+			<TD WIDTH=113>Answered</TD>
+			<TD WIDTH=113>Call End</TD>
+			<TD WIDTH=100>Duration (sec)</TD>
+			<TD WIDTH=108>Disposition</TD>
+		</TR>
+	</TBODY>
+</TABLE>
+</div>
+<div id="todaylog" style="width:793px; overflow :auto; background-color : #FFFFFF">
+<TABLE id="cdrtable" FRAME=VOID CELLSPACING=0 COLS=7 RULES=NONE BORDER=0 ALIGN=CENTER>
+	<COLGROUP><COL WIDTH=77><COL WIDTH=91><COL WIDTH=113><COL WIDTH=113><COL WIDTH=113><COL WIDTH=108><COL WIDTH=108></COLGROUP>
+	<TBODY id="cdrtablebody">
+	</TBODY>
+</TABLE>
+</div>
+<div id="error_nodata" STYLE="display:none; position: absolute; left: 170; top: 190; width:350; height:115;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid; z-index:5; cursor: default;">
+	<table width="100%" cellpadding=0 cellspacing=0  onmousedown="ASTGUI.startDrag(event , 'error_nodata');">
+	<TR bgcolor="#7E5538"  style="background-image:url('images/title_gradient.gif');">
+		<TD><font color="#FFFFFF">&nbsp;&nbsp;<B>No log messages found</B></FONT></TD>
+		<TD Height="20" style="cursor: move"></TD>
+		<TD width=4></TD>
+	</TR>
+	</table>
+	<table cellpadding=2 cellspacing=2 border=0 width="100%" align="center">
+		<tr>	<td colspan=2 height=15 valign=middle align=center></td>	</tr>
+		<tr>	<td style="cursor: default;" class="field_text" align=center>No log messages found on this day.<br /><br />Please select another date.</td></tr>
+	</table>
+</div>
+<!--<div id="msg_rotating" STYLE="display:none; position: absolute; left: 170; top: 190; width:350; height:115;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid; z-index:5; cursor: default;">
+	<table width="100%" cellpadding=0 cellspacing=0  onmousedown="ASTGUI.startDrag(event , 'msg_rotating');">
+	<TR bgcolor="#7E5538"  style="background-image:url('images/title_gradient.gif');">
+		<TD><font color="#FFFFFF">&nbsp;&nbsp;<B>Archiving logs..</B></FONT></TD>
+		<TD Height="20" style="cursor: move"></TD>
+		<TD width=4></TD>
+	</TR>
+	</table>
+	<table cellpadding=2 cellspacing=2 border=0 width="100%" align="center">
+		<tr>	<td colspan=2 height=25 valign=middle align=center></td>	</tr>
+		<tr>	<td style="cursor: default;" class="field_text" align=center>Please wait while the call logs are being archived..</td></tr>
+	</table>
+</div>
+<div id="dialog_logsize" STYLE="display:none; position: absolute; left: 170; top: 190; width:350; height:170;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid; z-index:5; cursor: default;">
+	<table width="100%" cellpadding=0 cellspacing=0  onmousedown="ASTGUI.startDrag(event , 'dialog_logsize');">
+	<TR bgcolor="#7E5538"  style="background-image:url('images/title_gradient.gif');">
+		<TD><font color="#FFFFFF">&nbsp;&nbsp;<B>Archive logs?</B></FONT></TD>
+		<TD Height="20" style="cursor: move"></TD>
+		<TD width=4></TD>
+	</TR>
+	</table>
+	<table cellpadding=2 cellspacing=2 border=0 width="100%" align="center">
+		<tr>	<td colspan=2 height=5 valign=middle align=center></td>	</tr>
+		<tr>	<td style="cursor: default;" class="field_text" align=center id="logsize_msg"></td></tr>
+		<tr>	<td align="center"><input type='button' id='archivenow' value='Archive now' class="buttonbold" onclick="archivenow();">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' id='archivelater' value='Later' class="buttonbold" onclick="archivelater();"></td></tr>
+	</table>
+</div>-->
+<!--<div id="bg_transparent" STYLE="display:none; position: absolute; left: 0; top: 24; width:100%; height:100%;  background-color:#EFEFEF; -moz-opacity:.50;opacity:.50; border-width: 1px; border-color: #EFEFEF; border-style: solid; z-index:4">-->
+<div id="fg_transparent" STYLE="display:none; position: absolute; left: 0; top: 0; width:100%; height:100%;  background-color:#EFEFEF; -moz-opacity:.50;opacity:.50; border-width: 1px; z-index:4">
+</body>

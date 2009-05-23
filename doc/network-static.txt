@@ -1,0 +1,24 @@
+network-static
+--------------
+
+1/ Configure for your network:
+
+   $ vi /etc/init.d/network-static
+
+   Adjust these variable for your network:
+
+     IF=eth0
+     IPADDRESS="192.168.1.31"
+     NETMASK="255.255.255.0"
+     GATEWAY="192.168.1.1"
+     DNS="192.168.1.1"
+
+2/ Then reboot:
+
+   $ reboot
+
+   OR restart service:
+
+   $ /etc/init.d/network-static stop
+   $ /etc/init.d/network-static start
+

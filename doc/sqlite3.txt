@@ -1,0 +1,15 @@
+sqlite3
+-------
+
+Testing:
+
+  root:/tmp> sqlite3 test.db
+  sqlite> CREATE TABLE t1(tlkey INTEGER PRIMARY KEY,data TEXT);
+  sqlite> insert into t1 values ("1","hi");
+  sqlite> insert into t2 values ("2","bye");
+  sqlite> select * from t1;
+  1|hi
+  2|bye
+  sqlite> .exit
+  root:/tmp>
+

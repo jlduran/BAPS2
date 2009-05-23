@@ -1,0 +1,2103 @@
+--- uClinux-dist/lib/libssl/Configure	2006-08-01 12:13:45.000000000 -0400
++++ uClinux-dist/lib/libssl/Configure	2007-03-25 19:56:48.000000000 -0500
+@@ -98,9 +98,11 @@
+ # AES_ASM	ASE_[en|de]crypt is implemented in assembler
+ 
+ my $x86_gcc_des="DES_PTR DES_RISC1 DES_UNROLL";
++my $bfin_gcc_des="DES_PTR DES_RISC1 DES_UNROLL";
+ 
+ # MD2_CHAR slags pentium pros
+ my $x86_gcc_opts="RC4_INDEX MD2_INT";
++my $bfin_gcc_opts="RC4_INDEX MD2_INT";
+ 
+ # MODIFY THESE PARAMETERS IF YOU ARE GOING TO USE THE 'util/speed.sh SCRIPT
+ # Don't worry about these normally
+@@ -318,6 +320,7 @@
+ #### IA-32 targets...
+ "linux-ia32-icc",	"icc:-DL_ENDIAN -DTERMIO -O2 -no_cpprt::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-KPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+ "linux-elf",	"gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"linux-bfin",	"bfin-linux-uclibc-gcc:\$(CFLAGS) -DL_ENDIAN -DTERMIO -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${bfin_gcc_des} ${bfin_gcc_opts}:${no_asm}:dlfcn:linux-shared::-mfdpic:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):bfin-linux-uclibc-ranlib",
+ "linux-aout",	"gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -march=i486 -Wall::(unknown):::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_out_asm}",
+ ####
+ "linux-generic64","gcc:-DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+--- uClinux-dist/lib/libssl/crypto/opensslconf.h	2006-09-28 07:51:45.000000000 -0400
++++ uClinux-dist/lib/libssl/crypto/opensslconf.h	2007-03-25 19:56:49.000000000 -0500
+@@ -21,8 +21,11 @@
+ #endif
+ 
+ #endif /* OPENSSL_DOING_MAKEDEPEND */
+-#ifndef OPENSSL_NO_DYNAMIC_ENGINE
+-# define OPENSSL_NO_DYNAMIC_ENGINE
++#ifndef OPENSSL_THREADS
++# define OPENSSL_THREADS
++#endif
++#ifndef OPENSSL_NO_STATIC_ENGINE
++# define OPENSSL_NO_STATIC_ENGINE
+ #endif
+ 
+ /* The OPENSSL_NO_* macros are also defined as NO_* if the application
+@@ -107,7 +110,7 @@
+ 
+ #if defined(HEADER_BN_H) && !defined(CONFIG_HEADER_BN_H)
+ #define CONFIG_HEADER_BN_H
+-#undef BN_LLONG
++#define BN_LLONG
+ 
+ /* Should we define BN_DIV2W here? */
+ 
+@@ -126,7 +129,7 @@
+ #define CONFIG_HEADER_RC4_LOCL_H
+ /* if this is defined data[i] is used instead of *data, this is a %20
+  * speedup on x86 */
+-#undef RC4_INDEX
++#define RC4_INDEX
+ #endif
+ 
+ #if defined(HEADER_BF_LOCL_H) && !defined(CONFIG_HEADER_BF_LOCL_H)
+@@ -140,14 +143,14 @@
+ /* the following is tweaked from a config script, that is why it is a
+  * protected undef/define */
+ #ifndef DES_PTR
+-#undef DES_PTR
++#define DES_PTR
+ #endif
+ 
+ /* This helps C compiler generate the correct code for multiple functional
+  * units.  It reduces register dependancies at the expense of 2 more
+  * registers */
+ #ifndef DES_RISC1
+-#undef DES_RISC1
++#define DES_RISC1
+ #endif
+ 
+ #ifndef DES_RISC2
+@@ -161,7 +164,7 @@
+ /* Unroll the inner loop, this sometimes helps, sometimes hinders.
+  * Very mucy CPU dependant */
+ #ifndef DES_UNROLL
+-#undef DES_UNROLL
++#define DES_UNROLL
+ #endif
+ 
+ /* These default values were supplied by
+--- uClinux-dist/lib/libssl/INSTALL	2006-03-17 14:29:26.000000000 -0500
++++ uClinux-dist/lib/libssl/INSTALL	2007-03-25 19:56:49.000000000 -0500
+@@ -134,7 +134,7 @@
+      as the argument to ./Configure. For example, a "linux-elf" user would
+      run:
+ 
+-       $ ./Configure linux-elf [options]
++       $ ./Configure linux-bfin threads [options]
+ 
+      If your system is not available, you will have to edit the Configure
+      program and add the correct configuration for your system. The
+--- uClinux-dist/lib/libssl/Makefile	2006-09-28 07:51:45.000000000 -0400
++++ uClinux-dist/lib/libssl/Makefile	2007-03-25 19:56:49.000000000 -0500
+@@ -11,11 +11,11 @@
+ SHLIB_VERSION_HISTORY=
+ SHLIB_MAJOR=0
+ SHLIB_MINOR=9.8
+-SHLIB_EXT=
+-PLATFORM=dist
+-OPTIONS= no-camellia no-gmp no-krb5 no-mdc2 no-rc5 no-shared no-zlib no-zlib-dynamic
+-CONFIGURE_ARGS=dist
+-SHLIB_TARGET=
++SHLIB_EXT=.so.$(SHLIB_MAJOR).$(SHLIB_MINOR)
++PLATFORM=linux-bfin
++OPTIONS=enable-threads enable-shared no-camellia no-gmp no-krb5 no-mdc2 no-rc5 no-zlib no-zlib-dynamic
++CONFIGURE_ARGS=linux-bfin threads shared
++SHLIB_TARGET=linux-shared
+ 
+ # HERE indicates where this Makefile lives.  This can be used to indicate
+ # where sub-Makefiles are expected to be.  Currently has very limited usage,
+@@ -59,19 +59,19 @@
+ # equal 4.
+ # PKCS1_CHECK - pkcs1 tests.
+ 
+-CC= cc
+-CFLAG= -O
++CC= bfin-linux-uclibc-gcc
++CFLAG= -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H $(CFLAGS) -DL_ENDIAN -DTERMIO -fomit-frame-pointer -Wall
+ DEPFLAG= -DOPENSSL_NO_CAMELLIA -DOPENSSL_NO_GMP -DOPENSSL_NO_MDC2 -DOPENSSL_NO_RC5 
+ PEX_LIBS= 
+-EX_LIBS= 
++EX_LIBS= -ldl
+ EXE_EXT= 
+ ARFLAGS= 
+-AR=ar $(ARFLAGS) r
+-RANLIB= /usr/bin/ranlib
+-PERL= /usr/local/bin/perl
++AR= bfin-linux-uclibc-ar $(ARFLAGS) r
++RANLIB= bfin-linux-uclibc-ranlib
++PERL= perl
+ TAR= tar
+ TARFLAGS= --no-recursion
+-MAKEDEPPROG=makedepend
++MAKEDEPPROG= gcc
+ 
+ # We let the C compiler driver to take care of .s files. This is done in
+ # order to be excused from maintaining a separate set of architecture
+@@ -106,7 +106,7 @@
+ ZLIB_INCLUDE=
+ LIBZLIB=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl engines
+ SHLIBDIRS= crypto ssl
+ 
+ # dirs in crypto to build
+@@ -140,9 +140,9 @@
+ LIBS=   libcrypto.a libssl.a
+ SHARED_CRYPTO=libcrypto$(SHLIB_EXT)
+ SHARED_SSL=libssl$(SHLIB_EXT)
+-SHARED_LIBS=
+-SHARED_LIBS_LINK_EXTS=
+-SHARED_LDFLAGS=
++SHARED_LIBS=$(SHARED_CRYPTO) $(SHARED_SSL)
++SHARED_LIBS_LINK_EXTS=.so.$(SHLIB_MAJOR) .so
++SHARED_LDFLAGS=-mfdpic
+ 
+ GENERAL=        Makefile
+ BASENAME=       openssl
+@@ -359,6 +359,31 @@
+ 	rm -fr $$i/*; \
+ 	done
+ 
++romfs:
++	[ -d $(ROMFSDIR)/lib ] || mkdir -p $(ROMFSDIR)/lib ; \
++	for SHARED_LIB in $(SHARED_LIBS); do \
++		LIB=`basename $${SHARED_LIB} $(SHLIB_EXT)`; \
++		$(ROMFSINST) $${SHARED_LIB} /lib/$${SHARED_LIB} ; \
++		( \
++		cd $(ROMFSDIR)/lib; \
++		for i in $(SHARED_LIBS_LINK_EXTS); do \
++			ln -sf $${SHARED_LIB} $${LIB}$$i; \
++		done \
++		) \
++	done
++
++	for SHARED_LIB in $(SHARED_LIBS); do \
++		LIB=`basename $${SHARED_LIB} $(SHLIB_EXT)`; \
++		cp $${SHARED_LIB} $(STAGEDIR)/usr/lib/$${SHARED_LIB} ; \
++		( \
++		cd $(STAGEDIR)/usr/lib; \
++		for i in $(SHARED_LIBS_LINK_EXTS); do \
++			ln -sf $${SHARED_LIB} $${LIB}$$i; \
++		done \
++		) \
++	done
++	[ -d $(STAGEDIR)/usr/include/openssl ] || mkdir -p $(STAGEDIR)/usr/include/openssl ; \
++	cp include/openssl/*.h  $(STAGEDIR)/usr/include/openssl
+
+ makefile.one: files
+ 	$(PERL) util/mk1mf.pl >makefile.one; \
+ 	sh util/do_ms.sh
+--- uClinux-dist/lib/libssl/Makefile.org	2006-06-09 11:42:08.000000000 -0400
++++ uClinux-dist/lib/libssl/Makefile.org	2007-03-25 19:56:49.000000000 -0500
+@@ -64,12 +64,12 @@
+ EX_LIBS= 
+ EXE_EXT= 
+ ARFLAGS=
+-AR=ar $(ARFLAGS) r
++AR= bfin-linux-uclibc-ar $(ARFLAGS) r
+ RANLIB= ranlib
+ PERL= perl
+ TAR= tar
+ TARFLAGS= --no-recursion
+-MAKEDEPPROG=makedepend
++MAKEDEPPROG= gcc
+ 
+ # We let the C compiler driver to take care of .s files. This is done in
+ # order to be excused from maintaining a separate set of architecture
+@@ -104,7 +104,7 @@
+ ZLIB_INCLUDE=
+ LIBZLIB=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl engines
+ SHLIBDIRS= crypto ssl
+ 
+ # dirs in crypto to build
+@@ -357,6 +357,19 @@
+ 	rm -fr $$i/*; \
+ 	done
+ 
++romfs:
++	[ -d $(ROMFSDIR)/lib ] || mkdir -p $(ROMFSDIR)/lib ; \
++	for SHARED_LIB in $(SHARED_LIBS); do \
++		LIB=`basename $${SHARED_LIB} $(SHLIB_EXT)`; \
++		$(ROMFSINST) $${SHARED_LIB} /lib/$${SHARED_LIB} ; \
++		( \
++		cd $(ROMFSDIR)/lib; \
++		for i in $(SHARED_LIBS_LINK_EXTS); do \
++			ln -sf $${SHARED_LIB} $${LIB}$$i; \
++		done \
++		) \
++	done
++
+ makefile.one: files
+ 	$(PERL) util/mk1mf.pl >makefile.one; \
+ 	sh util/do_ms.sh
+--- uClinux-dist/lib/libssl/ms/bcb4.bat	1999-05-17 10:38:03.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/bcb4.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,6 +1,6 @@
+-perl Configure BC-32
+-perl util\mkfiles.pl > MINFO
+-
+-@rem create make file
+-perl util\mk1mf.pl no-asm BC-NT > bcb.mak
+-
++perl Configure BC-32
++perl util\mkfiles.pl > MINFO
++
++@rem create make file
++perl util\mk1mf.pl no-asm BC-NT > bcb.mak
++
+--- uClinux-dist/lib/libssl/ms/do_masm.bat	2005-05-16 20:07:13.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_masm.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,63 +1,63 @@
+-@echo off
+-echo Generating x86 for MASM assember
+-
+-echo Bignum
+-cd crypto\bn\asm
+-perl x86.pl win32 > bn_win32.asm
+-cd ..\..\..
+-
+-echo DES
+-cd crypto\des\asm
+-perl des-586.pl win32 > d_win32.asm
+-cd ..\..\..
+-
+-echo "crypt(3)"
+-
+-cd crypto\des\asm
+-perl crypt586.pl win32 > y_win32.asm
+-cd ..\..\..
+-
+-echo Blowfish
+-
+-cd crypto\bf\asm
+-perl bf-586.pl win32 > b_win32.asm
+-cd ..\..\..
+-
+-echo CAST5
+-cd crypto\cast\asm
+-perl cast-586.pl win32 > c_win32.asm
+-cd ..\..\..
+-
+-echo RC4
+-cd crypto\rc4\asm
+-perl rc4-586.pl win32 > r4_win32.asm
+-cd ..\..\..
+-
+-echo MD5
+-cd crypto\md5\asm
+-perl md5-586.pl win32 > m5_win32.asm
+-cd ..\..\..
+-
+-echo SHA1
+-cd crypto\sha\asm
+-perl sha1-586.pl win32 > s1_win32.asm
+-cd ..\..\..
+-
+-echo RIPEMD160
+-cd crypto\ripemd\asm
+-perl rmd-586.pl win32 > rm_win32.asm
+-cd ..\..\..
+-
+-echo RC5\32
+-cd crypto\rc5\asm
+-perl rc5-586.pl win32 > r5_win32.asm
+-cd ..\..\..
+-
+-echo on
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll VC-WIN32 >ms\ntdll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++@echo off
++echo Generating x86 for MASM assember
++
++echo Bignum
++cd crypto\bn\asm
++perl x86.pl win32 > bn_win32.asm
++cd ..\..\..
++
++echo DES
++cd crypto\des\asm
++perl des-586.pl win32 > d_win32.asm
++cd ..\..\..
++
++echo "crypt(3)"
++
++cd crypto\des\asm
++perl crypt586.pl win32 > y_win32.asm
++cd ..\..\..
++
++echo Blowfish
++
++cd crypto\bf\asm
++perl bf-586.pl win32 > b_win32.asm
++cd ..\..\..
++
++echo CAST5
++cd crypto\cast\asm
++perl cast-586.pl win32 > c_win32.asm
++cd ..\..\..
++
++echo RC4
++cd crypto\rc4\asm
++perl rc4-586.pl win32 > r4_win32.asm
++cd ..\..\..
++
++echo MD5
++cd crypto\md5\asm
++perl md5-586.pl win32 > m5_win32.asm
++cd ..\..\..
++
++echo SHA1
++cd crypto\sha\asm
++perl sha1-586.pl win32 > s1_win32.asm
++cd ..\..\..
++
++echo RIPEMD160
++cd crypto\ripemd\asm
++perl rmd-586.pl win32 > rm_win32.asm
++cd ..\..\..
++
++echo RC5\32
++cd crypto\rc5\asm
++perl rc5-586.pl win32 > r5_win32.asm
++cd ..\..\..
++
++echo on
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll VC-WIN32 >ms\ntdll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/do_ms.bat	2005-05-16 20:07:13.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_ms.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl no-asm VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN32 >ms\ntdll.mak
+-perl util\mk1mf.pl no-asm VC-CE >ms\ce.mak
+-perl util\mk1mf.pl dll no-asm VC-CE >ms\cedll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl no-asm VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll no-asm VC-WIN32 >ms\ntdll.mak
++perl util\mk1mf.pl no-asm VC-CE >ms\ce.mak
++perl util\mk1mf.pl dll no-asm VC-CE >ms\cedll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/do_nasm.bat	2005-05-16 20:07:13.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_nasm.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,65 +1,65 @@
+-
+-@echo off
+-echo Generating x86 for NASM assember
+-
+-echo Bignum
+-cd crypto\bn\asm
+-perl x86.pl win32n > bn_win32.asm
+-cd ..\..\..
+-
+-echo DES
+-cd crypto\des\asm
+-perl des-586.pl win32n > d_win32.asm
+-cd ..\..\..
+-
+-echo "crypt(3)"
+-
+-cd crypto\des\asm
+-perl crypt586.pl win32n > y_win32.asm
+-cd ..\..\..
+-
+-echo Blowfish
+-
+-cd crypto\bf\asm
+-perl bf-586.pl win32n > b_win32.asm
+-cd ..\..\..
+-
+-echo CAST5
+-cd crypto\cast\asm
+-perl cast-586.pl win32n > c_win32.asm
+-cd ..\..\..
+-
+-echo RC4
+-cd crypto\rc4\asm
+-perl rc4-586.pl win32n > r4_win32.asm
+-cd ..\..\..
+-
+-echo MD5
+-cd crypto\md5\asm
+-perl md5-586.pl win32n > m5_win32.asm
+-cd ..\..\..
+-
+-echo SHA1
+-cd crypto\sha\asm
+-perl sha1-586.pl win32n > s1_win32.asm
+-cd ..\..\..
+-
+-echo RIPEMD160
+-cd crypto\ripemd\asm
+-perl rmd-586.pl win32n > rm_win32.asm
+-cd ..\..\..
+-
+-echo RC5\32
+-cd crypto\rc5\asm
+-perl rc5-586.pl win32n > r5_win32.asm
+-cd ..\..\..
+-
+-echo on
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl nasm VC-WIN32 >ms\nt.mak
+-perl util\mk1mf.pl dll nasm VC-WIN32 >ms\ntdll.mak
+-perl util\mk1mf.pl nasm BC-NT >ms\bcb.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++@echo off
++echo Generating x86 for NASM assember
++
++echo Bignum
++cd crypto\bn\asm
++perl x86.pl win32n > bn_win32.asm
++cd ..\..\..
++
++echo DES
++cd crypto\des\asm
++perl des-586.pl win32n > d_win32.asm
++cd ..\..\..
++
++echo "crypt(3)"
++
++cd crypto\des\asm
++perl crypt586.pl win32n > y_win32.asm
++cd ..\..\..
++
++echo Blowfish
++
++cd crypto\bf\asm
++perl bf-586.pl win32n > b_win32.asm
++cd ..\..\..
++
++echo CAST5
++cd crypto\cast\asm
++perl cast-586.pl win32n > c_win32.asm
++cd ..\..\..
++
++echo RC4
++cd crypto\rc4\asm
++perl rc4-586.pl win32n > r4_win32.asm
++cd ..\..\..
++
++echo MD5
++cd crypto\md5\asm
++perl md5-586.pl win32n > m5_win32.asm
++cd ..\..\..
++
++echo SHA1
++cd crypto\sha\asm
++perl sha1-586.pl win32n > s1_win32.asm
++cd ..\..\..
++
++echo RIPEMD160
++cd crypto\ripemd\asm
++perl rmd-586.pl win32n > rm_win32.asm
++cd ..\..\..
++
++echo RC5\32
++cd crypto\rc5\asm
++perl rc5-586.pl win32n > r5_win32.asm
++cd ..\..\..
++
++echo on
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl nasm VC-WIN32 >ms\nt.mak
++perl util\mk1mf.pl dll nasm VC-WIN32 >ms\ntdll.mak
++perl util\mk1mf.pl nasm BC-NT >ms\bcb.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/do_nt.bat	1999-05-22 19:24:38.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_nt.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,7 +1,7 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl no-asm VC-NT >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-NT >ms\ntdll.mak
+-
+-perl util\mkdef.pl libeay NT > ms\libeay32.def
+-perl util\mkdef.pl ssleay NT > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl no-asm VC-NT >ms\nt.mak
++perl util\mk1mf.pl dll no-asm VC-NT >ms\ntdll.mak
++
++perl util\mkdef.pl libeay NT > ms\libeay32.def
++perl util\mkdef.pl ssleay NT > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/do_win64a.bat	2005-07-04 19:24:12.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_win64a.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl ms\uplink.pl win64a > ms\uptable.asm
+-ml64 -c -Foms\uptable.obj ms\uptable.asm
+-perl util\mk1mf.pl no-asm VC-WIN64A >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN64A >ms\ntdll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl ms\uplink.pl win64a > ms\uptable.asm
++ml64 -c -Foms\uptable.obj ms\uptable.asm
++perl util\mk1mf.pl no-asm VC-WIN64A >ms\nt.mak
++perl util\mk1mf.pl dll no-asm VC-WIN64A >ms\ntdll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/do_win64i.bat	2005-07-04 19:24:12.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/do_win64i.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,9 +1,9 @@
+-
+-perl util\mkfiles.pl >MINFO
+-perl ms\uplink.pl win64i > ms\uptable.asm
+-ias -o ms\uptable.obj ms\uptable.asm
+-perl util\mk1mf.pl no-asm VC-WIN64I >ms\nt.mak
+-perl util\mk1mf.pl dll no-asm VC-WIN64I >ms\ntdll.mak
+-
+-perl util\mkdef.pl 32 libeay > ms\libeay32.def
+-perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
++
++perl util\mkfiles.pl >MINFO
++perl ms\uplink.pl win64i > ms\uptable.asm
++ias -o ms\uptable.obj ms\uptable.asm
++perl util\mk1mf.pl no-asm VC-WIN64I >ms\nt.mak
++perl util\mk1mf.pl dll no-asm VC-WIN64I >ms\ntdll.mak
++
++perl util\mkdef.pl 32 libeay > ms\libeay32.def
++perl util\mkdef.pl 32 ssleay > ms\ssleay32.def
+--- uClinux-dist/lib/libssl/ms/mw.bat	2003-02-22 13:00:09.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/mw.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,26 +1,26 @@
+-@rem OpenSSL with Mingw32
+-@rem --------------------
+-
+-@rem Makefile
+-perl util\mkfiles.pl >MINFO
+-perl util\mk1mf.pl Mingw32 >ms\mingw32.mak
+-@rem DLL definition files
+-perl util\mkdef.pl 32 libeay >ms\libeay32.def
+-if errorlevel 1 goto end
+-perl util\mkdef.pl 32 ssleay >ms\ssleay32.def
+-if errorlevel 1 goto end
+-
+-@rem Build the libraries
+-make -f ms/mingw32.mak
+-if errorlevel 1 goto end
+-
+-@rem Generate the DLLs and input libraries
+-dllwrap --dllname libeay32.dll --output-lib out/libeay32.a --def ms/libeay32.def out/libcrypto.a -lwsock32 -lgdi32
+-if errorlevel 1 goto end
+-dllwrap --dllname libssl32.dll --output-lib out/libssl32.a --def ms/ssleay32.def out/libssl.a out/libeay32.a
+-if errorlevel 1 goto end
+-
+-echo Done compiling OpenSSL
+-
+-:end
+-
++@rem OpenSSL with Mingw32
++@rem --------------------
++
++@rem Makefile
++perl util\mkfiles.pl >MINFO
++perl util\mk1mf.pl Mingw32 >ms\mingw32.mak
++@rem DLL definition files
++perl util\mkdef.pl 32 libeay >ms\libeay32.def
++if errorlevel 1 goto end
++perl util\mkdef.pl 32 ssleay >ms\ssleay32.def
++if errorlevel 1 goto end
++
++@rem Build the libraries
++make -f ms/mingw32.mak
++if errorlevel 1 goto end
++
++@rem Generate the DLLs and input libraries
++dllwrap --dllname libeay32.dll --output-lib out/libeay32.a --def ms/libeay32.def out/libcrypto.a -lwsock32 -lgdi32
++if errorlevel 1 goto end
++dllwrap --dllname libssl32.dll --output-lib out/libssl32.a --def ms/ssleay32.def out/libssl.a out/libeay32.a
++if errorlevel 1 goto end
++
++echo Done compiling OpenSSL
++
++:end
++
+--- uClinux-dist/lib/libssl/ms/tenc.bat	1999-03-08 22:01:45.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/tenc.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,14 +1,14 @@
+-rem called by testenc
+-
+-echo test %1 %2 %3 %4 %5 %6 
+-%ssleay% %1 %2 %3 %4 %5 %6 -e -bufsize 113 -k test -in %input% -out %tmp1%
+-%ssleay% %1 %2 %3 %4 %5 %6 -d -bufsize 157 -k test -in %tmp1% -out %out1%
+-%cmp% %input% %out1%
+-if errorlevel 1 goto err
+-
+-echo test base64 %1 %2 %3 %4 %5 %6 
+-%ssleay% %1 %2 %3 %4 %5 %6 -a -e -bufsize 113 -k test -in %input% -out %tmp1%
+-%ssleay% %1 %2 %3 %4 %5 %6 -a -d -bufsize 157 -k test -in %tmp1% -out %out1%
+-%cmp% %input% %out1%
+-
+-:err
++rem called by testenc
++
++echo test %1 %2 %3 %4 %5 %6 
++%ssleay% %1 %2 %3 %4 %5 %6 -e -bufsize 113 -k test -in %input% -out %tmp1%
++%ssleay% %1 %2 %3 %4 %5 %6 -d -bufsize 157 -k test -in %tmp1% -out %out1%
++%cmp% %input% %out1%
++if errorlevel 1 goto err
++
++echo test base64 %1 %2 %3 %4 %5 %6 
++%ssleay% %1 %2 %3 %4 %5 %6 -a -e -bufsize 113 -k test -in %input% -out %tmp1%
++%ssleay% %1 %2 %3 %4 %5 %6 -a -d -bufsize 157 -k test -in %tmp1% -out %out1%
++%cmp% %input% %out1%
++
++:err
+--- uClinux-dist/lib/libssl/ms/tencce.bat	2002-11-15 17:36:48.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/tencce.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,19 +1,19 @@
+-rem called by testencce
+-
+-echo test %1 %2 %3 %4 %5 %6 
+-cecopy %input% CE:\OpenSSL
+-cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -e -bufsize 113 -k test -in \OpenSSL\%input% -out \OpenSSL\%tmp1%
+-cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -d -bufsize 157 -k test -in \OpenSSL\%tmp1% -out \OpenSSL\%out1%
+-del %out1% >nul 2>&1
+-cecopy CE:\OpenSSL\%out1% .
+-%cmp% %input% %out1%
+-if errorlevel 1 goto err
+-
+-echo test base64 %1 %2 %3 %4 %5 %6 
+-cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -a -e -bufsize 113 -k test -in \OpenSSL\%input% -out \OpenSSL\%tmp1%
+-cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -a -d -bufsize 157 -k test -in \OpenSSL\%tmp1% -out \OpenSSL\%out1%
+-del %out1% >nul 2>&1
+-cecopy CE:\OpenSSL\%out1% .
+-%cmp% %input% %out1%
+-
+-:err
++rem called by testencce
++
++echo test %1 %2 %3 %4 %5 %6 
++cecopy %input% CE:\OpenSSL
++cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -e -bufsize 113 -k test -in \OpenSSL\%input% -out \OpenSSL\%tmp1%
++cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -d -bufsize 157 -k test -in \OpenSSL\%tmp1% -out \OpenSSL\%out1%
++del %out1% >nul 2>&1
++cecopy CE:\OpenSSL\%out1% .
++%cmp% %input% %out1%
++if errorlevel 1 goto err
++
++echo test base64 %1 %2 %3 %4 %5 %6 
++cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -a -e -bufsize 113 -k test -in \OpenSSL\%input% -out \OpenSSL\%tmp1%
++cerun CE:\OpenSSL\%ssleay% %1 %2 %3 %4 %5 %6 -a -d -bufsize 157 -k test -in \OpenSSL\%tmp1% -out \OpenSSL\%out1%
++del %out1% >nul 2>&1
++cecopy CE:\OpenSSL\%out1% .
++%cmp% %input% %out1%
++
++:err
+--- uClinux-dist/lib/libssl/ms/test.bat	2005-05-17 02:57:45.000000000 -0400
++++ uClinux-dist/lib/libssl/ms/test.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,195 +1,195 @@
+-@echo off
+-
+-set test=..\ms
+-set opath=%PATH%
+-PATH=..\ms;%PATH%
+-set OPENSSL_CONF=..\apps\openssl.cnf
+-
+-rem run this from inside the bin directory
+-
+-echo rsa_test
+-rsa_test
+-if errorlevel 1 goto done
+-
+-echo destest
+-destest
+-if errorlevel 1 goto done
+-
+-echo ideatest
+-ideatest
+-if errorlevel 1 goto done
+-
+-echo bftest
+-bftest
+-if errorlevel 1 goto done
+-
+-echo shatest
+-shatest
+-if errorlevel 1 goto done
+-
+-echo sha1test
+-sha1test
+-if errorlevel 1 goto done
+-
+-echo md5test
+-md5test
+-if errorlevel 1 goto done
+-
+-echo md2test
+-md2test
+-if errorlevel 1 goto done
+-
+-echo rc2test
+-rc2test
+-if errorlevel 1 goto done
+-
+-echo rc4test
+-rc4test
+-if errorlevel 1 goto done
+-
+-echo randtest
+-randtest
+-if errorlevel 1 goto done
+-
+-echo dhtest
+-dhtest
+-if errorlevel 1 goto done
+-
+-echo exptest
+-exptest
+-if errorlevel 1 goto done
+-
+-echo dsatest
+-dsatest
+-if errorlevel 1 goto done
+-
+-echo ectest
+-ectest
+-if errorlevel 1 goto done
+-
+-echo testenc
+-call %test%\testenc openssl
+-if errorlevel 1 goto done
+-
+-echo testpem
+-call %test%\testpem openssl
+-if errorlevel 1 goto done
+-
+-echo verify
+-copy ..\certs\*.pem cert.tmp >nul
+-openssl verify -CAfile cert.tmp ..\certs\*.pem
+-
+-echo testss
+-call %test%\testss openssl
+-if errorlevel 1 goto done
+-
+-set SSL_TEST=ssltest -key keyU.ss -cert certU.ss -c_key keyU.ss -c_cert certU.ss -CAfile certCA.ss
+-
+-echo test sslv2
+-ssltest -ssl2
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with server authentication
+-%SSL_TEST% -ssl2 -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with client authentication
+-%SSL_TEST% -ssl2 -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with both client and server authentication
+-%SSL_TEST% -ssl2 -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3
+-ssltest -ssl3
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with server authentication
+-%SSL_TEST% -ssl3 -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with client authentication
+-%SSL_TEST% -ssl3 -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with both client and server authentication
+-%SSL_TEST% -ssl3 -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3
+-ssltest
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with server authentication
+-%SSL_TEST% -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with client authentication
+-%SSL_TEST% -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with both client and server authentication
+-%SSL_TEST% -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2 via BIO pair
+-ssltest -bio_pair -ssl2
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with 1024 bit DHE via BIO pair
+-ssltest -bio_pair -dhe1024dsa -v
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with server authentication via BIO pair
+-%SSL_TEST% -bio_pair -ssl2 -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with client authentication via BIO pair
+-%SSL_TEST% -bio_pair -ssl2 -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2 with both client and server authentication via BIO pair
+-%SSL_TEST% -bio_pair -ssl2 -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3 via BIO pair
+-ssltest -bio_pair -ssl3
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with server authentication via BIO pair
+-%SSL_TEST% -bio_pair -ssl3 -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with client authentication  via BIO pair
+-%SSL_TEST% -bio_pair -ssl3 -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv3 with both client and server authentication via BIO pair
+-%SSL_TEST% -bio_pair -ssl3 -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 via BIO pair
+-ssltest -bio_pair
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with server authentication
+-%SSL_TEST% -bio_pair -server_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with client authentication via BIO pair
+-%SSL_TEST% -bio_pair -client_auth
+-if errorlevel 1 goto done
+-
+-echo test sslv2/sslv3 with both client and server authentication via BIO pair
+-%SSL_TEST% -bio_pair -server_auth -client_auth
+-if errorlevel 1 goto done
+-
+-del cert.tmp
+-
+-echo passed all tests
+-goto end
+-:done
+-echo problems.....
+-:end
+-PATH=%opath%
++@echo off
++
++set test=..\ms
++set opath=%PATH%
++PATH=..\ms;%PATH%
++set OPENSSL_CONF=..\apps\openssl.cnf
++
++rem run this from inside the bin directory
++
++echo rsa_test
++rsa_test
++if errorlevel 1 goto done
++
++echo destest
++destest
++if errorlevel 1 goto done
++
++echo ideatest
++ideatest
++if errorlevel 1 goto done
++
++echo bftest
++bftest
++if errorlevel 1 goto done
++
++echo shatest
++shatest
++if errorlevel 1 goto done
++
++echo sha1test
++sha1test
++if errorlevel 1 goto done
++
++echo md5test
++md5test
++if errorlevel 1 goto done
++
++echo md2test
++md2test
++if errorlevel 1 goto done
++
++echo rc2test
++rc2test
++if errorlevel 1 goto done
++
++echo rc4test
++rc4test
++if errorlevel 1 goto done
++
++echo randtest
++randtest
++if errorlevel 1 goto done
++
++echo dhtest
++dhtest
++if errorlevel 1 goto done
++
++echo exptest
++exptest
++if errorlevel 1 goto done
++
++echo dsatest
++dsatest
++if errorlevel 1 goto done
++
++echo ectest
++ectest
++if errorlevel 1 goto done
++
++echo testenc
++call %test%\testenc openssl
++if errorlevel 1 goto done
++
++echo testpem
++call %test%\testpem openssl
++if errorlevel 1 goto done
++
++echo verify
++copy ..\certs\*.pem cert.tmp >nul
++openssl verify -CAfile cert.tmp ..\certs\*.pem
++
++echo testss
++call %test%\testss openssl
++if errorlevel 1 goto done
++
++set SSL_TEST=ssltest -key keyU.ss -cert certU.ss -c_key keyU.ss -c_cert certU.ss -CAfile certCA.ss
++
++echo test sslv2
++ssltest -ssl2
++if errorlevel 1 goto done
++
++echo test sslv2 with server authentication
++%SSL_TEST% -ssl2 -server_auth
++if errorlevel 1 goto done
++
++echo test sslv2 with client authentication
++%SSL_TEST% -ssl2 -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2 with both client and server authentication
++%SSL_TEST% -ssl2 -server_auth -client_auth
++if errorlevel 1 goto done
++
++echo test sslv3
++ssltest -ssl3
++if errorlevel 1 goto done
++
++echo test sslv3 with server authentication
++%SSL_TEST% -ssl3 -server_auth
++if errorlevel 1 goto done
++
++echo test sslv3 with client authentication
++%SSL_TEST% -ssl3 -client_auth
++if errorlevel 1 goto done
++
++echo test sslv3 with both client and server authentication
++%SSL_TEST% -ssl3 -server_auth -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3
++ssltest
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with server authentication
++%SSL_TEST% -server_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with client authentication
++%SSL_TEST% -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with both client and server authentication
++%SSL_TEST% -server_auth -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2 via BIO pair
++ssltest -bio_pair -ssl2
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with 1024 bit DHE via BIO pair
++ssltest -bio_pair -dhe1024dsa -v
++if errorlevel 1 goto done
++
++echo test sslv2 with server authentication via BIO pair
++%SSL_TEST% -bio_pair -ssl2 -server_auth
++if errorlevel 1 goto done
++
++echo test sslv2 with client authentication via BIO pair
++%SSL_TEST% -bio_pair -ssl2 -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2 with both client and server authentication via BIO pair
++%SSL_TEST% -bio_pair -ssl2 -server_auth -client_auth
++if errorlevel 1 goto done
++
++echo test sslv3 via BIO pair
++ssltest -bio_pair -ssl3
++if errorlevel 1 goto done
++
++echo test sslv3 with server authentication via BIO pair
++%SSL_TEST% -bio_pair -ssl3 -server_auth
++if errorlevel 1 goto done
++
++echo test sslv3 with client authentication  via BIO pair
++%SSL_TEST% -bio_pair -ssl3 -client_auth
++if errorlevel 1 goto done
++
++echo test sslv3 with both client and server authentication via BIO pair
++%SSL_TEST% -bio_pair -ssl3 -server_auth -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 via BIO pair
++ssltest -bio_pair
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with server authentication
++%SSL_TEST% -bio_pair -server_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with client authentication via BIO pair
++%SSL_TEST% -bio_pair -client_auth
++if errorlevel 1 goto done
++
++echo test sslv2/sslv3 with both client and server authentication via BIO pair
++%SSL_TEST% -bio_pair -server_auth -client_auth
++if errorlevel 1 goto done
++
++del cert.tmp
++
++echo passed all tests
++goto end
++:done
++echo problems.....
++:end
++PATH=%opath%
+--- uClinux-dist/lib/libssl/ms/testenc.bat	2002-11-14 03:08:54.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testenc.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,94 +1,94 @@
+-@echo off
+-echo start testenc
+-
+-path=..\ms;%path%
+-set ssleay=%1%
+-set input=..\ms\testenc.bat
+-set tmp1=..\ms\cipher.out
+-set out1=..\ms\clear.out
+-set cmp=perl ..\ms\cmp.pl
+-
+-cd
+-call tenc.bat enc
+-if errorlevel 1 goto err
+-
+-call tenc.bat rc4
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede3-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede3-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ecb
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede3
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-cbc
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede-cbc
+-if errorlevel 1 goto err
+-
+-call tenc.bat des-ede3-cbc
+-if errorlevel 1 goto err
+-
+-call tenc.bat idea-ecb
+-if errorlevel 1 goto err
+-
+-call tenc.bat idea-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat idea-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat idea-cbc
+-if errorlevel 1 goto err
+-
+-call tenc.bat rc2-ecb
+-if errorlevel 1 goto err
+-
+-call tenc.bat rc2-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat rc2-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat rc2-cbc
+-if errorlevel 1 goto err
+-
+-call tenc.bat bf-ecb
+-if errorlevel 1 goto err
+-
+-call tenc.bat bf-cfb
+-if errorlevel 1 goto err
+-
+-call tenc.bat bf-ofb
+-if errorlevel 1 goto err
+-
+-call tenc.bat bf-cbc
+-if errorlevel 1 goto err
+-
+-echo OK
+-del %out1%
+-del %tmp1%
+-:err
+-
++@echo off
++echo start testenc
++
++path=..\ms;%path%
++set ssleay=%1%
++set input=..\ms\testenc.bat
++set tmp1=..\ms\cipher.out
++set out1=..\ms\clear.out
++set cmp=perl ..\ms\cmp.pl
++
++cd
++call tenc.bat enc
++if errorlevel 1 goto err
++
++call tenc.bat rc4
++if errorlevel 1 goto err
++
++call tenc.bat des-cfb
++if errorlevel 1 goto err
++
++call tenc.bat des-ede-cfb
++if errorlevel 1 goto err
++
++call tenc.bat des-ede3-cfb
++if errorlevel 1 goto err
++
++call tenc.bat des-ofb
++if errorlevel 1 goto err
++
++call tenc.bat des-ede-ofb
++if errorlevel 1 goto err
++
++call tenc.bat des-ede3-ofb
++if errorlevel 1 goto err
++
++call tenc.bat des-ecb
++if errorlevel 1 goto err
++
++call tenc.bat des-ede
++if errorlevel 1 goto err
++
++call tenc.bat des-ede3
++if errorlevel 1 goto err
++
++call tenc.bat des-cbc
++if errorlevel 1 goto err
++
++call tenc.bat des-ede-cbc
++if errorlevel 1 goto err
++
++call tenc.bat des-ede3-cbc
++if errorlevel 1 goto err
++
++call tenc.bat idea-ecb
++if errorlevel 1 goto err
++
++call tenc.bat idea-cfb
++if errorlevel 1 goto err
++
++call tenc.bat idea-ofb
++if errorlevel 1 goto err
++
++call tenc.bat idea-cbc
++if errorlevel 1 goto err
++
++call tenc.bat rc2-ecb
++if errorlevel 1 goto err
++
++call tenc.bat rc2-cfb
++if errorlevel 1 goto err
++
++call tenc.bat rc2-ofb
++if errorlevel 1 goto err
++
++call tenc.bat rc2-cbc
++if errorlevel 1 goto err
++
++call tenc.bat bf-ecb
++if errorlevel 1 goto err
++
++call tenc.bat bf-cfb
++if errorlevel 1 goto err
++
++call tenc.bat bf-ofb
++if errorlevel 1 goto err
++
++call tenc.bat bf-cbc
++if errorlevel 1 goto err
++
++echo OK
++del %out1%
++del %tmp1%
++:err
++
+--- uClinux-dist/lib/libssl/ms/testencce.bat	2002-11-15 17:36:49.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testencce.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,97 +1,97 @@
+-@echo off
+-echo start testenc
+-
+-path=..\ms;%path%
+-set ssleay=%1%
+-copy ..\ms\testenc.bat >nul
+-set input=testenc.bat
+-set tmp1=cipher.out
+-set out1=clear.out
+-set cmp=perl ..\ms\cmp.pl
+-
+-cecopy %ssleay% CE:\OpenSSL
+-
+-cd
+-call tencce.bat enc
+-if errorlevel 1 goto err
+-
+-call tencce.bat rc4
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede3-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede3-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ecb
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede3
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-cbc
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede-cbc
+-if errorlevel 1 goto err
+-
+-call tencce.bat des-ede3-cbc
+-if errorlevel 1 goto err
+-
+-call tencce.bat idea-ecb
+-if errorlevel 1 goto err
+-
+-call tencce.bat idea-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat idea-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat idea-cbc
+-if errorlevel 1 goto err
+-
+-call tencce.bat rc2-ecb
+-if errorlevel 1 goto err
+-
+-call tencce.bat rc2-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat rc2-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat rc2-cbc
+-if errorlevel 1 goto err
+-
+-call tencce.bat bf-ecb
+-if errorlevel 1 goto err
+-
+-call tencce.bat bf-cfb
+-if errorlevel 1 goto err
+-
+-call tencce.bat bf-ofb
+-if errorlevel 1 goto err
+-
+-call tencce.bat bf-cbc
+-if errorlevel 1 goto err
+-
+-echo OK
+-del %out1% >nul 2>&1
+-del %tmp1% >nul 2>&1
+-:err
+-
++@echo off
++echo start testenc
++
++path=..\ms;%path%
++set ssleay=%1%
++copy ..\ms\testenc.bat >nul
++set input=testenc.bat
++set tmp1=cipher.out
++set out1=clear.out
++set cmp=perl ..\ms\cmp.pl
++
++cecopy %ssleay% CE:\OpenSSL
++
++cd
++call tencce.bat enc
++if errorlevel 1 goto err
++
++call tencce.bat rc4
++if errorlevel 1 goto err
++
++call tencce.bat des-cfb
++if errorlevel 1 goto err
++
++call tencce.bat des-ede-cfb
++if errorlevel 1 goto err
++
++call tencce.bat des-ede3-cfb
++if errorlevel 1 goto err
++
++call tencce.bat des-ofb
++if errorlevel 1 goto err
++
++call tencce.bat des-ede-ofb
++if errorlevel 1 goto err
++
++call tencce.bat des-ede3-ofb
++if errorlevel 1 goto err
++
++call tencce.bat des-ecb
++if errorlevel 1 goto err
++
++call tencce.bat des-ede
++if errorlevel 1 goto err
++
++call tencce.bat des-ede3
++if errorlevel 1 goto err
++
++call tencce.bat des-cbc
++if errorlevel 1 goto err
++
++call tencce.bat des-ede-cbc
++if errorlevel 1 goto err
++
++call tencce.bat des-ede3-cbc
++if errorlevel 1 goto err
++
++call tencce.bat idea-ecb
++if errorlevel 1 goto err
++
++call tencce.bat idea-cfb
++if errorlevel 1 goto err
++
++call tencce.bat idea-ofb
++if errorlevel 1 goto err
++
++call tencce.bat idea-cbc
++if errorlevel 1 goto err
++
++call tencce.bat rc2-ecb
++if errorlevel 1 goto err
++
++call tencce.bat rc2-cfb
++if errorlevel 1 goto err
++
++call tencce.bat rc2-ofb
++if errorlevel 1 goto err
++
++call tencce.bat rc2-cbc
++if errorlevel 1 goto err
++
++call tencce.bat bf-ecb
++if errorlevel 1 goto err
++
++call tencce.bat bf-cfb
++if errorlevel 1 goto err
++
++call tencce.bat bf-ofb
++if errorlevel 1 goto err
++
++call tencce.bat bf-cbc
++if errorlevel 1 goto err
++
++echo OK
++del %out1% >nul 2>&1
++del %tmp1% >nul 2>&1
++:err
++
+--- uClinux-dist/lib/libssl/ms/testpem.bat	2002-11-14 03:08:55.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testpem.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,32 +1,32 @@
+-@echo off
+-set ssleay=%1%
+-set tmp1=pem.out
+-set cmp=fc.exe
+-
+-call tpem.bat crl ..\test\testcrl.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat pkcs7 ..\test\testp7.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat req ..\test\testreq2.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat rsa ..\test\testrsa.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat x509 ..\test\testx509.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat x509 ..\test\v3-cert1.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat x509 ..\test\v3-cert1.pem
+-if errorlevel 1 goto err
+-
+-call tpem.bat sess_id ..\test\testsid.pem
+-if errorlevel 1 goto err
+-
+-echo OK
+-del %tmp1%
+-:err
++@echo off
++set ssleay=%1%
++set tmp1=pem.out
++set cmp=fc.exe
++
++call tpem.bat crl ..\test\testcrl.pem
++if errorlevel 1 goto err
++
++call tpem.bat pkcs7 ..\test\testp7.pem
++if errorlevel 1 goto err
++
++call tpem.bat req ..\test\testreq2.pem
++if errorlevel 1 goto err
++
++call tpem.bat rsa ..\test\testrsa.pem
++if errorlevel 1 goto err
++
++call tpem.bat x509 ..\test\testx509.pem
++if errorlevel 1 goto err
++
++call tpem.bat x509 ..\test\v3-cert1.pem
++if errorlevel 1 goto err
++
++call tpem.bat x509 ..\test\v3-cert1.pem
++if errorlevel 1 goto err
++
++call tpem.bat sess_id ..\test\testsid.pem
++if errorlevel 1 goto err
++
++echo OK
++del %tmp1%
++:err
+--- uClinux-dist/lib/libssl/ms/testpemce.bat	2002-11-15 17:36:49.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testpemce.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,42 +1,42 @@
+-@echo off
+-set ssleay=%1%
+-set tmp1=pem.out
+-set cmp=fc.exe
+-
+-cecopy %ssleay% CE:\OpenSSL
+-
+-copy ..\test\testcrl.pem >nul
+-call tpemce.bat crl testcrl.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\testp7.pem >nul
+-call tpemce.bat pkcs7 testp7.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\testreq2.pem >nul
+-call tpemce.bat req testreq2.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\testrsa.pem >nul
+-call tpemce.bat rsa testrsa.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\testx509.pem >nul
+-call tpemce.bat x509 testx509.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\v3-cert1.pem >nul
+-call tpemce.bat x509 v3-cert1.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\v3-cert1.pem >nul
+-call tpemce.bat x509 v3-cert1.pem
+-if errorlevel 1 goto err
+-
+-copy ..\test\testsid.pem >nul
+-call tpemce.bat sess_id testsid.pem
+-if errorlevel 1 goto err
+-
+-echo OK
+-del %tmp1% >nul 2>&1
+-:err
++@echo off
++set ssleay=%1%
++set tmp1=pem.out
++set cmp=fc.exe
++
++cecopy %ssleay% CE:\OpenSSL
++
++copy ..\test\testcrl.pem >nul
++call tpemce.bat crl testcrl.pem
++if errorlevel 1 goto err
++
++copy ..\test\testp7.pem >nul
++call tpemce.bat pkcs7 testp7.pem
++if errorlevel 1 goto err
++
++copy ..\test\testreq2.pem >nul
++call tpemce.bat req testreq2.pem
++if errorlevel 1 goto err
++
++copy ..\test\testrsa.pem >nul
++call tpemce.bat rsa testrsa.pem
++if errorlevel 1 goto err
++
++copy ..\test\testx509.pem >nul
++call tpemce.bat x509 testx509.pem
++if errorlevel 1 goto err
++
++copy ..\test\v3-cert1.pem >nul
++call tpemce.bat x509 v3-cert1.pem
++if errorlevel 1 goto err
++
++copy ..\test\v3-cert1.pem >nul
++call tpemce.bat x509 v3-cert1.pem
++if errorlevel 1 goto err
++
++copy ..\test\testsid.pem >nul
++call tpemce.bat sess_id testsid.pem
++if errorlevel 1 goto err
++
++echo OK
++del %tmp1% >nul 2>&1
++:err
+--- uClinux-dist/lib/libssl/ms/testss.bat	2005-02-01 18:48:35.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testss.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,98 +1,98 @@
+-@echo off
+-
+-rem set ssleay=..\out\ssleay
+-set ssleay=%1
+-
+-set reqcmd=%ssleay% req
+-set x509cmd=%ssleay% x509 -sha1
+-set verifycmd=%ssleay% verify
+-
+-set CAkey=keyCA.ss
+-set CAcert=certCA.ss
+-set CAserial=certCA.srl
+-set CAreq=reqCA.ss
+-set CAconf=..\test\CAss.cnf
+-set CAreq2=req2CA.ss	
+-
+-set Uconf=..\test\Uss.cnf
+-set Ukey=keyU.ss
+-set Ureq=reqU.ss
+-set Ucert=certU.ss
+-
+-echo make a certificate request using 'req'
+-%reqcmd% -config %CAconf% -out %CAreq% -keyout %CAkey% -new
+-if errorlevel 1 goto e_req
+-
+-echo convert the certificate request into a self signed certificate using 'x509'
+-%x509cmd% -CAcreateserial -in %CAreq% -days 30 -req -out %CAcert% -signkey %CAkey% >err.ss
+-if errorlevel 1 goto e_x509
+-
+-echo --
+-echo convert a certificate into a certificate request using 'x509'
+-%x509cmd% -in %CAcert% -x509toreq -signkey %CAkey% -out %CAreq2% >err.ss
+-if errorlevel 1 goto e_x509_2
+-
+-%reqcmd% -verify -in %CAreq% -noout
+-if errorlevel 1 goto e_vrfy_1
+-
+-%reqcmd% -verify -in %CAreq2% -noout
+-if errorlevel 1 goto e_vrfy_2
+-
+-%verifycmd% -CAfile %CAcert% %CAcert%
+-if errorlevel 1 goto e_vrfy_3
+-
+-echo --
+-echo make another certificate request using 'req'
+-%reqcmd% -config %Uconf% -out %Ureq% -keyout %Ukey% -new >err.ss
+-if errorlevel 1 goto e_req_gen
+-
+-echo --
+-echo sign certificate request with the just created CA via 'x509'
+-%x509cmd% -CAcreateserial -in %Ureq% -days 30 -req -out %Ucert% -CA %CAcert% -CAkey %CAkey% -CAserial %CAserial%
+-if errorlevel 1 goto e_x_sign
+-
+-%verifycmd% -CAfile %CAcert% %Ucert%
+-echo --
+-echo Certificate details
+-%x509cmd% -subject -issuer -startdate -enddate -noout -in %Ucert%
+-
+-echo Everything appeared to work
+-echo --
+-echo The generated CA certificate is %CAcert%
+-echo The generated CA private key is %CAkey%
+-echo The current CA signing serial number is in %CAserial%
+-
+-echo The generated user certificate is %Ucert%
+-echo The generated user private key is %Ukey%
+-echo --
+-
+-del err.ss
+-
+-goto end
+-
+-:e_req
+-echo error using 'req' to generate a certificate request
+-goto end
+-:e_x509
+-echo error using 'x509' to self sign a certificate request
+-goto end
+-:e_x509_2
+-echo error using 'x509' convert a certificate to a certificate request
+-goto end
+-:e_vrfy_1
+-echo first generated request is invalid
+-goto end
+-:e_vrfy_2
+-echo second generated request is invalid
+-goto end
+-:e_vrfy_3
+-echo first generated cert is invalid
+-goto end
+-:e_req_gen
+-echo error using 'req' to generate a certificate request
+-goto end
+-:e_x_sign
+-echo error using 'x509' to sign a certificate request
+-goto end
+-
+-:end
++@echo off
++
++rem set ssleay=..\out\ssleay
++set ssleay=%1
++
++set reqcmd=%ssleay% req
++set x509cmd=%ssleay% x509 -sha1
++set verifycmd=%ssleay% verify
++
++set CAkey=keyCA.ss
++set CAcert=certCA.ss
++set CAserial=certCA.srl
++set CAreq=reqCA.ss
++set CAconf=..\test\CAss.cnf
++set CAreq2=req2CA.ss	
++
++set Uconf=..\test\Uss.cnf
++set Ukey=keyU.ss
++set Ureq=reqU.ss
++set Ucert=certU.ss
++
++echo make a certificate request using 'req'
++%reqcmd% -config %CAconf% -out %CAreq% -keyout %CAkey% -new
++if errorlevel 1 goto e_req
++
++echo convert the certificate request into a self signed certificate using 'x509'
++%x509cmd% -CAcreateserial -in %CAreq% -days 30 -req -out %CAcert% -signkey %CAkey% >err.ss
++if errorlevel 1 goto e_x509
++
++echo --
++echo convert a certificate into a certificate request using 'x509'
++%x509cmd% -in %CAcert% -x509toreq -signkey %CAkey% -out %CAreq2% >err.ss
++if errorlevel 1 goto e_x509_2
++
++%reqcmd% -verify -in %CAreq% -noout
++if errorlevel 1 goto e_vrfy_1
++
++%reqcmd% -verify -in %CAreq2% -noout
++if errorlevel 1 goto e_vrfy_2
++
++%verifycmd% -CAfile %CAcert% %CAcert%
++if errorlevel 1 goto e_vrfy_3
++
++echo --
++echo make another certificate request using 'req'
++%reqcmd% -config %Uconf% -out %Ureq% -keyout %Ukey% -new >err.ss
++if errorlevel 1 goto e_req_gen
++
++echo --
++echo sign certificate request with the just created CA via 'x509'
++%x509cmd% -CAcreateserial -in %Ureq% -days 30 -req -out %Ucert% -CA %CAcert% -CAkey %CAkey% -CAserial %CAserial%
++if errorlevel 1 goto e_x_sign
++
++%verifycmd% -CAfile %CAcert% %Ucert%
++echo --
++echo Certificate details
++%x509cmd% -subject -issuer -startdate -enddate -noout -in %Ucert%
++
++echo Everything appeared to work
++echo --
++echo The generated CA certificate is %CAcert%
++echo The generated CA private key is %CAkey%
++echo The current CA signing serial number is in %CAserial%
++
++echo The generated user certificate is %Ucert%
++echo The generated user private key is %Ukey%
++echo --
++
++del err.ss
++
++goto end
++
++:e_req
++echo error using 'req' to generate a certificate request
++goto end
++:e_x509
++echo error using 'x509' to self sign a certificate request
++goto end
++:e_x509_2
++echo error using 'x509' convert a certificate to a certificate request
++goto end
++:e_vrfy_1
++echo first generated request is invalid
++goto end
++:e_vrfy_2
++echo second generated request is invalid
++goto end
++:e_vrfy_3
++echo first generated cert is invalid
++goto end
++:e_req_gen
++echo error using 'req' to generate a certificate request
++goto end
++:e_x_sign
++echo error using 'x509' to sign a certificate request
++goto end
++
++:end
+--- uClinux-dist/lib/libssl/ms/testssce.bat	2002-11-15 17:36:49.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/testssce.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,104 +1,104 @@
+-rem set ssleay=..\out\ssleay
+-set ssleay=%1
+-
+-set reqcmd=%ssleay% req
+-set x509cmd=%ssleay% x509
+-set verifycmd=%ssleay% verify
+-
+-set CAkey=\OpenSSL\keyCA.ss
+-set CAcert=\OpenSSL\certCA.ss
+-set CAserial=\OpenSSL\certCA.srl
+-set CAreq=\OpenSSL\reqCA.ss
+-cecopy ..\test\CAss.cnf CE:\OpenSSL
+-set CAconf=\OpenSSL\CAss.cnf
+-set CAreq2=\OpenSSL\req2CA.ss	
+-
+-cecopy ..\test\Uss.cnf CE:\OpenSSL
+-set Uconf=\OpenSSL\Uss.cnf
+-set Ukey=\OpenSSL\keyU.ss
+-set Ureq=\OpenSSL\reqU.ss
+-set Ucert=\OpenSSL\certU.ss
+-
+-echo make a certificate request using 'req'
+-cerun CE:\OpenSSL\%reqcmd% -config %CAconf% -out %CAreq% -keyout %CAkey% -new
+-if errorlevel 1 goto e_req
+-
+-echo convert the certificate request into a self signed certificate using 'x509'
+-cerun CE:\OpenSSL\%x509cmd% -CAcreateserial -in %CAreq% -days 30 -req -out %CAcert% -signkey %CAkey% "> \OpenSSL\err.ss"
+-if errorlevel 1 goto e_x509
+-
+-echo --
+-echo convert a certificate into a certificate request using 'x509'
+-cerun CE:\OpenSSL\%x509cmd% -in %CAcert% -x509toreq -signkey %CAkey% -out %CAreq2% "> \OpenSSL\err.ss"
+-if errorlevel 1 goto e_x509_2
+-
+-cerun CE:\OpenSSL\%reqcmd% -verify -in %CAreq% -noout
+-if errorlevel 1 goto e_vrfy_1
+-
+-cerun CE:\OpenSSL\%reqcmd% -verify -in %CAreq2% -noout
+-if errorlevel 1 goto e_vrfy_2
+-
+-cerun CE:\OpenSSL\%verifycmd% -CAfile %CAcert% %CAcert%
+-if errorlevel 1 goto e_vrfy_3
+-
+-echo --
+-echo make another certificate request using 'req'
+-cerun CE:\OpenSSL\%reqcmd% -config %Uconf% -out %Ureq% -keyout %Ukey% -new "> \OpenSSL\err.ss"
+-if errorlevel 1 goto e_req_gen
+-
+-echo --
+-echo sign certificate request with the just created CA via 'x509'
+-cerun CE:\OpenSSL\%x509cmd% -CAcreateserial -in %Ureq% -days 30 -req -out %Ucert% -CA %CAcert% -CAkey %CAkey% -CAserial %CAserial%
+-if errorlevel 1 goto e_x_sign
+-
+-cerun CE:\OpenSSL\%verifycmd% -CAfile %CAcert% %Ucert%
+-echo --
+-echo Certificate details
+-cerun CE:\OpenSSL\%x509cmd% -subject -issuer -startdate -enddate -noout -in %Ucert%
+-
+-cecopy CE:%CAcert% .
+-cecopy CE:%CAkey% .
+-cecopy CE:%CAserial% .
+-cecopy CE:%Ucert% .
+-cecopy CE:%Ukey% .
+-
+-echo Everything appeared to work
+-echo --
+-echo The generated CA certificate is %CAcert%
+-echo The generated CA private key is %CAkey%
+-echo The current CA signing serial number is in %CAserial%
+-
+-echo The generated user certificate is %Ucert%
+-echo The generated user private key is %Ukey%
+-echo --
+-
+-cedel CE:\OpenSSL\err.ss
+-
+-goto end
+-
+-:e_req
+-echo error using 'req' to generate a certificate request
+-goto end
+-:e_x509
+-echo error using 'x509' to self sign a certificate request
+-goto end
+-:e_x509_2
+-echo error using 'x509' convert a certificate to a certificate request
+-goto end
+-:e_vrfy_1
+-echo first generated request is invalid
+-goto end
+-:e_vrfy_2
+-echo second generated request is invalid
+-goto end
+-:e_vrfy_3
+-echo first generated cert is invalid
+-goto end
+-:e_req_gen
+-echo error using 'req' to generate a certificate request
+-goto end
+-:e_x_sign
+-echo error using 'x509' to sign a certificate request
+-goto end
+-
+-:end
++rem set ssleay=..\out\ssleay
++set ssleay=%1
++
++set reqcmd=%ssleay% req
++set x509cmd=%ssleay% x509
++set verifycmd=%ssleay% verify
++
++set CAkey=\OpenSSL\keyCA.ss
++set CAcert=\OpenSSL\certCA.ss
++set CAserial=\OpenSSL\certCA.srl
++set CAreq=\OpenSSL\reqCA.ss
++cecopy ..\test\CAss.cnf CE:\OpenSSL
++set CAconf=\OpenSSL\CAss.cnf
++set CAreq2=\OpenSSL\req2CA.ss	
++
++cecopy ..\test\Uss.cnf CE:\OpenSSL
++set Uconf=\OpenSSL\Uss.cnf
++set Ukey=\OpenSSL\keyU.ss
++set Ureq=\OpenSSL\reqU.ss
++set Ucert=\OpenSSL\certU.ss
++
++echo make a certificate request using 'req'
++cerun CE:\OpenSSL\%reqcmd% -config %CAconf% -out %CAreq% -keyout %CAkey% -new
++if errorlevel 1 goto e_req
++
++echo convert the certificate request into a self signed certificate using 'x509'
++cerun CE:\OpenSSL\%x509cmd% -CAcreateserial -in %CAreq% -days 30 -req -out %CAcert% -signkey %CAkey% "> \OpenSSL\err.ss"
++if errorlevel 1 goto e_x509
++
++echo --
++echo convert a certificate into a certificate request using 'x509'
++cerun CE:\OpenSSL\%x509cmd% -in %CAcert% -x509toreq -signkey %CAkey% -out %CAreq2% "> \OpenSSL\err.ss"
++if errorlevel 1 goto e_x509_2
++
++cerun CE:\OpenSSL\%reqcmd% -verify -in %CAreq% -noout
++if errorlevel 1 goto e_vrfy_1
++
++cerun CE:\OpenSSL\%reqcmd% -verify -in %CAreq2% -noout
++if errorlevel 1 goto e_vrfy_2
++
++cerun CE:\OpenSSL\%verifycmd% -CAfile %CAcert% %CAcert%
++if errorlevel 1 goto e_vrfy_3
++
++echo --
++echo make another certificate request using 'req'
++cerun CE:\OpenSSL\%reqcmd% -config %Uconf% -out %Ureq% -keyout %Ukey% -new "> \OpenSSL\err.ss"
++if errorlevel 1 goto e_req_gen
++
++echo --
++echo sign certificate request with the just created CA via 'x509'
++cerun CE:\OpenSSL\%x509cmd% -CAcreateserial -in %Ureq% -days 30 -req -out %Ucert% -CA %CAcert% -CAkey %CAkey% -CAserial %CAserial%
++if errorlevel 1 goto e_x_sign
++
++cerun CE:\OpenSSL\%verifycmd% -CAfile %CAcert% %Ucert%
++echo --
++echo Certificate details
++cerun CE:\OpenSSL\%x509cmd% -subject -issuer -startdate -enddate -noout -in %Ucert%
++
++cecopy CE:%CAcert% .
++cecopy CE:%CAkey% .
++cecopy CE:%CAserial% .
++cecopy CE:%Ucert% .
++cecopy CE:%Ukey% .
++
++echo Everything appeared to work
++echo --
++echo The generated CA certificate is %CAcert%
++echo The generated CA private key is %CAkey%
++echo The current CA signing serial number is in %CAserial%
++
++echo The generated user certificate is %Ucert%
++echo The generated user private key is %Ukey%
++echo --
++
++cedel CE:\OpenSSL\err.ss
++
++goto end
++
++:e_req
++echo error using 'req' to generate a certificate request
++goto end
++:e_x509
++echo error using 'x509' to self sign a certificate request
++goto end
++:e_x509_2
++echo error using 'x509' convert a certificate to a certificate request
++goto end
++:e_vrfy_1
++echo first generated request is invalid
++goto end
++:e_vrfy_2
++echo second generated request is invalid
++goto end
++:e_vrfy_3
++echo first generated cert is invalid
++goto end
++:e_req_gen
++echo error using 'req' to generate a certificate request
++goto end
++:e_x_sign
++echo error using 'x509' to sign a certificate request
++goto end
++
++:end
+--- uClinux-dist/lib/libssl/ms/tpem.bat	1999-03-08 22:01:45.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/tpem.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,6 +1,6 @@
+-rem called by testpem
+-
+-echo test %1 %2
+-%ssleay% %1 -in %2 -out %tmp1%
+-%cmp% %2 %tmp1%
+-
++rem called by testpem
++
++echo test %1 %2
++%ssleay% %1 -in %2 -out %tmp1%
++%cmp% %2 %tmp1%
++
+--- uClinux-dist/lib/libssl/ms/tpemce.bat	2002-11-15 17:36:49.000000000 -0500
++++ uClinux-dist/lib/libssl/ms/tpemce.bat	2007-03-25 19:56:49.000000000 -0500
+@@ -1,8 +1,8 @@
+-rem called by testpemce
+-
+-echo test %1 %2
+-cecopy %2 CE:\OpenSSL
+-cerun CE:\OpenSSL\%ssleay% %1 -in \OpenSSL\%2 -out \OpenSSL\%tmp1%
+-del %tmp1% >nul 2>&1
+-cecopy CE:\OpenSSL\%tmp1% .
+-%cmp% %2 %tmp1%
++rem called by testpemce
++
++echo test %1 %2
++cecopy %2 CE:\OpenSSL
++cerun CE:\OpenSSL\%ssleay% %1 -in \OpenSSL\%2 -out \OpenSSL\%tmp1%
++del %tmp1% >nul 2>&1
++cecopy CE:\OpenSSL\%tmp1% .
++%cmp% %2 %tmp1%

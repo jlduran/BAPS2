@@ -1,0 +1,292 @@
+<!--
+ * Asterisk-GUI	-	an Asterisk configuration interface
+ *
+ * Setup WIzard/ Finish Screen
+ *
+ * Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Mark Spencer <markster@digium.com>
+ * Pari Nannapaneni <pari@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+ *
+-->
+<HTML>
+<HEAD>
+	<TITLE> Asterisk GUI Setup Wizard</TITLE>
+	<link href="setup.css" media="all" rel="Stylesheet" type="text/css" />
+</HEAD>
+<script src="../scripts/prototype.js"></script>
+<script src="../scripts/astman.js"></script>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var rawman_url;
+var custinfo_callbacks = new Object;
+var fieldnames = new Array( 'status', 'new', 'save', 'cancel','name','cust_firstName','cust_lastName','cust_title','cust_company','cust_industry','cust_URL','cust_email',
+'cust_phone','cust_street','cust_city','cust_state','cust_zip','cust_country');
+var widgets = new Array;
+var custinfo_filename = "contactinfo.conf" ;
+var custinfo_context = "Myinfo";
+
+function loadcustinfo(){
+		for (var x =0; x < fieldnames.length; x++ ) {
+			widgets[fieldnames[x]] = $(fieldnames[x]);
+			widgets[fieldnames[x]].disabled = true;
+		}
+		parent.astmanEngine.config2list( custinfo_filename, $('select_custinfo'), widgets, custinfo_callbacks);
+	
+}
+
+custinfo_callbacks.format = function(t){
+		if ( t.name == custinfo_context  )
+			return t.name;
+	return null;
+}
+
+
+custinfo_callbacks.loaded= function(){
+	// if there is no "Myinfo" - create a new context 
+		if( $('select_custinfo').length == 0 ){
+			$('new').click();
+			$('name').value = custinfo_context ;
+		}else{
+			$('select_custinfo').selectitem(0);
+		}
+//		$('registration').style.display="";
+}
+
+custinfo_callbacks.savechanges= function(){
+			$('retURL').value = window.location.href + "?registered" ;
+			document.getElementById("form1").submit();
+			$('registration').style.display='none';
+			$('status_message').style.display= "";
+}
+
+function save_userdetails(){
+		var requiredfields = {'cust_firstName': "First Name", 'cust_lastName': "Last Name" , 'cust_email' : "Email" , 'cust_phone':"Phone" , 'cust_country' :"Country" } ;
+		for(var i in requiredfields ){
+				if( requiredfields.hasOwnProperty(i) && $(i).value == ""  ){
+						alert( " Please enter your " + requiredfields[i] );
+						$(i).focus();
+						return false;
+				}
+
+		}
+		if( $('save').disabled ){
+			$('registration').style.display='none';
+			$('status').innerHTML = "<i> No Changes made!! </i>";
+			parent.$('next').disabled = false;
+		}else{
+			$('save').click();
+		}
+}
+
+
+function localinit(){
+	parent.$('next').disabled = false;
+	parent.$('next').onclick = function(){	 parent.window.location.href ="../cfgbasic.html"; };
+	parent.$('back').disabled = false;
+	parent.$('back').onclick  = function(){	 	parent.$('next').disabled = false; window.location.href="8.html"; };
+	rawman_url = parent.rawman_url ;
+	parent.astmanEngine.setURL(rawman_url);
+	ping();
+}
+
+function ping(){
+			var opt = {
+				method: 'get',
+				asynchronous: true,
+				onComplete: isloggedin
+			};
+			opt.parameters="action=ping" ;
+			var tmp = new Ajax.Request(rawman_url , opt);
+}
+
+function isloggedin(originalRequest){
+			if ( originalRequest.responseText.match("Error") ) {
+				// User is not logged in , show him the login screen
+				parent.window.location.href = parent.window.location.href ; 
+			}
+
+			if ( originalRequest.responseText.match("Pong") ) {
+					// load default numbnerplan settings
+					parent.astmanEngine.pollEvents();
+					if(window.location.href.match("registered") ){
+						parent.$('next').disabled = false; 
+						$('registration').style.display='none';
+						$('usermessage').innerHTML = "You have been registered successfully !! ";
+/*					}else{
+						$('usermessage').innerHTML = "<A href=# onclick=\"$('registration').style.display='';\">Register AsteriskNOW</A>";
+							parent.astmanEngine.run_tool("/bin/touch /etc/asterisk/"+custinfo_filename ,	loadcustinfo );				
+*/					
+					}
+			}
+}
+
+//-->
+</SCRIPT>
+<BODY bgcolor="#FFFFFF" onload="localinit()" topmargin=0 leftmargin=0>
+<table width="100%" height="100%" border=0 cellpadding=0 cellspacing=0>
+	<tr><td width="170" valign=top align=left>
+					<div id="menu">
+					<table cellpadding=3 cellspacing=2 border=0 id="sidelist">
+						<tr><td width=3></td><td>Start</td></tr>
+						<tr><td></td><td>Verify Analog Ports</td></tr>
+						<!-- <tr><td></td><td>Date & Time</td></tr> -->
+						<tr><td></td><td>Local Extension Settings</td></tr>
+						<tr><td></td><td>Service Providers</td></tr>
+						<tr><td></td><td>Calling Rules</td></tr>
+						<tr><td></td><td>VoiceMail Settings</td></tr>
+						<tr><td></td><td>User Extensions</td></tr>
+						<tr><td></td><td>Incoming Calls</td></tr>
+						<!-- <tr><td></td><td>VoiceMenus</td></tr>
+						<tr><td></td><td>Step 9 </td></tr> -->
+						<tr><td></td><td class="slselected">Finish</td></tr>
+					</table>
+					</div>
+			</td>
+			<td valign=top align=center>
+			<!--  this page -->
+			
+				<div class="heading"> Finish</div>
+				<div class="subheading">
+				Congratulations! You have successfully configured your Asterisk installation!<BR></div>
+				
+<form id="form1" action="https://asterisknow.digium.com/register" method="POST">
+<div id="registration" STYLE="display:none; position: absolute; left: 180; top: 80; width:600; height:300;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid;z-index:5">
+	<table width="100%" cellpadding=0 cellspacing=0>
+		<TR bgcolor="#7E5538" >
+				<TD  onmousedown="startDrag(event , 'registration');" id="registration_title" style="cursor: move;color:#FFFFFF; font-size: 12px; font-weight:bold;" align="center">Register AsteriskNOW with Digium</TD>
+				<TD Height="20" width=15 align="center"  style="color:#FFFFFF; font-size: 12px; font-weight:bold;" onclick="$('registration').style.display='none';">X</TD>
+		</TR>
+	</table>
+<TABLE width=590 cellpadding=1 cellspacing=2 border=0>
+<TR><TD height=10 colspan=4></TD></TR>
+<TR>
+	<TD>First Name <font color=red>*</font></TD>
+	<TD><input  maxlength="40" type="text" id="cust_firstName" size="16" name="cust_firstName"></TD>
+	<TD>Last Name <font color=red>*</font></TD>
+	<TD><input  maxlength="40" type="text" id="cust_lastName" size="16" name="cust_lastName"></TD>
+</TR>
+<TR>
+	<TD>Title</TD>
+	<TD><input  maxlength="80" type="text" id="cust_title" size="16" name="cust_title"></TD>
+	<TD>Company</TD>
+	<TD><input  maxlength="80" type="text" id="cust_company" size="16" name="cust_company"></TD>
+</TR>
+
+<TR>
+	<TD>Industry</TD>
+	<TD><select  id="cust_industry" name="cust_industry">
+			<option value="">--None--</option>
+			<option value="Agriculture">Agriculture</option>
+			<option value="Apparel">Apparel</option>
+			<option value="Banking">Banking</option>
+			<option value="Biotechnology">Biotechnology</option>
+			<option value="Chemicals">Chemicals</option>
+			<option value="Communications">Communications</option>
+			<option value="Construction">Construction</option>
+			<option value="Consulting">Consulting</option>
+			<option value="Education">Education</option>
+			<option value="Electronics">Electronics</option>
+			<option value="Energy">Energy</option>
+			<option value="Engineering">Engineering</option>
+			<option value="Entertainment">Entertainment</option>
+			<option value="Environmental">Environmental</option>
+			<option value="Finance">Finance</option>
+			<option value="Food & Beverage">Food & Beverage</option>
+			<option value="Government">Government</option>
+			<option value="Healthcare">Healthcare</option>
+			<option value="Hospitality">Hospitality</option>
+			<option value="Insurance">Insurance</option>
+			<option value="Machinery">Machinery</option>
+			<option value="Manufacturing">Manufacturing</option>
+			<option value="Media">Media</option>
+			<option value="Not For Profit">Not For Profit</option>
+			<option value="Other">Other</option>
+			<option value="Recreation">Recreation</option>
+			<option value="Retail">Retail</option>
+			<option value="Shipping">Shipping</option>
+			<option value="Technology">Technology</option>
+			<option value="Telecommunications">Telecommunications</option>
+			<option value="Transportation">Transportation</option>
+			<option value="Utilities">Utilities</option>
+			</select>
+			</TD>
+	<TD>Website</TD>
+	<TD><input  maxlength="80" type="text" id="cust_URL" size="20" name="cust_URL"></TD>
+</TR>
+<TR>
+	<TD>Email <font color=red>*</font></TD>
+	<TD><input  maxlength="80" type="text" id="cust_email" size="16" name="cust_email"></TD>
+	<TD>Phone <font color=red>*</font></TD>
+	<TD><input  maxlength="40" type="text" id="cust_phone" size="14" name="cust_phone"></TD>
+</TR>
+<TR>
+	<TD valign=top>Address</TD>
+	<TD><textarea name="cust_street" id="cust_street"></textarea></TD>
+	<TD valign=top>City</TD>
+	<TD valign=top><input  maxlength="40" type="text" id="cust_city" size="14" name="cust_city"></TD>
+</TR>
+<TR>
+	<TD>State/Province</TD>
+	<TD><input  maxlength="20" type="text" id="cust_state" size="14" name="cust_state"></TD>
+	<TD>Zip</TD>
+	<TD><input  maxlength="20" type="text" id="cust_zip" size="6" name="cust_zip"></TD>
+</TR>
+<TR>
+	<TD>Country <font color=red>*</font></TD>
+	<TD><input  maxlength="40" type="text" id="cust_country" size="14" name="cust_country" value="US"></TD>
+	<TD></TD>
+	<TD></TD>
+</TR>
+<TR><TD height=10 colspan=4></TD></TR>
+<TR>
+	<TD colspan=4 align="center">
+		<input type=hidden name="oid" id="oid" value="00D300000006mPe">
+		<input type=hidden name="retURL" id="retURL" value="">
+		<input type="hidden" id="recordType" name="recordType" value="012300000004zos">
+		<input type="hidden" id="lead_source" name="lead_source" value="ver0.9.6"> 
+		<input type="button" value="Skip" onclick="parent.$('next').disabled = false; $('registration').style.display='none';">
+		&nbsp;&nbsp;
+		<input type="button" value="Register AsteriskNOW with Digium" onclick="save_userdetails()">
+	</TD>
+</TR>
+</TABLE>
+</div>
+</form>
+
+			<BR><BR><BR><DIV id="usermessage"></div>
+			<div id="status"></div>
+
+			<div style="display:none">
+				<select id="select_custinfo"></select>
+				<input type="button" id="new" value="New">
+				<input type="button" id="save" value="Save">
+				<input type="button" id="cancel" value="Cancel">
+				<input id="name">
+			</div>
+
+		<div ID="status_message"  STYLE="display:none; position: absolute; left: 170; top: 190; width:350; height:115;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid;">
+			<BR><BR>
+			<TABLE border=0 cellpadding=0 cellspacing=3 align="center">
+			<TR><TD><img src="../images/loading.gif"></TD>
+			<TD valign="middle" align="center">&nbsp;&nbsp;<div id="message_text">Please wait ... </div></TD>
+			</TR>
+			</TABLE>
+		</div>
+
+			<!--  this page -->
+			</td>
+		</tr>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,30 @@
+dropbear.txt
+------------
+
+1/ To test:
+
+  [host]$ ssh root@your.ip04.ip
+
+  (default root password is uClinux)
+
+2/ Reverse ssh via tunneling trick, useful for maintenance when IP04
+is behind a NAT:
+
+  A(IP04) ---> Firewall/NAT -> B(manager)
+
+  From A:
+
+    ssh -R 2048:localhost:22 username@manager
+
+  You need to keep this ssh session running.
+
+  From B:
+
+    ssh root@localhost -p 2048
+
+  We should be able to log into A from B
+
+3/ Lots more information in the README file which is included in the
+dropbear source, available from:
+
+  http://matt.ucc.asn.au/dropbear/dropbear.html

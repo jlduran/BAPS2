@@ -1,0 +1,76 @@
+Major
+-----
+
+[X] Patches to build uClinux-dist for IP04
+[X] Build an ipkg for Asterisk
+[X] test install ipkg on x86
+[X] Build a working ipkg for the IP04
+    + three candidates so far:
+      + shell script
+      + busybox (fork problem)
+      + ipkg-cl
+
+Clean Up
+--------
+
+[X] Build patches to build uClinux-dist for IP04
+[ ] Target to build libgdots
+[X] Set up README for basic uImage, e.g. bootargs console=
+[ ] Asterisk on the BF537 STAMP
+[ ] no need to mention package name twice, e.g.:
+      [david@bunny ucasterisk]$ make -f asterisk.mk asterisk
+      [david@bunny ucasterisk]$ make -f asterisk.mk asterisk-package
+    consider change to:
+      [david@bunny ucasterisk]$ make -f asterisk.mk 
+      [david@bunny ucasterisk]$ make -f asterisk.mk package
+    or maybe even:
+      [david@bunny ucasterisk]$ make asterisk
+      [david@bunny ucasterisk]$ make asterisk-package
+    if we can work out how to recombine makefiles and collect targets
+[ ] dropbear, add hooks for installation
+    + good test for ipkg
+    + work out how to hook inetd stuff
+[ ] is there a more sensible dir structure - get others to review?
+[X] tutorial on IP04 uClinux-dist hacking
+    + modify rc for distro (or motd, or busybox options)
+    + how to capture
+[X] tutorial/walkthru on simple package (hello)
+    + look at steps to compile
+    + look at makefile
+    + look at what happens on target.
+    + compare to more complex example like compiling a uClinux-dist/user program
+    + !/bin/sh -x is yr friend for debugging
+    + link to msh strangeness
+
+[ ] Hacking tutorial
+    + walk people thru development
+    [ ] mods to wcfxs
+        + rcp wcfxs.ko/insmod etc
+    [ ] new zaptel package
+        + MD5 problems
+        + ipkg update if installing from web
+        + remove 'snapshots'file
+    [ ] 
+
+[ ] script to automate testing
+    + make all packages
+    + download to a target and test
+    + way to automate uImage install
+    + just nominate an IP
+
+[ ] script to automate build and upload
+    + build all packages
+    + create Package file
+    + update on web site
+    + ip08.mk is close, maybe rename and include all packages
+
+[X] use symlinks rather than cp for src and config files
+    + e.g. consider zaptel/wcfxs.c 
+    + we currently cp this from src top zaptel-x.y
+    + if we modify zaptel-x.y/wcfxs.c then we must remember to
+      cp it ito src to make sure mods get captured by svn
+    + better to sym link instead, mods in zaptel/wcfxs-x.y automatically
+      captured by SVN version control
+    + same for stuff menuselect.makeopts
+    + files that don't change much (like small changes to *) we can just use
+      patches

@@ -1,0 +1,11 @@
+# /etc/config/crontab
+
+# uncomment line below to test, see uClinux-dist/cron/README for
+# more information.  Note no shell is available, so u can't do
+# things like /bin/echo hello >> /tmp/test, but you could always
+# start a shell script to handle anything fancy.
+
+#* * * * * root /bin/touch /etc/config/crontab
+
+
+

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Start up file for lighttpd
+# David Rowe 9 Feb 2008
+
+case $1 in
+	start) lighttpd -D -f /etc/lighttpd.conf >/dev/null 2>/dev/null & ;;
+	stop) killall -9 lighttpd;;
+	enable) rm -f /etc/rc.d/S55lighttpd; 
+	        ln -s /etc/init.d/lighttpd /etc/rc.d/S55lighttpd;;
+	disable) rm -f /etc/rc.d/S55lighttpd;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/lighttpd [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

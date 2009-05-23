@@ -1,0 +1,11 @@
+--- vim71-orig/src/term.c	2007-05-07 20:39:11.000000000 +0100
++++ vim71/src/term.c	2008-02-20 21:07:28.000000000 +0000
+@@ -1415,7 +1415,7 @@
+ #endif
+ 
+ #if defined(UNIX) && !defined(__MINT__)
+-# define DEFAULT_TERM	(char_u *)"ansi"
++# define DEFAULT_TERM	(char_u *)"xterm"
+ #endif
+ 
+ #ifdef __MINT__

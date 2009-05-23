@@ -1,0 +1,8 @@
+login
+=====
+
+Installing this package forces a username/password prompt when using
+telnet to access the IP04.  The default uImage has no username/password
+for convenience.
+
+The default root password is uClinux.

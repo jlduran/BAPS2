@@ -1,0 +1,28 @@
+#!/bin/sh
+# David Rowe 24 May 2008
+#
+# Plugin to monitor wispcar voltage
+#
+# Magic markers (optional - only used by munin-config and some
+# installation scripts):
+#
+#%# family=auto
+#%# capabilities=autoconf
+
+if [ "$1" = "autoconf" ]; then
+	echo yes
+	exit 0
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title Wispcar voltage'
+	echo 'graph_args --base 1000 -l 0'
+	echo 'graph_vlabel Voltage'
+	echo 'graph_category wispcar'
+	echo 'voltage.draw AREA'
+	echo 'voltage.label Voltage'
+	exit 0
+fi
+
+echo -n "voltage.value "
+cat /tmp/w | awk '{ print $2 }' 

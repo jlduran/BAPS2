@@ -1,0 +1,48 @@
+uImage.txt
+David Rowe March 2008
+
+uImage.ip08
+-----------
+
+uClinux-dist-2007R1.1-RC3.tar.bz2
+Initial BAPS uImage for IP04 and IP08
+
+uImage_r2.ip08
+--------------
+
++ March 2008
++ uClinux-dist-2007R1.1-RC3.tar.bz2
++ BAPS uImage for IP04 and IP08
++ Added password, tar GNU extensions
++ Removed some unneeded busybox utils and usr apps to save space
++ Reduced rootfs size from 8M to 3M to save 5M system memory
++ Removed need for console=ttyBF0,115200 in kernel cmd line
++ Adjusted uImage length to be multiple of 128k to experiment 
+  installing from Linux rather than u-boot.
++ iptables kernel modules compiled in, and iptables app
+
+Updating uImage from Linux
+--------------------------
+
+(Note: not working yet, I get a "NAND Read error on 0" from u-boot
+when I reboot)
+
+root:/var/tmp> tftp -g -r uImage_r2.ip08 192.168.1.2
+
+root:/var/tmp> ls
+uImage_r2.ip08
+
+root:/var/tmp> cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00300000 00001000 "ROMfs"
+mtd1: 00800000 00020000 "linux kernel"
+mtd2: 0f800000 00020000 "file system"
+
+root:/var/tmp> cp uImage_r2.ip08 /dev/mtd1
+
+root:/var/tmp> reboot
+
+Ideas for Next uImage
+---------------------
+
+busybox ftp

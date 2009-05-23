@@ -1,0 +1,32 @@
+--- ssmtp-orig/Makefile.in	2008-02-28 18:50:15.000000000 -0800
++++ ssmtp/Makefile.in	2009-02-17 10:28:51.000000000 -0800
+@@ -36,7 +36,8 @@
+ -DREVALIASES_FILE=\"$(REVALIASES_FILE)\" \
+ 
+ 
+-CFLAGS=@DEFS@ $(EXTRADEFS) @CFLAGS@
++CFLAGS=@DEFS@ $(EXTRADEFS) @CFLAGS@ $(EXTRA_CFLAGS)
++LDFLAGS = @LDFLAGS@
+ 
+ .PHONY: all
+ all: ssmtp
+@@ -79,7 +80,7 @@
+ 
+ # Binaries:
+ ssmtp: $(OBJS)
+-	$(CC) -o ssmtp $(OBJS) @LIBS@ $(CFLAGS)
++	$(CC) -o ssmtp $(OBJS) @LIBS@ $(CFLAGS) $(LDFLAGS)
+ 
+ .PHONY: clean
+ clean:
+--- ssmtp-orig/configure	2008-03-06 12:53:03.000000000 -0800
++++ ssmtp/configure	2009-02-17 10:04:37.000000000 -0800
+@@ -1562,7 +1562,7 @@
+ #define HAVE_SSL 1
+ EOF
+ 
+-	LIBS="$LIBS -lssl"
++	LIBS="$LIBS -lssl -lcrypto"
+ fi
+ enableval=""
+ 

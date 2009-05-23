@@ -1,0 +1,21 @@
+#!/bin/sh
+# Start up file for wispcar daemon
+
+case $1 in
+	start) /bin/wispcard& ;;
+	stop) killall -9 wispcard;;
+	enable) rm -f /etc/rc.d/S20wispcar; 
+	        ln -s /etc/init.d/wispcar /etc/rc.d/S20wispcar;;
+	disable) rm -f /etc/rc.d/S20wispcar;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/wispcar [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

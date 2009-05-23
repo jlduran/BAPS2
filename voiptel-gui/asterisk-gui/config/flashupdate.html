@@ -1,0 +1,222 @@
+<!--
+ * Asterisk-GUI	-	an Asterisk configuration interface
+ *
+ * Manage network settings on the appliance
+ *
+ * Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Mark Spencer <markster@digium.com>
+ * Pari Nannapaneni <pari@digium.com>
+ * Brandon Kruse <bkruse@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+-->
+<script src="scripts/prototype.js"></script>
+<script src="scripts/astman.js"></script>
+<link href="stylesheets/rico.css" media="all" rel="Stylesheet" type="text/css" />
+<link href="stylesheets/schwing.css" media="all" rel="Stylesheet" type="text/css" />
+<script>
+var uImage_filename;
+var uImage_uploadpath = "/var/lib/asterisk/sounds/imageupdate";
+
+
+function execute_applyuimage(a){
+	var b;
+	gui_feedback('Upgrading firmware','blue', 30000 );
+	_$('message_text').innerHTML ="&nbsp;&nbsp;Upgrading Firmware ... ";
+	_$('status_message').style.display = "";
+
+	if(a=="http"){
+    
+		b = "imageupload wget -O "+ uImage_uploadpath + "/uImage " + _$('httpurl').value;    
+	}else if(a == "file"){
+
+		b = "imageupload mv " + uImage_uploadpath + "/" + uImage_filename + " " + uImage_uploadpath + "/uImage";
+
+	}else if(a == "tftp"){
+
+		if( _$('tftp_filename').value.length ){
+			var fname = " " + _$('tftp_filename').value ;
+		}else{
+			var fname = "" ;
+		}
+		b = "imageupload tftp -g -r " + fname + " -l " + uImage_uploadpath +  "/uImage " + _$('tftpurl').value;
+
+	}
+	parent.astmanEngine.run_tool( b, onSuccess = function(){ check_flashupdateresult();} );
+	
+}
+
+
+function check_flashupdateresult(){
+	var opt = {
+		method: 'get',
+		asynchronous: true,
+		onComplete: function (originalRequest){
+			if ( originalRequest.responseText.match("FAIL: ") ) {
+				_$('status_message').style.display = "none";
+				gui_feedback('Firmware upgraded FAILED','default', 5000 );
+				alert("Firmware Update FAILED" + "\n"+originalRequest.responseText);
+				return ;
+			}
+			if ( originalRequest.responseText.match("PASS: ") ) {
+				flashupdate_success();
+			}
+		}
+	};
+	opt.parameters="" ;
+	var tmp = new Ajax.Request("/static/flashresult", opt);
+}
+
+
+function flashupdate_success(){
+	_$('status_message').style.display = "none";
+	gui_feedback('Firmware upgraded','green', 5000 );
+	var f= "Finished upgrading firmware <BR> note: new firmware will be loaded on reboot <BR> Reboot may take 5+ minutes";
+	gui_alert(f);
+	_$('fstatus').innerHTML = f; 
+}
+
+function localajaxinit(){
+	_$('updatetype_http').checked = true;
+	switch_httptftp('h');
+	showdiv_statusmessage();
+	_$('tdupload').style.display="none";parent.loadscreen(this);return;// Firmware upload feature is not in aadk
+	config2json('http.conf', 1, httpconfloaded ) ;
+}
+
+function httpconfloaded(b){ // check if post_mappings defined in http.conf
+	var c = b;
+	var ispmdefined = 0;
+
+	for( var d in c ){
+		if ( c.hasOwnProperty(d) && d == 'post_mappings'  ) {
+			if ( c[d]['uploads'] == uImage_uploadpath ){
+				ispmdefined = 1;
+			}
+		}
+	}
+
+	if(!ispmdefined){
+		_$('tdupload').style.display="none";
+		parent.loadscreen(this);
+		return;
+	}
+
+	_$('tdupload').style.display="none";
+	parent.loadscreen(this);
+}
+
+
+function switch_httptftp(a){
+	if(a=='h'){
+		_$('tr_1').style.display = "";
+		_$('tr_2').style.display = "none";
+		_$('tr_3').style.display = "none";
+	}
+	if(a=='t'){
+		_$('tr_1').style.display = "none";
+		_$('tr_2').style.display = "";
+		_$('tr_3').style.display = "";
+	}
+}
+
+function call_flashupdate(){
+	var h = _$('updatetype_http');
+	var hu = _$('httpurl');
+	var t = _$('updatetype_tftp');
+	var tu = _$('tftpurl');
+
+	if( h.checked && !hu.value.length ){
+		gui_alert("Please enter the url of the flash image");
+		return false;
+	}
+
+	if( t.checked && !tu.value.length ){
+		gui_alert("Please enter a TFTP server");
+		return false;
+	}
+
+	if( h.checked ){ 
+		execute_applyuimage("http");
+		return;
+	}
+
+	if( t.checked ){
+		execute_applyuimage("tftp");
+		return;
+	}
+}
+
+</script>
+<body id="foo" onload="localajaxinit()"  bgcolor="EFEFEF">
+<div class="mainscreenTitleBar">
+	<span style="margin-left: 4px;font-weight:bold;">Update Appliance Firmware</span>
+	<span style="cursor: pointer; cursor: hand;" onclick="window.location.href=window.location.href;" >&nbsp;<img src="images/refresh.png" title=" Refresh " border=0 >&nbsp;</span>
+</div>
+<div class="mainscreenContentBox" id="mailboxcontent">
+<table class="mainscreenTable" align="center">
+<tr>	<td valign="top" align="center">
+		<table width=510>
+		<tr>
+		<td align=left>
+			<BR>
+			<fieldset>
+			<legend><B>&nbsp;Download image from a :&nbsp;</B></legend>
+			<LABEL FOR="updatetype_http">
+				<input type=radio id="updatetype_http" name="updatetype" value="HTTP" onchange="switch_httptftp('h');"> HTTP URL
+			</LABEL>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<LABEL FOR="updatetype_tftp">
+				<input type=radio id="updatetype_tftp" name="updatetype" value="TFTP" onchange="switch_httptftp('t');"> TFTP Server
+			</LABEL>
+			<table>
+			<tr>
+				<td>	<table>
+						<tr id="tr_1">
+							<td align=right>HTTP URL :</td>
+							<td> <input id="httpurl" size=35> </td>
+						</tr>
+						<tr id="tr_2">
+							<td align=right>TFTP Server :</td>
+							<td><input id="tftpurl" size=35></td>
+						</tr>
+						<tr id="tr_3">
+							<td align=right>File Name :</td>
+							<td><input id="tftp_filename" size=25></td>
+						</tr>
+					</table>
+				</td>
+				<td valign=top>
+					<input type="button" id="Update_Image" onclick="call_flashupdate();" value="Go">
+				</td>
+			</tr>
+			</table>
+			</fieldset>
+		</td>
+		</tr>
+		<tr>
+		<td align=center id="tdupload">
+			<BR>
+			<fieldset>
+				<legend><B>&nbsp;Upload a new image :&nbsp;</B></legend>
+			<IFRAME src="upload2.html" id="uploadiframe" width="480" height="100" frameborder="0" border="0" marginheight="0" marginwidth="0"></IFRAME>
+			</fieldset>
+			<span id="fstatus"></span>
+		</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</table>
+</div>
+<div id="sysinfohtml" style="display:none"></div>
+</body>

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Start up file for Asterisk
+
+# NOTE: we set the TZ before starting as otherwise (when starting from
+# /etc/rc) this env variable won't be available to the shell that
+# starts Asterisk and the time will be messed up.
+
+case $1 in
+	start) export TZ=`cat /etc/TZ`;
+               asterisk -f >/dev/null 2>/dev/null & ;;
+	stop) killall -9 asterisk;;
+	enable) rm -f /etc/rc.d/S50asterisk; 
+	        ln -s /etc/init.d/asterisk /etc/rc.d/S50asterisk;;
+	disable) rm -f /etc/rc.d/S50asterisk;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/asterisk [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

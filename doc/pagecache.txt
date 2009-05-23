@@ -1,0 +1,31 @@
+pagecache.txt
+-------------
+
+Trivial package to set the pagecache_ratio at start up.  This sets
+the % of available memory that can be used for buffering files.  By
+default this is 100%, which is bad news as the system gradually uses
+all it's memory for buffering files, leaving none for applications.
+
+1/ To check the current ratio:
+
+  $ cat /proc/sys/vm/pagecache_ratio
+
+2/ To manually set ratio to 30%:
+
+  $ echo 30 >  /proc/sys/vm/pagecache_ratio
+
+3/ You can see the effect using:
+
+  $ cat /proc/meminfo
+  
+  root:/tmp> cat /proc/meminfo
+  MemTotal:        54036 kB
+  MemFree:         18588 kB
+  Buffers:             0 kB
+  Cached:          15092 kB
+  <snip>
+ 
+  This example is for an IP04 that has been running for a while
+  with pagecache_ratio = 30.  Note that the Cached sits at
+  about 15M, which is (around) 30% of the MemTotal.
+

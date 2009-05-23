@@ -1,0 +1,39 @@
+--- asterisk-gui-orig/config/cfgbasic.html	2007-11-27 10:53:05.000000000 +1030
++++ asterisk-gui/config/cfgbasic.html	2007-11-27 10:53:06.000000000 +1030
+@@ -313,7 +313,7 @@
+ 	</td>
+ 	<td align="right" bgcolor="white" valign="bottom">
+ 		<!-- <a href="#" onclick=" system_link()">System Configuration</a>&nbsp;|&nbsp; -->
+-		<a target="_extern" href="http://www.digium.com/en/company/profile/">About Digium</a>&nbsp;
++		<a target="_extern" href="http://astfin.org">About Astfin</a>&nbsp;
+ 		<input id="login_name" type="hidden">
+ 	</td>
+ </tr>
+@@ -338,7 +338,7 @@
+ 	</td>
+ </tr>
+ <tr><td colspan="3" align="center" height="18">
+-		<div id="status" class="statusbar">Copyright 2006-2007 Digium, Inc.  Digium and Asterisk are registered <a href="http://www.digium.com/en/company/profile/trademarkpolicy.php">trademarks</a> of Digium, Inc.  All Rights Reserved. <i><a href="http://www.digium.com/en/docs/APPLIANCE/appliance-pla.pdf" target="_blank">Legal Information</a></i></div>
++		<div id="status" class="statusbar">Asterisk&reg; is a registered trademark of Digium</div>
+ 		</td>
+ </tr>
+ </tbody></table>
+--- asterisk-gui-orig/scripts/gui_sysinfo	2007-11-27 10:52:57.000000000 +1030
++++ asterisk-gui/scripts/gui_sysinfo	2007-11-27 11:07:14.000000000 +1030
+@@ -3,6 +3,7 @@
+ 
+ 
+ 
++export TZ=`cat /etc/TZ`
+ UNAME="`uname -a`"
+ /bin/echo "<div id=si_uname>$UNAME</div>" > $SYSINFO_OUTPUT
+ 
+@@ -27,7 +28,7 @@
+ MEMORYUSAGE=`free`
+ /bin/echo "<div id=si_free>$MEMORYUSAGE</div>" >> $SYSINFO_OUTPUT
+ 
+-cfstatus=`mount | grep "\/dev\/hda1"`
++cfstatus=`mount | grep "\/dev\/root"`
+ if [ -n "$cfstatus" ]
+ then
+ /bin/echo "<div id=cf_status>1</div>" >> $SYSINFO_OUTPUT

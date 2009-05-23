@@ -1,0 +1,22 @@
+#!/bin/sh
+# Start up file for lighttpd
+# Mike Taht 6 Mar 2008
+
+case $1 in
+	start) php-cgi -b 127.0.0.1:1026 >/dev/null 2>/dev/null & ;;
+	stop) killall -9 php-cgi;;
+	enable) rm -f /etc/rc.d/S54fastphp; 
+	        ln -s /etc/init.d/fastphp /etc/rc.d/S54fastphp;;
+	disable) rm -f /etc/rc.d/S54fastphp;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/fastphp [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

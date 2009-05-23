@@ -1,0 +1,26 @@
+#!/bin/sh
+# Start up file for Zaptel
+# See /usr/doc/zaptel.txt for more information
+
+LOWPOWER=0 # set to 1 for lowpower (24V) mode
+
+case $1 in
+	start) modprobe wcfxs lowpower=$LOWPOWER;
+	       zapscan;
+	       ztcfg;;
+	stop) modprobe -r wcfxs;;
+	enable) rm -f /etc/rc.d/S40zaptel; 
+	        ln -s /etc/init.d/zaptel /etc/rc.d/S40zaptel;;
+	disable) rm -f /etc/rc.d/S40zaptel;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/zaptel [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

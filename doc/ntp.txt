@@ -1,0 +1,17 @@
+ntp.txt
+-------
+
+ NOTES:
+
+ 1. Set the /etc/TZ file for your timezone
+
+ 2. The TZ env variable in your shell will set the current
+    time zone.  This gets set automatically via /etc/profile
+    for console and ssh logins, but for some reason it is not
+    set in telnet logins (maybe because they currently don't
+    have a proper login).
+
+ 3. List of magic TZ codes here (thanks Mike Taht):
+        http://wiki.openwrt.org/OpenWrtDocs/Configuration
+        (search on TZ)
+

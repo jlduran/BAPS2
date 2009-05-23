@@ -1,0 +1,11 @@
+lighttpd.txt
+------------
+
+1/ To test point your browser at:
+
+  http://your.ip04.ip/
+
+2/ For debugging it is useful to see the server logs:
+
+  $ /etc/init/d/lighttpd stop
+  $ lighttpd -D -f /etc/lighttpd.conf 

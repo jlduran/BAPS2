@@ -1,0 +1,28 @@
+#!/bin/sh
+# David Rowe 24 May 2008
+#
+# Plugin to monitor wispcar current
+#
+# Magic markers (optional - only used by munin-config and some
+# installation scripts):
+#
+#%# family=auto
+#%# capabilities=autoconf
+
+if [ "$1" = "autoconf" ]; then
+	echo yes
+	exit 0
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title Wispcar current'
+	echo 'graph_args --base 1000 -l 0'
+	echo 'graph_vlabel Current'
+	echo 'graph_category wispcar'
+	echo 'current.draw AREA'
+	echo 'current.label Current'
+	exit 0
+fi
+
+echo -n "current.value "
+cat /tmp/w | awk '{ print $3 }' 

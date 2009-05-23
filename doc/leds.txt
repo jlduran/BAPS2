@@ -1,0 +1,13 @@
+leds.txt
+--------
+
+  Simple device driver to support control of IP04 LEDs via /proc
+  interface.
+
+  Usage:
+
+    $ modprobe leds
+    $ echo 1 > /proc/sd_led
+    $ echo 1 > /proc/sys_led
+
+  Turning the LEDs off is left as an exercise for the reader :-)

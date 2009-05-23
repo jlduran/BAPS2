@@ -1,0 +1,31 @@
+#!/bin/sh
+
+
+if [ "$1" = "autoconf" ]; then
+        echo no
+        exit 1
+fi
+
+if [ "$1" = "config" ]; then
+
+        echo 'graph_title Memory Utilisation'
+        echo 'graph_args -l 0 --base 1024'
+        echo 'graph_vlabel Mb'
+        echo 'graph_scale no'
+        echo 'graph_category system'
+        echo 'memory_used.label Memory Used'
+        echo 'memory_used.type GAUGE'
+        echo 'memory_used.draw AREA'
+        echo 'memory_used.min 0'
+        echo "memory_used.cdef memory_used,1024,/"
+        echo -n "memory_used.warning "; free | awk '/Mem:/ { printf "%d\n", ($2 * 0.75)}'
+        echo -n "memory_used.critical "; free | awk '/Mem:/ { printf "%d\n", ($2 * 0.90)}'
+        echo 'memory_free.label Memory Free'
+        echo 'memory_free.type GAUGE'
+        echo 'memory_free.draw STACK'
+        echo 'memory_free.min 0'
+        echo "memory_free.cdef memory_free,1024,/"
+        exit 0
+fi
+
+free | awk '/Mem/ { printf "memory_used.value %d\n", $3; printf "memory_free.value %d\n", $4; }'

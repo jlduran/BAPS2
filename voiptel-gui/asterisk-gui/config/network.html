@@ -1,0 +1,383 @@
+<!--
+ * VoIPtel-GUI	-	an Asterisk configuration interface
+ *
+ * Network settings page
+ *
+ * Based on Asterisk-GUI, Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Mark Spencer <markster@digium.com>
+ * Pari Nannapaneni <pari@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+ *
+-->
+<script src="scripts/prototype.js"></script>
+<script src="scripts/astman.js"></script>
+<script src="scripts/tooltip.js"></script>
+<link href="stylesheets/schwing.css" media="all" rel="Stylesheet" type="text/css" />
+
+<style type="text/css">
+
+</style>
+
+<script>
+var fields = ["dhcp","host","domain","IPaddress","subnet","gateway","DNS","NTP","country","save","cancel"];
+var widgets = new Array;
+var callbacks = new Object;
+
+var field = "";
+var file = "rc_auto.conf";
+
+function update_content(){
+	var c = 0;
+	var uri = build_action('delcat', c , field,"", ""); c++;
+	uri += build_action('newcat', c , field, "", ""); c++;
+	opt.parameters= "action=updateconfig&srcfilename=" + encodeURIComponent(file) + "&dstfilename=" + encodeURIComponent(file) + uri;
+	var tmp = new Ajax.Request(asterisk_rawmanPath, opt);
+}
+
+function update_nwinfo(content){
+	_$('status_message').style.display='none';
+	
+	var c = content;
+	var p = "";
+	var dhcp,host,domain,IPaddress,subnet,gateway,DNS,NTP,country;
+	
+	for( var d in c ){
+		if ( c.hasOwnProperty(d) ) {
+			for(var r=0; r < c[d].length ; r++ ){
+				p = unescape( c[d][r] );
+				
+				var line = p.split("=");
+				switch(line[0])
+				{
+					case "DOMAIN":
+						domain = line[1];
+						_$('domain').value = domain;
+						break;    
+					case "HOSTNAME":
+						host = line[1];
+						_$('host').value = host;
+						break;
+					case "DHCPD":
+						dhcp = line[1];
+						if( dhcp == "yes" ){
+							_$('dhcp').checked = true;
+						}else if( dhcp == "no" ){
+							_$('dhcp').checked = false;
+						}
+						dhcpswitch();
+						break;
+					case "IPADDRESS":
+						IPaddress = line[1];
+						_$('IPaddress').value = IPaddress.replace(/\"/g, "");
+						break;
+					case "NETMASK":
+						subnet = line[1];
+						_$('subnet').value = subnet.replace(/\"/g, "");
+						break;
+					case "GATEWAY":
+						gateway = line[1];
+						_$('gateway').value = gateway.replace(/\"/g, "");
+						break;
+					case "DNS":
+						DNS = line[1];
+						_$('DNS').value = DNS.replace(/\"/g, "");
+						break;
+					case "NTPserver":
+						NTP = line[1];
+						_$('NTP').value = NTP;
+						break;
+					case "LOADZONE":
+						country = line[1];
+						_$('country').value = country;
+						break;
+				}
+			}
+		}
+	}
+}
+
+function localajaxinit(){
+	ASTGUI.events.add(document, 'mouseover', show_tooltip);
+	setWindowTitle("Network & Country Settings");
+	
+	for (var x=0; x < fields.length; x++ ) {
+			widgets[fields[x]] = $(fields[x]);
+//			widgets[fields[x]].disabled = true;
+	}
+	
+	ASTGUI.events.add(_$('dhcp'), 'change', dhcpswitch); 
+
+	ASTGUI.events.add( _$('IPaddress') , 'change', function(){
+		if ( _$('IPaddress').value ){
+			var t = Number( _$('IPaddress').value.substr(0,3) );
+			if ( t >= 128 && t <= 191 ){ _$('subnet').value = "255.255.0.0"; return;}
+			if ( t >= 0 && t <= 127 ){ _$('subnet').value = "255.0.0.0"; return;}
+			if ( t >= 192  ){ _$('subnet').value = "255.255.255.0"; }
+		}
+	});
+
+	showdiv_statusmessage();
+	_$('status_message').style.display="block";
+	_$('message_text').innerHTML = "Loading system Information ...";
+	parent.loadscreen(this);
+	parent.astmanEngine.run_tool("sh /etc/voiptel-gui/rcparse.sh toauto",onSuccess = function() { } );
+	config2json( file, 0, update_nwinfo ) ;
+}
+
+function validated(string,type) {
+	switch(type){
+		case "addr":
+			var dots = 0;
+		    for (var i=0, output='', valid="0123456789"; i<string.length; i++){
+				if( string.charAt(i) == "." && dots < 3 ){
+					output += string.charAt(i);
+					dots++;
+				}else if (valid.indexOf(string.charAt(i)) != -1){
+			        output += string.charAt(i);
+				}
+			}
+			return output;
+			break;
+		case "host":
+			for (var i=0, output='', valid="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; i<string.length; i++){
+				if (valid.indexOf(string.charAt(i)) != -1){
+			        output += string.charAt(i);
+				}
+			}
+			return output;
+			break;
+		case "domain":
+			for (var i=0, output='', valid=".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; i<string.length; i++){
+				if (valid.indexOf(string.charAt(i)) != -1){
+			        output += string.charAt(i);
+				}
+			}
+			return output;
+			break;
+	}
+}  
+
+function dhcpswitch(){
+	if( _$('dhcp').checked ){
+		_$('IPaddress').disabled = true;
+		_$('subnet').disabled = true;
+		_$('gateway').disabled = true;
+		_$('DNS').disabled = true;
+	}else{
+		_$('IPaddress').disabled = false;
+		_$('subnet').disabled = false;
+		_$('gateway').disabled = false;
+		_$('DNS').disabled = false;
+	}
+}
+
+//callbacks.beforeSaving = function(){
+function beforeSaving(){
+	if ( (!check_patternonfields( ['IPaddress', 'subnet', 'gateway', 'DNS'] ) ) && ( !_$('dhcp').checked ) ){
+		return false;
+	}
+
+	return true;
+}
+
+function free_mem(){
+	if( navigator.userAgent.indexOf("MSIE") == -1 ){ return true; }
+	try{
+		purge( document.body );
+	} catch(e){ }
+}
+
+function savesettings(){
+	if(beforeSaving()){
+	
+		var uri = build_action('delete', 0, 'network' ,"LOADZONE", "", "" );
+		uri += build_action('delete', 1, 'network' ,"DEFAULTZONE", "", "" );
+		uri += build_action('delete', 2, 'network' ,"DOMAIN", "", "" );
+		uri += build_action('delete', 3, 'network' ,"HOSTNAME", "", "" );
+		uri += build_action('delete', 4, 'network' ,"DHCPD", "", "" );
+		uri += build_action('delete', 5, 'network' ,"IPADDRESS", "", "" );
+		uri += build_action('delete', 6, 'network' ,"NETMASK", "", "" );
+		uri += build_action('delete', 7, 'network' ,"GATEWAY", "", "" );
+		uri += build_action('delete', 8, 'network' ,"DNS", "", "" );
+		uri += build_action('delete', 9, 'network' ,"NTPserver", "", "" );
+		
+		uri += build_action('append', 10, 'network', "LOADZONE", _$('country').value);
+		uri += build_action('append', 11, 'network', "DEFAULTZONE", _$('country').value);
+		uri += build_action('append', 12, 'network', "", "");
+		uri += build_action('append', 13, 'network', "DOMAIN", _$('domain').value);
+		uri += build_action('append', 14, 'network', "HOSTNAME", _$('host').value);
+		var newdhcp = ( _$('dhcp').checked )? "yes" : "no" ;
+		uri += build_action('append', 15, 'network', "DHCPD", newdhcp);
+		var newipadd = "\"" + _$('IPaddress').value + "\"";
+		uri += build_action('append', 16, 'network', "IPADDRESS", newipadd);
+		var newsubnet = "\"" + _$('subnet').value + "\"";
+		uri += build_action('append', 17, 'network', "NETMASK", newsubnet);
+		var newgateway = "\"" + _$('gateway').value + "\"";
+		uri += build_action('append', 18, 'network', "GATEWAY", newgateway);
+		var newdns = "\"" + _$('DNS').value + "\"";
+		uri += build_action('append', 19, 'network', "DNS", newdns);
+		uri += build_action('append', 20, 'network', "NTPserver", _$('NTP').value);
+		
+		var opt = {
+			method: 'get',
+			asynchronous: true,
+			onSuccess: function(t) {
+				_$('saved').style.display="";
+				_$('bg_transparent').style.display="";
+				parent.astmanEngine.run_tool("sh /etc/voiptel-gui/rcparse.sh fromauto",onSuccess = function() { } );
+			},
+			onFailure: function(t) { gui_alert("Config Error: " + t.status + ": " + t.statusText); }
+		};
+		opt.parameters= "action=updateconfig&srcfilename=" + encodeURIComponent(file) + "&dstfilename=" + encodeURIComponent(file) + uri;
+		var tmp = new Ajax.Request(asterisk_rawmanPath, opt);
+	}
+}
+
+function cancelsettings(){
+	config2json( file, 0, update_nwinfo ) ;
+}
+
+function doReboot() {
+	_$('saved').style.display = "none";
+	parent.gui_feedback("Rebooting!","blue","40000");
+	parent.astmanEngine.run_tool("/bin/reboot",onSuccess = function() { } );
+}
+
+
+</script>
+<body id="foo" onload="localajaxinit()" bgcolor="#EFEFEF"  onunload="free_mem()">
+<div class="mainscreenTitleBar">
+	<span style="margin-left: 4px;font-weight:bold;">Network & Country Settings</span>
+	<span style="cursor: pointer; cursor: hand;" onclick="window.location.href=window.location.href;" >&nbsp;<img src="images/refresh.png" title=" Refresh " border=0 >&nbsp;</span>
+</div>
+<div class="mainscreenContentBox" id="userscontent">
+<table class="mainscreenTable" align="center">
+	<tr valign="top" height="20">
+		<td>
+			&nbsp;
+		</td>
+	</tr>
+	<tr valign="top" height="40" align="center">	
+		<td align="left">&nbsp;</td>
+		<td align="center" colspan='2' width="280">
+			<fieldset>
+				<table>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,0">DHCP:</td>
+						<td align="left" tip="en,network,0"><input type="checkbox" id='dhcp'></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,1">Hostname:</td>
+						<td align="left" tip="en,network,1">&nbsp;<input size=14 id='host' onChange="this.value=validated(this.value,'host')" class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,2">Domain:</td>
+						<td align="left" tip="en,network,2">&nbsp;<input size=14 id='domain' onChange="this.value=validated(this.value,'domain')" class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,3">IP address:</td>
+						<td align="left" tip="en,network,3">&nbsp;<input size=14 id='IPaddress' onChange="this.value=validated(this.value,'addr')" pattern='\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b' class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,4">Subnet mask:</td>
+						<td align="left" tip="en,network,4">&nbsp;<input size=14 id='subnet' onChange="this.value=validated(this.value,'addr')" pattern='\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b' class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,5">Gateway:</td>
+						<td align="left" tip="en,network,5">&nbsp;<input size=14 id='gateway' onChange="this.value=validated(this.value,'addr')" pattern='\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b' class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,6">DNS:</td>
+						<td align="left" tip="en,network,6">&nbsp;<input size=14 id='DNS' onChange="this.value=validated(this.value,'addr')" pattern='\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b' class="input8"></td>
+					</tr>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,10">NTP:</td>
+						<td align="left" tip="en,network,10">&nbsp;<input size=14 id='NTP' onChange="this.value=validated(this.value,'domain')" class="input8"></td>
+					</tr>
+				</table>
+			</fieldset>
+			
+			<fieldset style="margin-top:15px;">
+				<table>
+					<tr>
+						<td class="field_text" align="right" style="cursor:default;" tip="en,network,7">Country:</td>
+						<td valign="left" tip="en,network,7">&nbsp;<select id='country' class="input8">
+							<option value='at'>AT - Austria</option>
+							<option value='au'>AU - Australia</option>
+							<option value='br'>BR - Brazil</option>
+							<option value='be'>BE - Belgium</option>
+							<option value='ch'>CH - Switzerland</option>
+							<option value='cl'>CL - Chile</option>
+							<option value='cn'>CN - China</option>
+							<option value='cz'>CZ - Czech Republic</option>
+							<option value='de'>DE - Germany</option>
+							<option value='dk'>DK - Denmark</option>
+							<option value='ee'>EE - Estonia</option>
+							<option value='es'>ES - Spain</option>
+							<option value='fi'>FI - Finland</option>
+							<option value='fr'>FR - France</option>
+							<option value='gr'>GR - Greece</option>
+							<option value='hu'>HU - Hungary</option>
+							<option value='it'>IT - Italy</option>
+							<option value='lt'>LT - Lithuania</option>
+							<option value='mx'>MX - Mexico</option>
+							<option value='nl'>NL - Netherlands</option>
+							<option value='no'>NO - Norway</option>
+							<option value='nz'>NZ - New Zealand</option>
+							<option value='pl'>PL - Poland</option>
+							<option value='pt'>PT - Portugal</option>
+							<option value='ru'>RU - Russia</option>
+							<option value='se'>SE - Sweden</option>
+							<option value='sg'>SG - Singapore</option>
+							<option value='uk'>UK - United Kingdom</option>
+							<option value='us'>US - United States</option>
+<!--					<option value='us-old'>US (old) - United States ca.1950</option> -->
+							<option value='tw'>TW - Taiwan</option>
+							<option value='za'>ZA - South Africa</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+			<table>
+				<tr>
+					<td align='center' colspan='2'>
+					<input type="button" value="Save" id="save" class="input" onclick="savesettings();" tip="en,network,8"><span style="font-size: 3em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="button" value="Cancel" id="cancel" class="input" onclick="cancelsettings();" tip="en,network,9">
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td align="right">&nbsp;</td>
+	</tr>
+	<tr>
+		<td>
+		</td>
+	</tr>
+</table>
+</div>
+<div id="saved" STYLE="display:none; position: absolute; left: 170; top: 190; width:350; height:115;  background-color:#F4EFE5;   border-width: 1px; border-color: #7E5538; border-style: solid; z-index:5; cursor: default;">
+	<table width="100%" cellpadding=0 cellspacing=0  onmousedown="ASTGUI.startDrag(event , 'saved');">
+	<TR bgcolor="#7E5538"  style="background-image:url('images/title_gradient.gif');">
+		<TD align="center"><font color="#FFFFFF">&nbsp;&nbsp;<B>Settings saved</B></FONT></TD>
+		<TD Height="20" style="cursor: move"></TD>
+		<TD width=4></TD>
+	</TR>
+	</table>
+	<table cellpadding=2 cellspacing=2 border=0 width="100%" align="center">
+		<tr>	<td colspan=2 height=10 valign=middle align=center></td>	</tr>
+		<tr>	<td style="cursor: default;" class="field_text" align=center>Settings saved successfully. The PBX will need to be restarted for the new changes to take effect. Do you wish to reboot now?</td></tr>
+		<tr>	<td style="cursor: default;" class="field_text" align=center><input type="button" id="reboot" value="Yes" onClick="doReboot()" class="input"><span style="font-size: 2em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="button" id="later" value="No" onClick="_$('saved').style.display='none'; _$('bg_transparent').style.display='none';" class="input"></td></tr>
+	</table>
+</div>
+<div id="bg_transparent" STYLE="display:none; position: absolute; left: 0; top: 24; width:100%; height:100%;  background-color:#EFEFEF; -moz-opacity:.50;opacity:.50; border-width: 1px; border-color: #EFEFEF; border-style: solid; z-index:4">
+</body>

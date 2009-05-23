@@ -1,0 +1,41 @@
+<script>
+var starteduploading = 0 ;
+
+function beforeupload(){
+	
+	var fullpath = document.getElementById("uf1").value ;
+	if(!fullpath){
+		parent.gui_alert("Please select a timezone file to upload");
+		return;
+	}
+	var a = fullpath.lastIndexOf("\\");
+	if (a == -1){
+		a = fullpath.lastIndexOf("/");
+	}
+	parent.tz_filename = fullpath.substr(a+1); 
+
+        parent._$('status_message').style.display = "";
+	parent.gui_feedback('File Upload in progress, please wait','default', 100000 );
+	parent._$('message_text').innerHTML ="Uploading Timezone file ..... ";
+	starteduploading = 1;
+        document.getElementById('form1').submit();
+}
+
+
+function hidetheupload(){
+	if(!starteduploading){ return; }
+        parent._$('uploadiframe').style.display="none";
+        parent._$('status_message').style.display = "none";
+        parent.gui_feedback("File Uploaded");
+	parent.window.location.href = parent.window.location.href ;
+}
+
+</script>
+<body onunload="hidetheupload()">
+<table>
+<FORM method="POST" action="/timezone" enctype="multipart/form-data" id="form1">
+<tr><td>
+	<nobr><input name="uploadedfile1" type="file" id="uf1">&nbsp;&nbsp;<input type="button" value="Upload" onclick="beforeupload();"></nobr>
+</td></tr>
+</FORM>
+</table>

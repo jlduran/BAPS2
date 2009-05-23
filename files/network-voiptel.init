@@ -1,0 +1,20 @@
+#!/bin/sh
+# Start up file for VoIPtel GUI-controlled networking
+
+case $1 in
+        start) sh /etc/voiptel-gui/network.sh start;;
+        stop) sh /etc/voiptel-gui/network.sh stop;;
+        enable) rm -f /etc/rc.d/S10network-voiptel;
+                ln -s /etc/init.d/network-voiptel /etc/rc.d/S10network-voiptel;;
+        disable) rm -f /etc/rc.d/S10network-voiptel;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/network-voiptel [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+

@@ -1,0 +1,215 @@
+--- uClinux-dist.old/lib/blackfin-gsm/gsm/inc/private.h	2006-09-11 22:08:30.000000000 +0930
++++ uClinux-dist/lib/blackfin-gsm/gsm/inc/private.h	2008-04-18 09:56:40.000000000 +0930
+@@ -4,6 +4,8 @@
+  * details.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
+  */
+ 
++/*$Header$*/
++
+ #ifndef	PRIVATE_H
+ #define	PRIVATE_H
+ 
+@@ -83,56 +85,32 @@
+  *  Inlined functions from add.h 
+  */
+ 
++#ifdef BFIN
++#define GSM_MULT_R(a,b) \
++  (__builtin_bfin_multr_fr1x16(a,b))
++#else
+ /* 
+  * #define GSM_MULT_R(a, b) (* word a, word b, !(a == b == MIN_WORD) *)	\
+  *	(0x0FFFF & SASR(((longword)(a) * (longword)(b) + 16384), 15))
+  */
+-//#define GSM_MULT_R(a, b) /* word a, word b, !(a == b == MIN_WORD) */	\
+-//	(SASR( ((longword)(a) * (longword)(b) + 16384), 15 ))
+-
+-static inline word GSM_MULT_R(word a, word b) {
+-  longword res;
+-
+-  __asm__  __volatile__(
+-         "%0 = %1.L * %2.L;\n\t"
+-	 "%0.L = %0 (RND);\n\t" 
+-   : "=d" (res)
+-   : "d" (a), "d" (b)
+-   );
+-
+-   return res;
+-}
+-
+-//# define GSM_MULT(a,b)	 /* word a, word b, !(a == b == MIN_WORD) */	\
+-//	(SASR( ((longword)(a) * (longword)(b)), 15 ))
+-
+-static inline word GSM_MULT(word a, word b) {
+-  longword res;
+-
+-  __asm__  __volatile__(
+-         "%0 = %1.L * %2.L (IS);\n\t"
+-       	 "%0 >>>= 15;\n\t" 
+-   : "=d" (res)
+-   : "d" (a), "d" (b)
+-   );
+-
+-   return res;
+-}
+-
+-//# define GSM_L_MULT(a, b) /* word a, word b */	\
+-//	(((longword)(a) * (longword)(b)) << 1)
+-
+-static inline longword GSM_L_MULT(word a, word b) {
+-  longword res;
++#define GSM_MULT_R(a, b) /* word a, word b, !(a == b == MIN_WORD) */	\
++	(SASR( ((longword)(a) * (longword)(b) + 16384), 15 ))
++#endif
+ 
+-  __asm__  __volatile__(
+-         "%0 = %1.L * %2.L;\n\t"
+-   : "=d" (res)
+-   : "d" (a), "d" (b)
+-   );
++#ifdef BFIN
++#define GSM_MULT(a,b) (__builtin_bfin_mult_fr1x16(a, b))
++#else
++# define GSM_MULT(a,b)	 /* word a, word b, !(a == b == MIN_WORD) */	\
++	(SASR( ((longword)(a) * (longword)(b)), 15 ))
++#endif
+ 
+-   return res;
+-}
++#ifdef BFIN
++#define GSM_L_MULT(a,b) \
++    (__builtin_bfin_mult_fr1x32x32(a,b))
++#else
++# define GSM_L_MULT(a, b) /* word a, word b */	\
++	(((longword)(a) * (longword)(b)) << 1)
++#endif
+ 
+ #if defined(__GNUC__) && defined(__i386__)
+ 
+@@ -172,83 +150,59 @@
+ 
+ #else
+ 
+-//# define GSM_L_ADD(a, b)	\
+-//	( (a) <  0 ? ( (b) >= 0 ? (a) + (b)	\
+-//		 : (utmp = (ulongword)-((a) + 1) + (ulongword)-((b) + 1)) \
+-//		   >= MAX_LONGWORD ? MIN_LONGWORD : -(longword)utmp-2 )   \
+-//	: ((b) <= 0 ? (a) + (b)   \
+-//	          : (utmp = (ulongword)(a) + (ulongword)(b)) >= MAX_LONGWORD \
+-//		    ? MAX_LONGWORD : utmp))
+-
+-static __inline__ longword GSM_L_ADD(longword a, longword b)
+-{
+-  longword res;
+-
+-  __asm__ __volatile__ (
+-			"%0 = %1 + %2 (S);\n\t"
+-			: "=d" (res)
+-			: "d" (a), "d" (b)
+-			);
+-
+-  return(res);
+-}
++#ifdef BFIN
++#define GSM_L_ADD(a,b) \
++  (__builtin_bfin_add_fr1x32(a,b))
++#else
+ 
+-/*
+- * # define GSM_ADD(a, b)	\
+- * 	((ltmp = (longword)(a) + (longword)(b)) >= MAX_WORD \
+- * 	? MAX_WORD : ltmp <= MIN_WORD ? MIN_WORD : ltmp)
+- */
+-/* Nonportable, but faster: */
++#ifdef WIN32
++#define inline __inline
++#define __inline__ __inline
++#endif 
++
++# define GSM_L_ADD(a, b)	\
++	( (a) <  0 ? ( (b) >= 0 ? (a) + (b)	\
++		 : (utmp = (ulongword)-((a) + 1) + (ulongword)-((b) + 1)) \
++		   >= MAX_LONGWORD ? MIN_LONGWORD : -(longword)utmp-2 )   \
++	: ((b) <= 0 ? (a) + (b)   \
++	          : (utmp = (ulongword)(a) + (ulongword)(b)) >= MAX_LONGWORD \
++		    ? MAX_LONGWORD : utmp))
++#endif
+ 
+-//#define	GSM_ADD(a, b)	\
+-//	((ulongword)((ltmp = (longword)(a) + (longword)(b)) - MIN_WORD) > \
+-//		MAX_WORD - MIN_WORD ? (ltmp > 0 ? MAX_WORD : MIN_WORD) : ltmp)
++#ifdef BFIN
++#define GSM_ADD(a,b) \
++  (__builtin_bfin_add_fr1x16(a,b))
++#else
+ 
+-static __inline__ word GSM_ADD(word a, word b)
++static inline word GSM_ADD(longword a, longword b)
+ {
+-  word res;
+-
+-  __asm__ __volatile__ (
+-			"%0.L = %1.L + %2.L (S);\n\t"
+-			: "=d" (res)
+-			: "d" (a), "d" (b)
+-			);
+-
+-  return(res);
+-}
++	register longword ltmp;
++	ltmp = a + b;
++	return (word)((ulongword) (ltmp - MIN_WORD) > MAX_WORD - MIN_WORD ? (ltmp > 0 ? MAX_WORD : MIN_WORD) : ltmp);
++};
+ 
+-//#define GSM_SUB(a, b)	\
+-//	((ltmp = (longword)(a) - (longword)(b)) >= MAX_WORD \
+-//	? MAX_WORD : ltmp <= MIN_WORD ? MIN_WORD : ltmp)
++#endif
+ 
+-static __inline__ word GSM_SUB(word a, word b)
++#ifdef BFIN
++#define GSM_SUB(a,b) \
++  (__builtin_bfin_sub_fr1x16(a,b))
++#else
++static inline word GSM_SUB(longword a, longword b)
+ {
+-  word res;
+-
+-  __asm__ __volatile__ (
+-			"%0.L = %1.L - %2.L (S);\n\t"
+-			: "=d" (res)
+-			: "d" (a), "d" (b)
+-			);
+-
+-  return(res);
+-}
++	register longword ltmp;
++	ltmp = a - b;
++	return (word)(ltmp >= MAX_WORD ? MAX_WORD : ltmp <= MIN_WORD ? MIN_WORD : ltmp);
++};
+ 
+ #endif
++#endif
+ 
+-//# define GSM_ABS(a)	((a) < 0 ? ((a) == MIN_WORD ? MAX_WORD : -(a)) : (a))
+-
+-static inline longword GSM_ABS(longword a) {
+-  word res;
+-
+-  __asm__  __volatile__(
+-    "%0 = ABS %1;\n\t"
+-    : "=d" (res)
+-    : "d" (a)
+-  );
+-
+-   return res;
+-}
++#ifdef BFIN
++#define GSM_ABS(a) \
++  (__builtin_bfin_abs_fr1x16(a))
++#else
++# define GSM_ABS(a)	((a) < 0 ? ((a) == MIN_WORD ? MAX_WORD : -(a)) : (a))
++#endif
+ 
+ /* Use these if necessary:
+ 

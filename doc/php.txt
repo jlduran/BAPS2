@@ -1,0 +1,30 @@
+php.txt
+-------
+
+To test point your browser at 
+
+  http://your.ip04.ip/test.php
+
+To test sqlite3 support:
+
+  http://your.ip04.ip/testdb.php
+
+To test bindtext support:
+
+  http://your.ip04.ip/test_.php
+
+Or run it from the target command line:
+
+ root:/> php /www/testdb.php
+
+Running php using fast-cgi
+--------------------------
+
+root:~> cp /etc
+root:~> cp lighttpd-fastphp.conf lighttpd.conf
+root:~> /etc/init.d/fastphp enable
+root:~> /etc/init.d/fastphp start
+root:~> /etc/init.d/lighttpd stop
+root:~> /etc/init.d/lighttpd start
+
+

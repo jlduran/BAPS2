@@ -1,0 +1,21 @@
+#!/bin/sh
+# Start up file for pagecache
+
+case $1 in
+	start) echo 30 >  /proc/sys/vm/pagecache_ratio;;
+	stop) ;;
+	enable) rm -f /etc/rc.d/S20pagecache; 
+	        ln -s /etc/init.d/pagecache /etc/rc.d/S20pagecache;;
+	disable) rm -f /etc/rc.d/S20pagecache;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/hello [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

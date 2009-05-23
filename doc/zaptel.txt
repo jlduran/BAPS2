@@ -1,0 +1,92 @@
+zaptel.txt
+----------
+
+The latest release has:
+
+1/ A bug fix that improves performance under load.  Earlier versions
+of bfsi.c ISR code sometimes dropped chunks of 8 samples under load.
+
+2/ Some improved debug info:
+
+   i) First load the drivers in debug mode:
+
+      root:~> /etc/init.d/asterisk stop
+      root:~> modprobe -r wcfxs
+      root:~> modprobe wcfxs debug=1
+      root:~> ztcfg
+      root:~> /etc/init.d/asterisk start
+
+   ii) Reset the stats:
+
+      root:~> echo 1 > /proc/bfsi_reset
+
+   iii) Then monitor as the system is loaded 
+    
+      root:~> cat /proc/bfsi
+    
+      readchunk_first.........: 7870
+      readchunk_second........: 7870
+      readchunk_didntswap.....: 0
+      bad_x...................: 0 0 0 0 0
+      log_readchunk...........: 0x03f01040
+      writechunk_first........: 7870
+      writechunk_second.......: 7870
+      writechunk_didntswap....: 0
+      isr_cycles_last.........: 27753
+      isr_cycles_worst........: 38206
+      isr_cycles_average......: 18497
+      echo_sams...............: 0
+      isr_between_diff........: 400007
+      isr_between_worst.......: 401946
+      isr_between_skip........: 0
+      isr_between_difflastskip: 0
+
+  Notes:
+    
+      a) See wcfxs.c and bfsi.c for more information.
+    
+      b) readchunk_didntswap and writechunk_didnt swap should remain at zero.  If
+         they get incremented it indicates the ping/pong buffers didn't swap as
+         expected on alternate ISRs.
+  
+      c) isr_cycles_average is a key parameter - how many cycles/ISR were used 
+         for the ISR.  Divide by 1000 to get MIPs, e.g. in example above
+         18.5 MIPs are being used (400 MIP IP08 with no calls).
+    
+      d) isr_between_skip should stay at zero.  If it goes above zero it means
+         an entire ISR has been skipped. isr_between_diff is the number of cycles
+	 since the last ISR.  As ISRs occur every 1ms, on a 400MHz machine this
+	 should be around 400,000.
+    
+      e) One reason for problems such as (b) and (d) above is a
+         relatively long delay somewhere in the kernel.  For example
+         when wcfxs starts it has many printk's and some wait loops
+         that mean the kernel can't serve interrupts.  It is a good
+         idea to reset the bfsi stats after wcfxs is loaded, and avoid
+         printks in the context of ISRs.
+
+3/ There are two levels of reduced power consumption for FXS ports in
+idle state.  The first is the "low power" mode in the wcfxs driver -
+this drops the line voltage from 48V to 24V.  This is fine for typical
+line lengths, 48V is really only required to overcome line resistance
+of long lines.  An added bonus is that the FXS modules run much
+cooler, extending their life and reliability.
+
+To enable low power (24V line voltage) mode, edit /etc/init/d.zaptel:
+
+  $LOWP0WER=1
+
+To return to 48V line voltage:
+
+  $LOWP0WER=0
+
+4/ The second low power mode disables the FXS on-hook audio path, further
+lowering power consumption:
+
+  $LOWP0WER=2
+
+Unfortunately this mode stops FXS caller ID working.
+
+The low power code could use further improvement.  See the wcfxs.c
+driver (search on "lowpower") for more information.
+

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Start up file for hello world demo
+
+case $1 in
+	start) /bin/hello;;
+	stop) ;;
+	enable) rm -f /etc/rc.d/S50hello; 
+	        ln -s /etc/init.d/hello /etc/rc.d/S50hello;;
+	disable) rm -f /etc/rc.d/S50hello;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/hello [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

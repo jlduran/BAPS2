@@ -1,0 +1,128 @@
+--- asterisk-1.6.0-beta1-orig/channels/chan_zap.c	2008-01-18 07:21:26.000000000 +1030
++++ asterisk-1.6.0-beta1/channels/chan_zap.c	2008-01-22 15:33:04.000000000 +1030
+@@ -125,6 +125,10 @@
+ };
+ static struct ast_jb_conf global_jbconf;
+ 
++extern unsigned int cycles(void);
++
++
++
+ #if !defined(ZT_SIG_EM_E1) || (defined(HAVE_PRI) && !defined(ZT_SIG_HARDHDLC))
+ #error "Your Zaptel is too old.  Please update"
+ #endif
+@@ -681,6 +685,9 @@
+ #endif	
+ 	int polarity;
+ 	int dsp_features;
++	int dsp_cycles_last;            /* DR: stats for DSP execution */
++        int dsp_cycles_worst;
++        int dsp_cycles_average;
+ #ifdef HAVE_SS7
+ 	struct zt_ss7 *ss7;
+ 	struct isup_call *ss7call;
+@@ -5214,6 +5221,7 @@
+ 	int index;
+ 	void *readbuf;
+ 	struct ast_frame *f;
++	int before;
+ 	
+ 
+ 	ast_mutex_lock(&p->lock);
+@@ -5459,7 +5467,18 @@
+ 	}
+ 	if (p->dsp && (!p->ignoredtmf || p->callwaitcas || p->busydetect  || p->callprogress) && !index) {
+ 		/* Perform busy detection. etc on the zap line */
++		/* DR: measure some execution stats around this as it is a
++                computationally intensive part of the real time code */
++	        before = cycles();
+ 		f = ast_dsp_process(ast, p->dsp, &p->subs[index].f);
++		p->dsp_cycles_last = cycles() - before;
++                if (p->dsp_cycles_last > p->dsp_cycles_worst) {
++			p->dsp_cycles_worst = p->dsp_cycles_last;
++		}
++                p->dsp_cycles_average = (int)(0.1*(float)p->dsp_cycles_last + 
++					      0.9*(float)p->dsp_cycles_average);
++
++		//f = 0;
+ 		if (f) {
+ 			if ((f->frametype == AST_FRAME_CONTROL) && (f->subclass == AST_CONTROL_BUSY)) {
+ 				if ((ast->_state == AST_STATE_UP) && !p->outgoing) {
+@@ -10318,6 +10337,9 @@
+ 								pri->pvts[x]->owner->_softhangup |= AST_SOFTHANGUP_DEV;
+ 							ast_mutex_unlock(&pri->pvts[x]->lock);
+ 						}
++						pri->pvts[x]->dsp_cycles_last = 0;
++						pri->pvts[x]->dsp_cycles_worst = 0;
++						pri->pvts[x]->dsp_cycles_average = 0;
+ 				}
+ 				break;
+ 			case PRI_EVENT_KEYPAD_DIGIT:
+@@ -11615,6 +11637,7 @@
+ 	return 0;
+ }
+ 
++extern int dsp_sample;
+ static char *zap_show_channels(struct ast_cli_entry *e, int cmd, struct ast_cli_args *a)
+ {
+ #define FORMAT "%7s %-10.10s %-15.15s %-10.10s %-20.20s %-10.10s %-10.10s\n"
+@@ -11868,6 +11891,9 @@
+ 			else
+ 				ast_cli(a->fd, "\tnone\n");
+ #endif
++			ast_cli(a->fd, "DSP cycles last: %d worst: %d average: %d sample: %d\n", 
++				tmp->dsp_cycles_last, tmp->dsp_cycles_worst, tmp->dsp_cycles_average, dsp_sample);
++
+ 			if (tmp->master)
+ 				ast_cli(a->fd, "Master Channel: %d\n", tmp->master->channel);
+ 			for (x = 0; x < MAX_SLAVES; x++) {
+--- asterisk-1.6.0-beta1-orig/main/dsp.c	2008-01-18 07:21:26.000000000 +1030
++++ asterisk-1.6.0-beta1/main/dsp.c	2008-01-22 15:17:37.000000000 +1030
+@@ -54,6 +54,27 @@
+ #include "asterisk/utils.h"
+ #include "asterisk/options.h"
+ 
++unsigned int cycles(void);
++
++#ifdef __BLACKFIN__
++unsigned int cycles() {
++  int ret;
++
++   __asm__ __volatile__
++   (
++   "%0 = CYCLES;\n\t"
++   : "=&d" (ret)
++   :
++   : "R1"
++   );
++
++   return ret;
++}
++#else
++unsigned int cycles() {}
++#endif
++int dsp_sample;
++
+ /*! Number of goertzels for progress detect */
+ enum gsamp_size {
+ 	GSAMP_SIZE_NA = 183,			/*!< North America - 350, 440, 480, 620, 950, 1400, 1800 Hz */
+@@ -360,6 +381,9 @@
+ 	int best_col;
+ 	int hit;
+ 	int limit;
++	int before;
++
++	before = cycles();
+ 
+ 	hit = 0;
+ 	for (sample = 0;  sample < samples;  sample = limit) {
+@@ -495,6 +519,9 @@
+ 		s->energy = 0.0;
+ 		s->current_sample = 0;
+ 	}
++
++	dsp_sample = cycles() - before;
++
+ 	return (s->mhit);	/* return the debounced hit */
+ }
+ 

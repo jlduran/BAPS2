@@ -1,0 +1,22 @@
+#!/bin/sh
+# Kelvin Chua 
+# NEXTix-INF
+# kelvin@nextixsystems.com
+# Start up file for net-snmp
+case $1 in
+        start) snmpd -Lsd -c /etc/default/snmpd.conf -p /var/run/snmpd.pid -f >/dev/null 2>/dev/null & ;;
+        stop) killall -9 snmpd;;
+        enable) rm -f /etc/rc.d/S45snmpd;
+                ln -s /etc/init.d/snmpd /etc/rc.d/S45snmpd;;
+        disable) rm -f /etc/rc.d/S45snmpd;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/snmpd [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+

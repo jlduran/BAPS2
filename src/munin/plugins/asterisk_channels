@@ -1,0 +1,28 @@
+#!/bin/sh
+# David Rowe 11 May 2008
+#
+# Plugin to monitor the number of active Asterisk channels
+#
+# Magic markers (optional - only used by munin-config and some
+# installation scripts):
+#
+#%# family=auto
+#%# capabilities=autoconf
+
+if [ "$1" = "autoconf" ]; then
+	echo yes
+	exit 0
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title Asterisk channels'
+	echo 'graph_args --base 1000 -l 0'
+	echo 'graph_vlabel Channels'
+	echo 'graph_category asterisk'
+	echo 'channels.draw AREA'
+	echo 'channels.label channels'
+	exit 0
+fi
+
+echo -n "channels.value "
+asterisk -rx 'show channels' 2>/dev/null | grep 'active channel' | awk '{ print $1 }' 

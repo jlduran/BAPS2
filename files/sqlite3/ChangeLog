@@ -1,0 +1,33 @@
+
+* 04 APR 07: ------ release 0.5
+
+* fix  BEGIN...END/ROLLBACK statments queries (thanks to John Morrissey!)
+* better support for BLOB columns (thanks to Michal Srajer!)
+
+
+* 28 MAR 06: ------ release 0.4
+
+* change package license to revised-BSD license.
+* fix a bug in sqlite3_query_close() (resource was not freed).
+
+
+* 20 MAR 06:
+
+-  include RPM spec files (thanks to Michiel van Leening!)
+
+* 10 FEB 06: ------ release 0.3
+
+- fix a really stupid bug in php_sqlite3_user_function_cb()
+
+* 17 OCT 05: ------ release 0.2
+
+- add sqlite3_create_function(). See examples/example4.php .
+- add sqlite3_column_type() (and SQLITE3_* constants)
+- add sqlite3_bind_*(). See examples/example5.php
+- add sqlite3_query_exec()
+
+* 14 OCT 05: ------ release 0.1
+
+- initial CVS import
+
+

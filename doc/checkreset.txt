@@ -1,0 +1,18 @@
+checkreset.txt
+--------------
+
+Sense if reset is held down when we boot.  If reset is down we execute
+a (user defined) script called /etc/on_reset_down.  Note that only
+/etc/on_reset_down will be executed - no other services will be
+booted.  This prevents other services over-riding on_reset_down, e.g.
+setting up the network twice.  It also allows recovery from damaged
+service start-up scripts.
+
+Here is a sample /etc/on_reset_down script to try:
+
+#!/bin/sh
+echo "on reset down!"
+ifconfig eth0 192.168.1.30
+
+
+

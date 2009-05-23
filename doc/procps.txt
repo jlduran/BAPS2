@@ -1,0 +1,17 @@
+procps.txt
+----------
+
+If you get something like:
+
+  root:/tmp> ./slabtop
+  Error opening terminal: unknown.
+
+Try:
+
+root:/tmp> TERM=linux ./slabtop
+
+Status
+------
+
+slabtop works OK but top reports odd values for some stats.  Still
+useful, though.

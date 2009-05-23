@@ -1,0 +1,62 @@
+wispcar.txt
+-----------
+
+WiSPCaR - Wifi Station Power Controller And Reporter
+
+Wispcar is a small PIC-based device with the following functions:
+
+  1/ Monitor Voltage
+  2/ Monitor Current
+  3/ Watchdog timer
+  4/ Sleep timer
+
+For more information see:
+
+  http://freetel.svn.sourceforge.net/viewvc/freetel/wispcar/
+
+Files
+-----
+
+This ipkg contains shell scripts to drive Wispcar on the IP04:
+
+  wispcard: - daemon that sends a 'w' to Wispcar every 3 seconds,
+              resetting watchdog and prompting a status line to be
+	      sent
+
+  wispcar.: - script executed when status line is sent
+
+Hardware Connection
+-------------------
+
+Wispcar is connected to the IP04 RS232 port directly without the RS232
+daughter board.  As Wispcar uses 5V logic a resistive voltage divider is
+used to drop the tx level from wispcar to the IP04 rx.
+
+    Wispcar                IP04
+    -------                ----
+	    1k
+    TX ---/\/\/\--*-------- Rx
+		  |
+		  \
+		  / 1k
+		  \
+		  /
+		  |
+    GND ----------*-------- GND            
+
+
+    RX -------------------- Tx
+
+U-boot Configuration
+--------------------
+
+Wispcar requires a 4800 baud serial connection.  In u-boot, set
+bootargs:
+
+  set bootargs ethaddr=your:mac:address root=/dev/mtdblock2 rw console=ttyBF0,4800 
+
+Munin
+-----
+
+Use Munin package to monitor Wispcar (current, voltage, watchdog
+status) remotely.

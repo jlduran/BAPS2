@@ -1,0 +1,193 @@
+<!--
+ * Asterisk-GUI	-	an Asterisk configuration interface
+ *
+ * Upload timezone file for the appliance
+ *
+ * Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Pari Nannapaneni <pari@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+-->
+<script src="scripts/prototype.js"></script>
+<script src="scripts/astman.js"></script>
+<link href="stylesheets/rico.css" media="all" rel="Stylesheet" type="text/css" />
+<link href="stylesheets/schwing.css" media="all" rel="Stylesheet" type="text/css" />
+<script>
+var tz_filename;
+var tz_uploadpath = "/usr/share/zoneinfo/";
+var default_tz = "";
+
+function bbbb(){
+	parent.astmanEngine.run_tool("ls -l /etc/localtime > /var/lib/asterisk/static-http/config/sysinfo_output.html", callback = function() { 
+		var opt = { method: 'get', asynchronous: true,
+			onComplete: function(originalRequest){
+				if(originalRequest.responseText.length == 0){
+					gui_feedback("You do not have a default TimeZone","default",10000);
+				}else{
+					var p = originalRequest.responseText.split("->");
+					p = p[1].strip().split(tz_uploadpath);
+					default_tz = p[1];
+				}
+				aaaa();
+			},
+			onFailure: function(t) { alert("Config Error: " + t.status + ": " + t.statusText); }
+		};
+		opt.parameters="";
+		var tmp = new Ajax.Request(asterisk_guiSysInfo_output, opt);
+		return true;
+	});
+}
+
+
+function aaaa(){
+	parent.astmanEngine.run_tool(asterisk_guiListFiles + " " + tz_uploadpath, callback = function() { 
+		var opt = { method: 'get', asynchronous: true,
+			onComplete: function(originalRequest){
+				showlist_of_files(originalRequest.responseText);
+			},
+			onFailure: function(t) { alert("Config Error: " + t.status + ": " + t.statusText); }
+		};
+		opt.parameters="";
+		var tmp = new Ajax.Request(asterisk_guiSysInfo_output, opt);
+		return true;
+	});
+}
+
+
+function showlist_of_files(ors){
+	var bkpfiles = ors.split("\n") ;
+	clear_table();
+
+	for( var i =0 ; i < bkpfiles.length ; i++){
+		if( typeof bkpfiles[i] == "undefined"  || bkpfiles[i] == "" ){
+			continue;
+		}
+		bkpfiles[i] = bkpfiles[i].replace(/^\s*|\s*$/g,'') ;
+		if( bkpfiles[i] == "" ){continue;	}
+		addrow_totable( bkpfiles[i].stripTags());
+	}
+
+
+	var _bft = _$('tzfilesTable') ;
+	
+	if( _bft.rows.length == 0 ){
+		_$('table_one').style.display="none";
+		var newRow = _bft.insertRow(-1);
+		var newCell0 = newRow.insertCell(0);
+		newCell0 .align = "center";
+		newCell0 .innerHTML = "<BR><I> No Previous TimeZone files found !!</I> <BR>" ;
+	}
+
+	parent.loadscreen(this);
+}
+
+
+function clear_table(){
+	var _bft = _$('tzfilesTable') ;
+	for( var i=0; i <  _bft.rows.length; ){
+		 _bft.deleteRow(i);
+	}
+}
+
+
+
+function addrow_totable(filename){
+	var newRow = _$('tzfilesTable').insertRow(-1);
+	newRow.style.backgroundColor= (default_tz==filename)?'#D5D5FF':'#FFFFFF';
+	if(default_tz!=filename){
+		newRow.onmouseover= function(){ this.style.backgroundColor='#F9F0D1'; };
+		newRow.onmouseout=function(){ this.style.backgroundColor='#FFFFFF'; };
+	}
+	
+	var newCell0 = newRow.insertCell(0);
+	newCell0.innerHTML =_$('tzfilesTable').rows.length  ;
+	newCell0.width = 35;
+	newCell0.align = "center";
+	
+	var newCell1 = newRow.insertCell(1);
+	newCell1.innerHTML = filename ;
+	
+	var newCell2 = newRow.insertCell(2);
+	newCell2.innerHTML = (default_tz==filename)?"Default TimeZone":"<input type=\"button\" onclick='setaslocal(\""+ filename + "\")'  value=\"Set as Default\" class=\"splbutton\">&nbsp;"  +
+	"<input type=\"button\" onclick='delete_tz(\""+ filename + "\")'  value=\"Delete\"  class=\"splbutton\">" ;
+	newCell2.align = "center";
+	newCell2.width = 200;
+}
+
+
+function delete_tz( filename ){
+	if(!confirm("Delete selected Backup Configuration ?")){ return ; }
+	parent.astmanEngine.run_tool("/bin/rm -f "+ tz_uploadpath + filename , callback=function(){
+		gui_feedback('Delete Request Successfull !','default');
+		window.location.href = window.location.href ;
+	});
+}
+
+function setaslocal( filename ){
+	if(!confirm("Set '"+ filename +"' as the Default TimeZone ?")){ return ; }
+	parent.astmanEngine.run_tool("rm /etc/localtime ; /bin/ln -s " + tz_uploadpath + filename + " /etc/localtime", callback=function(){
+		gui_feedback('Default Timezone set to '+ filename + ' !','blue');
+		alert("Please Save your Changes and restart the appliance for this change to take effect");
+		window.location.href = window.location.href ;
+	});
+}
+
+
+function localajaxinit(){
+	showdiv_statusmessage();
+	bbbb();
+	//parent.loadscreen(this);
+}
+
+</script>
+<body id="foo" onload="localajaxinit()"  bgcolor="EFEFEF">
+<div class="mainscreenTitleBar">
+	<span style="margin-left: 4px;font-weight:bold;">Manage TimeZones</span>
+	<span style="cursor: pointer; cursor: hand;" onclick="window.location.href=window.location.href;" >&nbsp;<img src="images/refresh.png" title=" Refresh " border=0 >&nbsp;</span>
+</div>
+<div class="mainscreenContentBox" id="mailboxcontent">
+<table class="mainscreenTable" align="center">
+<tr>	<td valign="top" align="center">
+		<table width=510>
+		<tr>
+		<td align=center id="tdupload" height=55>
+			<BR>
+			<fieldset>
+				<legend><B>&nbsp;Upload a Timezone file:&nbsp;</B></legend>
+			<IFRAME src="timezone2.html" id="uploadiframe" width="480" height="50" frameborder="0" border="0" marginheight="0" marginwidth="0"></IFRAME>
+			</fieldset>
+		</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>	<td valign="top" align="center">
+	<BR>
+	<fieldset  style="height: 300px; "  id="fieldset2">
+		<legend>&nbsp;List of TimeZone Files&nbsp;</legend>
+		<table class="table_blacksm" cellpadding=2 cellspacing=2 border=0 align=center width=500 id="table_one">
+			<tr>	<td width=35>S.No</td>
+				<td>Name</td>
+				<td align="center" width="200">Options</td>
+			</tr>
+		</table>
+		<div id="bkpfilesTable_div" style="height:260px;width=100%; overflow :auto; padding : 0px 0px 0px 0px;">
+			<table id="tzfilesTable" cellpadding=2 cellspacing=1 border=0 align=center width=500></table>
+		</div>
+		<BR>
+	</fieldset>
+	</td>
+</tr>
+</table>
+</div>
+<div id="sysinfohtml" style="display:none"></div>
+</body>

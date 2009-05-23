@@ -1,0 +1,144 @@
+freepbx.txt
+-----------
+
+Alpha port of FreePBX for Blackfin Asterisk.
+
+INSTALL
+-------
+
+The BAPS package installer hasn't been fully automated yet, as we are
+still developing.  Here are the install instructions:
+
+1/ Flash uImage_r2.ip08.  Note R2 is required as it (i) frees a lot of
+   memory and (ii) includes a busybox tar issue (GNU extensions) that
+   was missing from the previous uImage.
+
+1a/ It's a good idea to install the pagecache package first.  This will
+    ensure you don't run out of memory in the following steps:
+
+   root:~> ipkg update
+   root:~> ipkg install pagecache
+   root:~> reboot
+
+2/ Install the following packages
+
+   root:~> ipkg install zaptel-spi asterisk asterisk-gui native-sounds
+   root:~> ipkg install freepbx
+   root:~> ipkg list_installed
+
+   The freepbx install step will take a while (several minutes) due to
+   the size of the packages.
+
+   The list_installed step lists all the packages you just installed.
+
+2a/ Edit /etc/asterisk/http.conf and make sure the internal Asterisk web
+    server is off "enabled=no".
+
+3/ Lets set PHP to run in fast CGI mode.  This means we have php-cgi
+   resident in memory all the time for faster web server response and
+   more stable memory allocation (important in uClinux):
+
+   root:~> cd /etc
+   root:~> cp lighttpd-fastphp.conf lighttpd.conf
+
+   Note: if you see two php-cgi processes running and keep running out
+   of memory, it might be due to missing this step!
+
+4/ Now reboot:
+
+   root:~> reboot
+
+   This is not really necessary, just a little easier than manually
+   starting zaptel/asterisk/lighttpd etc.  It also makes sure the
+   system is in a nice stable state with maximum memory available for
+   the FreePBX installer in the next step.
+
+5/ Now install FreePBX manually.  This could be automated with an ipkg
+   script but while we are developing it's useful to install manually.
+   First we set up the sqlite3 database, then run the PHP install
+   script.  Note that this procedure is very similar to the x86
+   procedure - unlike most embedded work we actually run the installer
+   on the embedded target machine.
+  
+a) First lets initialise the SQL database:
+
+   root:~> cd freepbx-2.4.0
+   root:~> cat SQL/newinstall.sqlite3.sql | sqlite3 /var/freepbx.db
+
+b) The FreePBX installer currently requires some bash scripts
+   (apply_config.sh & amportal) to set permissions.  We don't have
+   bash on the IP04 so we will manually install these scripts which
+   will guarantee the permissions are OK:
+
+   root:~> cp amp_conf/bin/retrieve_conf /var/lib/asterisk/bin/
+   root:~> cp amp_conf/bin/module_admin /var/lib/asterisk/bin/
+
+c) Now we can run the installer:
+
+   root:~> cp amportal.conf /etc/
+   root:~> ./install_amp
+   
+   The first step stops the installer asking a bunch of questions.
+
+d) For some reason the installer misses some AGI files.  Install them manually
+   for now:
+
+   root:/freepbx-2.4.0> mkdir -p /var/lib/asterisk/agi-bin/
+   root:/freepbx-2.4.0> cp amp_conf/htdocs/admin/modules/core/agi-bin/* \
+                        /var/lib/asterisk/agi-bin/
+   root:/freepbx-2.4.0> cp amp_conf/agi-bin/* /var/lib/asterisk/agi-bin/
+
+   If you run out of memory in this step please check that php-cgi is
+   not running.
+
+6/ Start the CGI server:
+
+   root:~> /etc/init.d/fastphp enable
+   root:~> /etc/init.d/fastphp start
+   root:~> /etc/init.d/lighttpd enable
+   root:~> /etc/init.d/lighttpd start
+
+   Point your web browser at your IP04 and the FreePBX screens should
+   come up.
+
+7/ Monitoring: FreePBX on the Blackfin is a work in progress.  It's a
+   good idea to keep a window open to the console (RS232 serial) to
+   watch for any core dumps.  I also keep a telnet seesion open with
+   top running to monitor free system memory.
+
+
+STATUS
+------
+
++ Admin screen works OK for about 1 hour then php-cgi mysteriously
+  stops without an error message.  No core dumps evident.  Almost
+  like it's programmed to do that.  Can restart without incident.
+
++ Flash Op Panel not implemented (yet).  This may be possible, a small
+  Perl has been compiled, but a way to add the CPAN packages is
+  required.
+
++ Have only tested very basic functionality, like set up an
+  extension/trunk/route and made a few SIP - FXS calls.
+
++ Disk (RH side) isn't reported correctly due to df -P option not
+  supported by busybox df and 'mount' format differences that confuse
+  the regexp in class.parseProgs.inc.php.
+
++ I can't work out how to change the context of the Zap channels
+  from numberplan-local.  Need to change this to be able to dial
+  from FXS handsets using freepbx.  Note we need to include
+  zapata_additional.conf in zapata.conf
+
++ Some installer oddities - like paths for AGIs.  Installing manually
+  for now.
+
+TODO
+----
+
+[ ] try static linked PHP and check overall memory usage, dynamic
+    linked seems to peak at 15M for FreePBX code, min of 6.6M for just
+    running php with no args.
+
+[ ] run load test on IP04 (4 analog/8 SIP) at the same time as FreePBX
+    Admin Screen.  See if there are any audio clicks or core dumps.

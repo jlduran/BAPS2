@@ -1,0 +1,90 @@
+Munin Node
+----------
+
+Munin is a monitoring tool that polls a list of computers and logs the
+data.  It presents all the information in graphs through a web
+interface.  The data logged is defined by simple to write plugins
+stored in /etc/munin/plugins.  There are also hooks to gather SNMP
+data.
+
+This package installs a Munin node on a Blackfin system, allowing you
+to log and monitor all sorts of data.  It contains several built-in
+plugins, please feel to write your own and contribute them to this
+package.
+
+This package contains just the Munin node.  You need to run and
+configure a Munin master on your (probably) x86 host.  Installation of
+the Munin master is covered on the Munim site, and there are several
+HOWTOs on the web.  It is very easy to install, e.g. just a few
+packages to install under Ubuntu.
+
+Resources
+---------
+
+1/ Munin site:
+
+   http://munin.projects.linpro.no/
+
+2/ Some Munin plugins for Asterisk (written in Perl):
+
+   http://rodolphe.quiedeville.org/hack/munin/asterisk-1.2/
+
+Munin Master Conf File
+----------------------
+
+Here is a sample /etc/munin/munin.conf for your Munin master that logs
+a single IP04:
+
+start munin.conf ------------------------------------------------
+# These directories may vary for your Munin Master installation
+
+dbdir   /var/lib/munin
+htmldir /var/www/munin/
+logdir  /var/log/munin
+rundir  /var/run/munin
+
+tmpldir /etc/munin/templates
+
+# This is the important bit - our Blackfin Asterisk box we want
+# to monitor
+
+[pbx.yourdomain.com]
+    address 192.168.1.28
+    use_node_name yes
+end munin.conf --------------------------------------------------
+
+Testing Munin Node
+------------------
+
+  [host]$ telnet ip04 4949
+  Trying 192.168.1.28...
+  Connected to ip04.yourdomain.com.
+  Escape character is '^]'.
+  # munin node at ip04
+  list
+  load memory
+  fetch memory
+  memory_used.value 26132
+  memory_free.value 32948
+  .
+  quit
+  Connection closed by foreign host.
+
+Fast Update of Munin Master
+---------------------------
+
+The Munin master usually polls each node every 5 minutes.  While
+developing it's better to get instant feedback.  Here is how I run my
+Munin master on demand, and check the results:
+
+root@bunny:/var/log/munin# sudo -u munin /usr/bin/munin-cron
+root@bunny:/var/log/munin# tail munin-update.log
+
+Then refresh your web browser.
+
+Further Work
+------------
+
+Using asterisk -rx to grab stats is probably a big crude.  Using the
+manager interface would be a better method.  Not sure how to do that
+through shell script, perhaps pipe a comannd file.

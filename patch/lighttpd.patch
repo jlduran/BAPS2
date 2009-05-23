@@ -1,0 +1,44 @@
+--- lighttpd-1.4.18-orig/src/stream.c	2006-10-04 22:56:23.000000000 +0930
++++ lighttpd-1.4.18/src/stream.c	2008-02-09 07:50:42.000000000 +1030
+@@ -37,7 +37,7 @@
+ 		return -1;
+ 	}
+ 
+-	f->start = mmap(0, f->size, PROT_READ, MAP_SHARED, fd, 0);
++	f->start = mmap(0, f->size, PROT_READ, MAP_PRIVATE, fd, 0);
+ 
+ 	close(fd);
+ 
+--- lighttpd-1.4.18-orig/src/network_writev.c	2007-04-11 01:45:21.000000000 +0930
++++ lighttpd-1.4.18/src/network_writev.c	2008-02-09 07:50:42.000000000 +1030
+@@ -243,7 +243,7 @@
+ #endif
+ 				}
+ 
+-				if (MAP_FAILED == (c->file.mmap.start = mmap(0, to_mmap, PROT_READ, MAP_SHARED, c->file.fd, c->file.mmap.offset))) {
++				if (MAP_FAILED == (c->file.mmap.start = mmap(0, to_mmap, PROT_READ, MAP_PRIVATE, c->file.fd, c->file.mmap.offset))) {
+ 					/* close it here, otherwise we'd have to set FD_CLOEXEC */
+ 
+ 					log_error_write(srv, __FILE__, __LINE__, "ssbd", "mmap failed:",
+--- lighttpd-1.4.18-orig/openwrt/lighttpd.conf	2006-10-04 22:56:23.000000000 +0930
++++ lighttpd-1.4.18/openwrt/lighttpd.conf	2008-03-03 11:34:55.000000000 +1030
+@@ -20,7 +20,7 @@
+ #				"mod_fastcgi",
+ #				"mod_simple_vhost",
+ #				"mod_evhost",
+-#				"mod_cgi",
++				"mod_cgi",
+ #				"mod_compress",
+ #                               "mod_ssi",
+ #                               "mod_usertrack",
+--- lighttpd-1.4.18-orig/src/mod_cgi.c	2007-08-18 21:55:52.000000000 +0930
++++ lighttpd-1.4.18/src/mod_cgi.c	2008-02-09 10:42:28.000000000 +1030
+@@ -749,7 +749,7 @@
+ 	}
+ 
+ 	/* fork, execve */
+-	switch (pid = fork()) {
++	switch (pid = vfork()) {
+ 	case 0: {
+ 		/* child */
+ 		char **args;

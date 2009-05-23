@@ -1,0 +1,29 @@
+#!/bin/sh
+# Start up file for network with static IP. 
+
+IF=eth0
+IPADDRESS="192.168.1.30"
+NETMASK="255.255.255.0"
+GATEWAY="192.168.1.1"
+DNS="192.168.1.1"
+
+case $1 in
+        start) ifconfig $IF $IPADDRESS netmask $NETMASK up;
+               route add default gw $GATEWAY;
+	       echo "nameserver  $DNS" > /etc/resolv.conf;;
+	stop) ifconfig $IF down;;
+	enable) rm -f /etc/rc.d/S10network-static; 
+	        ln -s /etc/init.d/network-static /etc/rc.d/S10network-static;;
+	disable) rm -f /etc/rc.d/S10network-static;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/network-static [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

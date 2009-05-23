@@ -1,0 +1,15 @@
+--- ../baps-stamp/oslec/kernel/Makefile	2007-11-03 12:30:13.000000000 +1030
++++ oslec/kernel/Makefile	2007-11-01 20:41:58.000000000 +1030
+@@ -6,8 +6,10 @@
+ # Version 2
+ 
+ ifeq ($(ARCH), blackfin)
+-EXTRA_CFLAGS    := -Idrivers/zaptel/oslec/kernel -Idrivers/zaptel/oslec/spandsp-0.0.3/src/spandsp -D__BLACKFIN__ -D__BLACKFIN_ASM__ -O6 -DEXPORT_SYMTAB
+-obj-$(CONFIG_OSLEC)        += oslec.o
++EXTRA_CFLAGS    := -I$(OSLEC_DIR)/kernel \
++                   -I$(OSLEC_DIR)/spandsp-0.0.3/src/spandsp \
++                   -D__BLACKFIN__ -D__BLACKFIN_ASM__ -O6 -DEXPORT_SYMTAB
++obj-m        += oslec.o
+ 
+ oslec-objs := oslec_wrap.o \
+ 	../spandsp-0.0.3/src/echo.o

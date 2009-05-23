@@ -1,0 +1,22 @@
+#!/bin/sh
+# Start up file for cron
+# David Rowe 8 Feb 2008
+
+case $1 in
+	start) /bin/cron&;;
+	stop) killall -9 cron;;
+	enable) rm -f /etc/rc.d/S35cron; 
+	        ln -s /etc/init.d/cron /etc/rc.d/S35cron;;
+	disable) rm -f /etc/rc.d/S35cron;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/cron [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac
+
+        

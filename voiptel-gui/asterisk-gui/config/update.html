@@ -1,0 +1,286 @@
+<!--
+ * VoIPtel-GUI	-	an Asterisk configuration interface
+ *
+ * Updates the software
+ *
+ * Based on Asterisk-GUI, Copyright (C) 2006-2007, Digium, Inc.
+ *
+ * Mark Spencer <markster@digium.com>
+ * Pari Nannapaneni <pari@digium.com>
+ *
+ * See http://www.asterisk.org for more information about
+ * the Asterisk project. Please do not directly contact
+ * any of the maintainers of this project for assistance;
+ * the project provides a web site, mailing lists and IRC
+ * channels for your use.
+ *
+ * This program is free software, distributed under the terms of
+ * the GNU General Public License Version 2. See the LICENSE file
+ * at the top of the source tree.
+ *
+-->
+<script src="scripts/prototype.js"></script>
+<script src="scripts/astman.js"></script>
+<script src="scripts/tooltip.js"></script>
+<!-- <script src="scripts/progress.js"></script>
+<link href="stylesheets/progress.css" media="all" rel="Stylesheet" type="text/css" /> -->
+<link href="stylesheets/schwing.css" media="all" rel="Stylesheet" type="text/css" />
+
+<style type="text/css">
+#checklist {
+	border: 1px solid #ccc;
+	list-style: none;
+	height: 140px;
+	overflow: auto;
+	width: 225px;
+	float: left;
+}
+#checklist, #checklist li { margin: 0; padding: 0; }
+#CLdesc {
+	border: 1px solid #ccc;
+	height: 136px;
+	width: 225px;
+	margin-right: 2px;
+	float: right;
+	padding: 2px;
+	font-size: 0.8em;
+}
+</style>
+
+<script>
+var outputdir = "/var/lib/asterisk/static-http/config/";
+var outputfile = "updatestatus.html";
+var parseupdate;
+var tmplist = new Array;
+var conffileslist = new Array;
+var selconffiles = new Array;
+var recfiles2keep = new Array("extensions.conf","features.conf","manager.conf","meetme.conf","queues.conf","rc.conf","users.conf","voicemail.conf");
+
+function doUpdate(){
+	_$('update').disabled = true;
+//	setProgress('updateprogress','0');
+	
+	// demo part
+/*	_$('statusbox').value = "Connecting to server..\n";
+	setTimeout("_$('statusbox').value += \"Connection established.\\n\\n\"",1000);
+	setTimeout("_$('statusbox').value += \"Checking for new version..\\n\"",1200);
+	setTimeout("_$('statusbox').value += \"New version available!\\n\\n\"",2000);
+	setTimeout("_$('statusbox').value += \"Downloading update..\\n\"",2200);
+	setTimeout("fillProgress('updateprogress','100')",2200);
+	setTimeout("_$('statusbox').value += \"Download complete.\\n\\n\"",4200);
+	setTimeout("_$('statusbox').value += \"Installing update..\\n\"",4200);
+	setTimeout("_$('statusbox').value += \"Update complete. Please restart the device.\"",6200);
+*/	// end demo part
+	
+	_$('statusbox').value = "Checking for updates...";
+	
+	parent.astmanEngine.run_tool("touch " + outputdir + outputfile + "; ipkg update;",onSuccess = function() {
+		parent.astmanEngine.run_tool("ipkg -verbose_wget -force-defaults upgrade > " + outputdir + outputfile + " 2>&1;",onSuccess = function() {} );
+	} );
+	
+	parseupdate = window.setInterval(function () {
+		update_status();
+	},500);
+
+	return;
+}
+
+function update_status(){
+	var opt = {
+		method: 'get',
+		asynchronous: true,
+		onComplete: function(originalRequest){
+			var r = originalRequest.responseText;
+			var tmparray = r.split("\n");
+			var isGUIupdate = false;
+			
+			for( var i = 1; i < tmparray.length; i++ ){
+				var tmpline = tmparray[i].split(" ");
+				if( tmpline[0] == "Upgrading" ){
+					var pkgname = tmpline[1];
+					var fromver = tmpline[5];
+					var tover = tmpline[7];
+					var tmptxt = "\n\nDownloading update for " + pkgname + " package, " + fromver + " to " + tover;
+					check_n_append(pkgname,tmptxt);
+				}else if( tmpline[0] == "Configuring" ){
+					var pkgname = tmpline[1];
+					var tmptxt = "\n\nInstalling " + pkgname + " update...";
+					check_n_append(pkgname + "_ins",tmptxt);
+					if( pkgname == "voiptel-gui" ){
+						isGUIupdate = true;
+					}
+				}
+			}
+			
+			if( tmparray[tmparray.length-3] == "Nothing to be done" ){
+				var tmpname = "nothing";
+				var tmptxt = "\n\nNo updates available.";
+				check_n_append(tmpname,tmptxt);
+			}else if( tmparray[tmparray.length-2] == "Done." ){
+				if( isGUIupdate == true ){
+					restoreselconffiles();
+				}
+				var tmpname = "done";
+				var tmptxt = "\n\nUpdate complete. Please click the Update button again to see if there are any more updates available. If there are none you may restart the PBX to apply the changes.";
+				check_n_append(tmpname,tmptxt);
+			}
+			
+			if( tmparray[tmparray.length-2] == "Done." ){
+				clearInterval(parseupdate);
+				parent.astmanEngine.run_tool("cat /dev/null > " + outputdir + outputfile,onSuccess = function() {} );
+				tmplist.length = 0;
+				_$('update').disabled = false
+			}
+		},
+		onFailure: function(t) {
+			gui_alert("Error: " + t.status + ": " + t.statusText);
+		}
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request(outputfile , opt);
+	return true;
+}
+
+function restoreselconffiles(){
+	selconffiles.length = 0;
+	for( var i = 0; i < conffileslist.length; i++ ){
+		var currentfile = conffileslist[i];
+		if( _$(currentfile).checked == true ){
+			selconffiles.push(currentfile);
+		}
+	}
+	check_n_append("restoreconfmsg","\n\nRestoring selected conf files..");
+	for( var i = 0; i < selconffiles.length; i++ ){
+		var currentfile = selconffiles[i];
+		parent.astmanEngine.run_tool("cp -f /etc/asterisk.backup/" + currentfile + " /etc/asterisk/",onSuccess = function() {} );
+		check_n_append( currentfile + "_restoredmsg","\nRestored " + currentfile );
+	}
+	check_n_append("restoreconfdonemsg","\nDone.");
+	return;
+}
+
+function check_n_append(name,txt){
+	var exists = 0;
+	for( var i = 1; i < tmplist.length; i++ ){
+		if( tmplist[i] == name ){
+			exists = 1;
+		}
+	}
+	if( exists == 0 ){
+		for( var i = 1; i < tmplist.length; i++ ){
+			if( tmplist[i] == txt ){
+				exists = 1;
+			}
+		}
+		if( exists == 0 ){
+			_$('statusbox').value += txt;
+			_$('statusbox').scrollTop = 1000;
+			tmplist.push(name);
+			tmplist.push(txt);
+		}
+	}
+}
+
+function load_filelist(){
+	parent.astmanEngine.run_tool(asterisk_guiListFiles + " " + asterisk_configfolder, callback = function() { 
+	var opt = { method: 'get', asynchronous: true,
+		onComplete: function(originalRequest){
+			// Add config files to the list of files
+			var conffiles = originalRequest.responseText.split("\n") ;
+			var file_name;
+			for( var i =0 ; i < conffiles.length ; i++){
+				if( typeof conffiles[i] == "undefined"  || conffiles[i] == "" ){
+					continue;
+				}
+				conffiles[i] = conffiles[i].replace(/^\s*|\s*$/g,'') ;
+				if( conffiles[i] == "" ){ continue; }
+				if( conffiles[i].substr( (conffiles[i].length - 5), conffiles[i].length) != ".conf") { continue; }
+				file_name = conffiles[i].stripTags() ;
+				conffileslist.push(file_name);
+				var isrec2keep = 0;
+				for( var j = 0 ; j < recfiles2keep.length ; j++ ){
+					if( file_name == recfiles2keep[j] ){
+						isrec2keep = 1;
+					}
+				}
+				if( isrec2keep == 1 ){
+					add_checkboxitem(file_name,true);
+				}else{
+					add_checkboxitem(file_name,false);
+				}
+			}
+		},
+		onFailure: function(t) { alert("Config Error: " + t.status + ": " + t.statusText); }
+	};
+	opt.parameters="";
+	var tmp = new Ajax.Request(asterisk_guiSysInfo_output , opt);
+	});
+}
+
+function add_checkboxitem(name,checked){
+	var CL = document.getElementById('checklist');
+	var CLli = document.createElement('li');
+	var chkbox = document.createElement('input');
+	var lbl = document.createElement('label');
+	
+	chkbox.type = "checkbox";
+	chkbox.id = name; 
+	chkbox.name = name;
+	chkbox.checked = checked;
+
+	lbl.htmlFor = chkbox.id;
+	lbl.innerHTML = chkbox.name;
+
+	CLli.appendChild(chkbox);
+	CLli.appendChild(lbl);
+	CL.appendChild(CLli);
+}
+
+function localajaxinit(){
+	ASTGUI.events.add(document, 'mouseover', show_tooltip);
+	setWindowTitle("Update");
+	load_filelist();
+	parent.astmanEngine.setEventCallback(parent.eventeater.eventcd );
+	parent.loadscreen(this);
+	parent.astmanEngine.pollEvents();
+}
+
+function localajaxend(){
+	parent.astmanEngine.setEventCallback(null);
+	if( navigator.userAgent.indexOf("MSIE") != -1 ){ 
+		try{ purge( document.body ); } catch(e){ }	
+	}
+}
+
+</script>
+<body id="foo" onload="localajaxinit()"  bgcolor="EFEFEF" onunload="localajaxend()">
+<div class="mainscreenTitleBar">
+	<span style="margin-left: 4px;font-weight:bold">Update</span>
+	<span style="cursor: pointer; cursor: hand;" onclick="window.location.href=window.location.href;" >&nbsp;<img src="images/refresh.png" title=" Refresh " border=0 >&nbsp;</span>
+</div>
+<div class="mainscreenContentBox" id="userscontent">
+<table class="mainscreenTable" align="center">
+	<tr height=20 valign="middle">
+		&nbsp;
+	</tr>
+	<tr>
+		<td colspan=3 valign="top" align="center">
+			<div id="updateframe" style="width:465px; text-align:left;">
+				<textarea name="statusbox" id="statusbox" cols="54" rows="10" readonly="yes" style="border:1px solid black; padding: 5px;"></textarea>
+				<span style="float:left; margin-top:6px;"><input type="submit" id="update" value="Update" onClick="doUpdate()" tip="en,update,0" class="input"></span>
+<!--				<span style="float:right;"><script>display('updateprogress',0,1);</script></span> -->
+				<span style="clear:both;">&nbsp;</span>
+<!--				<span class="options"><a href="#" onClick="setProgress('element4','30');return false;"><img src="minus.gif" onMouseOver="$('Text4').innerHTML ='Set 30%'" /></a></span> -->
+				<div id="updateoptions" style="margin-top:40px;">
+					<div><u>Advanced:</u></div><br />
+					<ul id="checklist">
+					</ul>
+					<div id="CLdesc">Select the config files you wish to keep - the rest will be replaced with the newest defaults. Recommended ones are selected by default. You're advised not to select all files as some may need to be updated. Your existing files are always backed up to /etc/asterisk.backup/.</div>
+					<div style="clear:both;">&nbsp;</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+</body>

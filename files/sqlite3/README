@@ -1,0 +1,35 @@
+
+
+
+DESCRIPTION
+=-=-=-=-=-=
+
+
+This package enables PHP scripts to access SQLite3 (http://www.sqlite3.org) databases. 
+
+PHP 4 and PHP 5 have already built-in support for this RDBM, but this is limited to the 2.x versions.
+
+A PEAR DB::Db_common subclass is also provided with this package, providing SQLite3 database driver for the PEAR database abstraction class; 
+
+
+
+INSTALLATION INSTRUCTIONS
+=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+1. unzip & untar the package
+2. run "phpize"
+3. run "./configure --with-sqlite3=/path/to/your/sqlite3/install
+4. make && make install
+5. (optionally) copy DB/sqlite3.php to /path/to/php/lib/php/DB/sqlite3.php
+
+
+
+HELP - DOCUMENTATION
+-=-=-=-=-=-=-=-=-=-=
+
+See examples/* scripts for a quick help.
+
+
+
+

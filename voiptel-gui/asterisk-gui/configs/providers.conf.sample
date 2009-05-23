@@ -1,0 +1,26 @@
+[iaxtel]
+providername = IAXTEL
+providerlogo = images/iaxtel.jpg
+protocol = iax
+providerdesc = Iaxtel.com allows Asterisk users and IAX clients to connect with each other over the Inter-Asterisk eXchange protocol. Once registered with IAXtel, each user get a unique 1.700 telephone number that will ring their IAX compatible client from any where on the Asterisk network.
+hasiax =  yes
+hassip = no
+registeriax = yes
+registersip = no 
+host = iaxtel.com
+;trunk_username = iaxtel ; if set - the trunk created by the GUI will be by this name instead of trunk_x
+regurl = http://www.iaxtel.com ; URL to providers home/signup page
+
+[bandwidth]
+providername = Bandwidth
+providerlogo = images/bandwidth.gif
+protocol = sip
+providerdesc = Bandwidth.com's SIP (Session Initiation Protocol) Trunking solution, combined with an IP-PBX, enables organizations to save money by consolidating their voice and data over a single IP circuit -- maximizing its usage by utilizing unused bandwidth. Note: No username or password required. Bandwidth.com uses IP based Authentication.
+hasiax = no
+hassip = yes
+port = 5060
+registeriax = no
+registersip = no
+host = 4.79.212.236
+;host_out = 216.82.224.202 
+regurl = http://bandwidth.com

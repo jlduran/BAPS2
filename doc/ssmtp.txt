@@ -1,0 +1,34 @@
+ssmtp.txt
+---------
+
+Some notes gathered from the Blackfin Asterisk mailing list:
+
+1/ From  Karim M (karim786)
+
+I just gave it a try. It works great. Here is what I did to get it working:
+
+1. ipkg update
+2. ipkg install ssmtp
+3. Added my mail hub to /etc/ssmtp/ssmtp.conf 
+4. Added "mailcmd = /sbin/ssmtp -C/etc/ssmtp/ssmtp.conf -t" to the
+   general section of voicemail.conf
+5. Changed the format to wav from ulaw in the general section of voicemail.conf.
+
+2/ Submitted By: ming c. Li (macli)
+
+You could try ssmtp recipient_email_address < email_content_file to
+test if ssmtp works on command line.
+
+/etc/ssmtp/ssmtp.conf:
+
+mailhub=your_mail_host
+
+voicemail.conf:
+
+format=wav49
+serveremail=asterisk@legitimate_mail_domain
+mailcmd=/bin/ssmtp -t
+
+I use Postfix as my mail host, it will reject email with "sender
+domain not found.." if your email address domain part is not FQDN in
+voicemail serveremail config

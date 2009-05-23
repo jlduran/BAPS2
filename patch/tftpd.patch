@@ -1,0 +1,34 @@
+--- tftp-hpa-0.48-orig/tftpd/tftpd.c	2007-01-30 16:51:05.000000000 -0700
++++ tftp-hpa-0.48/tftpd/tftpd.c	2008-02-12 22:58:09.000000000 -0700
+@@ -527,7 +527,6 @@
+      is polled synchronously to make sure we don't
+      lose packets as a result. */
+   set_signal(SIGHUP, handle_sighup, 0);
+-  
+   while ( 1 ) {
+     fd_set readset;
+     struct timeval tv_waittime;
+@@ -598,19 +597,20 @@
+ 	 have bound to a specific address, if so we should use it */
+       memcpy(&myaddr.sin_addr, &bindaddr.sin_addr, sizeof bindaddr.sin_addr);
+     }
+-
++#ifndef __BLACKFIN__
+     /*
+      * Now that we have read the request packet from the UDP
+      * socket, we fork and go back to listening to the socket.
+      */
+-    pid = fork();
++    pid = vfork();
+     if (pid < 0) {
+       syslog(LOG_ERR, "fork: %m");
+       exit(EX_OSERR);	/* Return to inetd, just in case */
+     } else if ( pid == 0 )
++#endif
+       break;			/* Child exit, parent loop */
+   }
+-  
++ 
+   /* Child process: handle the actual request here */
+   
+   /* Ignore SIGHUP */
