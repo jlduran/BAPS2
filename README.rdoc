@@ -62,14 +62,14 @@ However once the uImage is install life gets much easier!
 This process will *erase your IP04 root file system* so please
 backup anything you really need (like your asterisk conf files).
 
-1/ Get the baseline BAPs uImage (contains kernel and basic root file
+1. Get the baseline BAPs uImage (contains kernel and basic root file
 system) and place it on your tftp server:
 
    http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08
 
 NOTE: Despite it's name, uImage_r2.ip08 works fine on both the IP04 and IP08.
 
-2/ Connect a RS232 cable to your IP04 (via the daughter board) and
+2. Connect a RS232 cable to your IP04 (via the daughter board) and
 stop the boot process at the u-boot prompt.
 
 Now we are going to write the new uImage to flash. your:mac:address
@@ -96,7 +96,7 @@ Install the new uImage into NAND flash using u-boot:
 TIP: If Linux doesn't boot or you experience other problems reboot
 into uboot, type "print", and carefully check bootargs
 
-3/ Now we have uClinux running, but using a ram-based ext2 file system
+3. Now we have uClinux running, but using a ram-based ext2 file system
 (mtdblock0) for root. So we need to copy /root into the yaffs file
 system:
 
@@ -105,7 +105,7 @@ On the IP04:
     root:~> copy_rootfs.sh
     root:~> reboot
 
-4/ Now set up u-boot to mount root from yaffs (some of these env
+4. Now set up u-boot to mount root from yaffs (some of these env
 variables may be set already, use 'print' to check):
 
   ip04>set autostart yes
@@ -115,7 +115,7 @@ variables may be set already, use 'print' to check):
   ip04>save
   ip04>reset
 
-5/ Boot IP04 to a uClinux root prompt.  Use mount to check that root
+5. Boot IP04 to a uClinux root prompt.  Use mount to check that root
 is mounted on mtdblock2 (yaffs file system).
 
 Now we can install some packages using ipkg:
@@ -135,9 +135,9 @@ http://svn.astfin.org/software/baps/trunk/doc[BAPS SVN].
 
 == HOWTO - Developer
 
-1/ svn co http://svn.astfin.org/software/baps/trunk baps
+1. svn co http://svn.astfin.org/software/baps/trunk baps
 
-2/ You need this toolchain:
+2. You need this toolchain:
 
    [baps]$ wget http://blackfin.uclinux.org/gf/download/frsrelease/ \
            348/3347/blackfin-toolchain-07r1.1-3.i386.tar.gz
@@ -147,7 +147,7 @@ If you untar the toolchain in baps directory then it will be included
 in your path automatically.  If you untar it somewhere else make sure
 the bin directories in this toolchain are in your path.
 
-3/ Make a BAPS uImage that supports ipkg.  This also configures
+3. Make a BAPS uImage that supports ipkg.  This also configures
 uClinux-dist to support compiling of other packages.  You need to make
 uClinux before making any other packages.
 
@@ -165,7 +165,7 @@ You can then try booting from your uImage via tftp, in u-boot:
 Or you can flash the uImage as described in the <<started,Getting
 Started>> section above.
 
-4/ Check out ipkg.conf:
+4. Check out ipkg.conf:
 
    root:~> cat /etc/ipkg.conf
    src snapshots http://rowetel.com/ucasterisk/ipkg
@@ -178,7 +178,7 @@ Try installing a simple ipkgs:
    root:~> ipkg install hello
    root:~> hello
 
-5/ BAPS uses init.d type start up scripts, for example:
+5. BAPS uses init.d type start up scripts, for example:
 
    root:~> ls /etc/init.d
    root:~> /etc/init.d/hello
@@ -210,14 +210,14 @@ And try:
 
 NOTES:
 
-1/ If you change the post or pre inst scripts, it is a good idea to rm
+1. If you change the post or pre inst scripts, it is a good idea to rm
 the existing $(TARGET_DIR) (see Makefile for your package), as the
 package make scripts don't seem to recognise when post/pre scripts
 have been changed.
 
-2/ To debug post/pre inst scripts #!/bin/sh -x is your friend!
+2. To debug post/pre inst scripts #!/bin/sh -x is your friend!
 
-3/ To test ipkgs you can rcp down to the target:
+3. To test ipkgs you can rcp down to the target:
    
    [host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
    [ip04]$ ipkg install asterisk_1.4.4-1_bfin.ipk
@@ -258,27 +258,27 @@ Then capture changes as above with:
 Notes
 ~~~~~
 
-1/ Patch files are compatible with Astfin, so hopefully it's possible
+1. Patch files are compatible with Astfin, so hopefully it's possible
 to move patches back and forth between BAPS and Astfin.
 
-2/ See TODO.txt
+2. See TODO.txt
 
-3/ To debug init shell scripts, e.g. files/hello.init, add a -x to the
+3. To debug init shell scripts, e.g. files/hello.init, add a -x to the
 first line if the script using vi on the IP04:
 
    #!/bin/sh -x 
 
-4/ When writing init scripts your will find the busybox msh shell has
+4. When writing init scripts your will find the busybox msh shell has
 some quirks, here is a link that explains them (all one line):
 
    http://dslinux.org/cgi-bin/moin.cgi/DSLinuxMshScriptingGuide?
    action=show&redirect=DSLinux+msh+scripting+guide
 
-5/ For more information on the IPKG format:
+5. For more information on the IPKG format:
 
    http://handhelds.org/moin/moin.cgi/Ipkg
 
-6/ On the target, the ipkg data is stored in /usr/lib/ipkg/info/
+6. On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
 == Directories
 
@@ -303,13 +303,13 @@ from Sipro to run this g729 codec legally.
 Here are the instructions for building and installing the g729 codec.
 Familiarity with compiling Blackfin code for the IP04 is assumed.
 
-1/ Make sure the 2007 toolchain is installed as per the <<developer,Developer
+1. Make sure the 2007 toolchain is installed as per the <<developer,Developer
 How To>> above.  You path should include these directories:
 
   /path/to/baps/opt/uClinux/bfin-linux-uclibc/bin
   /path/to/baps/opt/uClinux/bfin-uclinux/bin
 
-2/ Change the processor type in uClinux-dist/linux-2.6.x/.config to BF533:
+2. Change the processor type in uClinux-dist/linux-2.6.x/.config to BF533:
 
   # CONFIG_BF532 is not set
   CONFIG_BF533=y
@@ -331,7 +331,7 @@ the first 0x300000 of flash.
   ip04>nand erase 0x0 0x300000
   ip04>nand write 0x1000000 0x0 0x300000
 
-3/ Check out and build libbfgdots:
+3. Check out and build libbfgdots:
 
   $ svn co svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/lib/libbfgdots libbfgdots
   $ cd libbfgdots; make
@@ -388,16 +388,16 @@ the http://update.voiptel.no[Voiptel upgrade site].
 Here are the instructions (thanks Bruce) for installing the Voiptel
 firmware:
 
-1/ Download http://update.voiptel.no/uImage_r2.ip08[uImage_r2.ip08] and place the
+1. Download http://update.voiptel.no/uImage_r2.ip08[uImage_r2.ip08] and place the
 uImage on your TFTP server.
 
 NOTE: This uImage file is different to the uImage_r2.ip08 image from
 this site, it contains changes required to support the Voiptel GUI.
 
-2/ Follow steps 1-5 in the <<started,Getting Started - End
+2. Follow steps 1-5 in the <<started,Getting Started - End
 User>> section above.
   
-3/ If your gateway happens to be 192.168.1.1 then the IP04 should
+3. If your gateway happens to be 192.168.1.1 then the IP04 should
 automatically go online and fetch the needed packages and install
 them. If not you will have to change the network settings and reboot
 (replace x's with your gateway IP address, and y's with the new IP04
@@ -410,10 +410,10 @@ NOTE: There are two spaces after 'nameserver'
    root:~> sed -i 's/192.168.1.100/yyy.yyy.yyy.yyy/g' /etc/network.sh
    root:~> reboot
  
-4/ When the IP04 boots up again it should start the installation process,
+4. When the IP04 boots up again it should start the installation process,
 which will take 10-15m, depending on your Internet connection.
  
-5/ Once installation completes, reboot the IP04. It will start up with
+5. Once installation completes, reboot the IP04. It will start up with
 the default IP addresses again, so do the following if you use
 different addresses:
 
