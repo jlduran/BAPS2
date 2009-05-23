@@ -21,16 +21,9 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem)
 there is a growing list of packages:
 
-[frame="all",grid="all"]
-`15`20~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Name,Description
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-include::packages.csv[]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 == Getting Started
 
-The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the [IP04 Wiki][wiki] or please post to the Blackfin Asterisk forum.
+The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the IP04 Wiki[http://github.com/mislav/hanna/wikis/home] or please post to the Blackfin Asterisk forum.
 
 However once the uImage is install life gets much easier!
 
@@ -482,6 +475,4 @@ Some tasks that need doing....:
 4. BAPS uImages for BF537 and BF533
 5. A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
 6. Fix the Maintainer Field in packages (e.g. specific entries for each package).
-
-[wiki]: http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX "IP04 Wiki"
 
