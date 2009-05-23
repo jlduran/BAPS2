@@ -439,40 +439,38 @@ Well, not really a user guide!  Just some basic notes to get started:
 * Check out the CLI to see what the GUI is up
   to.  This is what I found after setting up two analog (6004 and 6016),
   and one SIP (6015) extensions:
-+
-------------------------------------------------------------------------------
-ip04*CLI> show dialplan default
 
-[ Context 'default' created by 'pbx_config' ]
-  '.' =>            1. Goto(${EXTEN})                             [pbx_config]
-  '6004' =>         hint: Zap/4                                   [pbx_config]
-                    1. Macro(stdexten|6004|${HINT})               [pbx_config]
-  '6015' =>         hint: SIP/6015                                [pbx_config]
-                    1. Macro(stdexten|6015|${HINT})               [pbx_config]
-  '6016' =>         hint: Zap/3                                   [pbx_config]
-                    1. Macro(stdexten|6016|${HINT})               [pbx_config]
-
-ip04*CLI> sip show peers
-
-Name/username              Host            Dyn Nat ACL Port     Status 
-6015/6015                  192.168.1.23     D          5060     Unmonitored 
-
-ip04*CLI> zap show channels
-
-   Chan Extension  Context         Language   MOH Interpret
- pseudo                                       default
-      1            default                    default
-      2            default                    default
-      3            numberplan-cust            default
-      4            numberplan-cust            default
-------------------------------------------------------------------------------
+  ip04*CLI> show dialplan default
+  
+  [ Context 'default' created by 'pbx_config' ]
+    '.' =>            1. Goto(${EXTEN})                             [pbx_config]
+    '6004' =>         hint: Zap/4                                   [pbx_config]
+                      1. Macro(stdexten|6004|${HINT})               [pbx_config]
+    '6015' =>         hint: SIP/6015                                [pbx_config]
+                      1. Macro(stdexten|6015|${HINT})               [pbx_config]
+    '6016' =>         hint: Zap/3                                   [pbx_config]
+                      1. Macro(stdexten|6016|${HINT})               [pbx_config]
+  
+  ip04*CLI> sip show peers
+  
+  Name/username              Host            Dyn Nat ACL Port     Status 
+  6015/6015                  192.168.1.23     D          5060     Unmonitored 
+  
+  ip04*CLI> zap show channels
+  
+     Chan Extension  Context         Language   MOH Interpret
+   pseudo                                       default
+        1            default                    default
+        2            default                    default
+        3            numberplan-cust            default
+        4            numberplan-cust            default
 
 === GUI Gotchas
 
 I was caught by these:
 
-* On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl--.
-* If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
+  * On my web browser (Firefox on an Ubuntu laptop) I sometimes can't see buttons like New and Save on the bottom of the Users Page. To see them I decreased my font size using Ctrl-.
+  * If you get a busy tone when you try to dial make sure you have selected a Dialplan (e.g. Dialplan1 above) for that phone.
 
 == BAPS TODO
 
