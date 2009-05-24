@@ -2,6 +2,7 @@
 .svn/
 dl/*
 ipkg/*
+libxml2-2.7.3/*
 opt/*
 tiff-3.8.2/*
 tmp/*
