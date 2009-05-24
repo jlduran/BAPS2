@@ -1,18 +1,12 @@
 #####################################################
 # libxml for the Blackfin
 # Based on Astfin2 libxml.mk
-#
-# I tried a few appraches to shrinking libxml:
-#   1/ normal build, then strip (libxml2.so.2.6.31 985256 bytes)
-#   2/ CFLAGS=-Os, then strip (libxml2.so.2.6.31 943488 bytes)
-# So I figured stick with (1) for extra speed
-#
 #####################################################
 
 include rules.mk
 
 LIBXML_SITE=ftp://xmlsoft.org/libxml2
-LIBXML_VERSION=2.6.31
+LIBXML_VERSION=2.7.3
 LIBXML_SOURCE=libxml2-sources-$(LIBXML_VERSION).tar.gz
 LIBXML_UNZIP=zcat
 LIBXML_CONFIGURE_OPTS=--host=bfin-linux-uclibc --build=i686-linux \
@@ -52,14 +46,15 @@ libxml: $(LIBXML_DIR)/.configured
 	# installed in the staging dir, also means .la has correct
 	# path to staging dir.  So now we set up libs on target:
 
-	mkdir -p $(TARGET_DIR)/lib;
-	cp $(STAGING_DIR)/usr/lib/libxml2.so.2.6.31 $(TARGET_DIR)/lib
-	ln -sf libxml2.so.2.6.31 $(TARGET_DIR)/lib/libxml2.so
-	ln -sf libxml2.so.2.6.31 $(TARGET_DIR)/lib/libxml2.so.2
+	rm -Rf $(TARGET_DIR)
+	mkdir -p $(TARGET_DIR)/lib
+	cp $(STAGING_DIR)/usr/lib/libxml2.so.2.7.3 $(TARGET_DIR)/lib
+	ln -sf libxml2.so.2.7.3 $(TARGET_DIR)/lib/libxml2.so
+	ln -sf libxml2.so.2.7.3 $(TARGET_DIR)/lib/libxml2.so.2
 
 	# strip is very effective - reduces .so size from 3M to 1M
 
-	$(STRIP) $(TARGET_DIR)/lib/libxml2.so.2.6.31
+	$(STRIP) $(TARGET_DIR)/lib/libxml2.so.2.7.3
 
 	# remove other junk to save room on target
 	cd $(TARGET_DIR); rm -Rf bin include share

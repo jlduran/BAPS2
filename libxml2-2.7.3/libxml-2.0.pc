@@ -1,0 +1,13 @@
+prefix=/usr/local/src/BAPS2/tmp/libxml/ipkg/libxml
+exec_prefix=${prefix}
+libdir=/usr/local/src/BAPS2/uClinux-dist/staging/usr/lib
+includedir=${prefix}/include
+modules=1
+
+Name: libXML
+Version: 2.7.3
+Description: libXML library version2.
+Requires:
+Libs: -L${libdir} -lxml2
+Libs.private:    -lm 
+Cflags: -I${includedir}/libxml2 
