@@ -1,0 +1,179 @@
+#!/usr/bin/expect
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+if { $board_type == "BF533-STAMP" } {
+    	set board_num 533
+} elseif { $board_type == "BF537-STAMP" } {
+	set board_num 537        
+}
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set case_num 0
+
+incr case_num
+
+set timeout 30
+
+send -s "ifconfig eth0 $targetip\r"
+while 1 {
+   sleep 3
+   expect {
+      ">" {
+         
+         puts "ifconfig set success.\n"
+         break
+      }
+
+      timeout {
+            puts "Fail ifconfig. "
+            break
+         }
+     }
+}
+
+send "cd /bin\r" 
+while 1 {
+   expect {
+      "bin" {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+expect "root:/bin>"
+send "./ppifcd_test -b $board_num \r" 
+while 1 {
+   expect {
+      "Total Frame Capture Time" {         
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+incr case_num
+
+expect "root:/bin>"
+send "./ppifcd_test -b $board_num -c3 -t\r" 
+while 1 {
+   expect {
+     -re "Total Frame Capture Time.*Total Frame Capture Time.*Total Frame Capture Time" {
+        
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+incr case_num
+
+expect "root:/bin>"
+send "ppifcd_test -b $board_num -c3 /var/img.bmp\r" 
+while 1 {
+   expect {
+     -re "Saved" {
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+incr case_num
+
+expect "root:/bin>"
+send "time ppifcd_test -b $board_num -c100 \r" 
+while 1 {
+   expect {
+     -re "real.*user.*sys" {
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+spawn ftp $targetip
+while 1 {
+    expect {
+                "Name" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+        send -s "root\r"
+        expect {
+                "Password:" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+        send -s "uClinux\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+
+        send -s "cd /var\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+
+        send -s "get img.bmp\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+
+	        send -s "bye\r"
+         expect {
+                "Goodbye" { break }
+                timeout { send_user "Failed first return\n"
+                        break }
+         }
+
+   }
+
+   
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+
+

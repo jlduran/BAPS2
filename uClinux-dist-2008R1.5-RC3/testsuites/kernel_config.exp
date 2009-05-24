@@ -1,0 +1,117 @@
+#!/usr/bin/expect
+
+
+# directory and file locations
+
+set user /home/test/work/cruise
+set uclinux_path $user/checkouts/uclinux-dist
+#set uclinux_path /uclinux/kernel/local/1218/uclinux-dist
+
+# environment settings
+
+set ttydev /dev/ttyS0
+set baud_rate   "57600"
+set sh_prompt "\[-@]*\[$>]"
+set kernel_prompt "root:\[^>].*>"
+
+set targetip 10.100.4.50
+set serverip 10.100.4.174
+set count  30
+set PING_COUNT  1999
+set password "blackfin"
+set send_slow {1 .1}
+set bootaddr_low 0x800000
+set bootaddr_high 0x1800000
+set name test
+set STRDATA "abcdefghijklmnopqrstuvwxyz0123456789"
+#set file names
+
+set kernel_only_image   vmlinux
+set compressed_kernel_only_image  vmImage
+
+set kernel_and_ext2_image   linux.ext2
+set kernel_and_cramfs_image linux.cramfs
+set kernel_and_romfs_image  linux.romfs
+
+set compressed_kernel_and_ext2_image   uImage.ext2
+set compressed_kernel_and_cramfs_image uImage.cramfs  
+
+set ext2_rootfs_image    rootfs.ext2
+set jffs2_rootfs_image   rootfs.jffs2
+set yaffs_rootfs_image   rootfs.yaffs
+set yaffs2_rootfs_image  rootfs.yaffs2
+set HAVE_JFFS2_IMAGE     0
+set HAVE_KERNEL_ONLY_IMAGE     0
+set HAVE_ROMFS_IMAGE     0
+
+set bootargs_param0      "root=/dev/mtdblock0 rw earlyprintk=serial,uart0,$baud_rate" 
+set bootargs_param1      "root=/dev/mtdblock2 rw rootfstype=jffs2 earlyprintk=serial,uart0,$baud_rate"
+# For linux mount jffs2 as rootfs, which need mtd ext2 support.
+set bootargs_param2      "root=/dev/mtdblock3 rw rootfstype=jffs2 earlyprintk=serial,uart0,$baud_rate" 
+set bootargs_param3      "root=/dev/mtdblock0 rw mem=32M max_mem=64M"
+set bootargs_param4      "root=/dev/mtdblock1 rw rootfstype=yaffs2"
+set bootargs_param5      "mtdparts=physmap-flash.0:256k(uboot)ro,1792k(kernel),-(rootfs) earlyprintk=serial,uart0,$baud_rate"
+set bootargs_param6      "mtdparts=physmap-flash.0:256k(uboot)ro,1792k(kernel),-(rootfs) root=/dev/mtdblock2 rw rootfstype=jffs2 earlyprintk=serial,uart0,$baud_rate"
+set bootargs_param7      "mtdparts=physmap-flash.0:256k(uboot)ro,1792k(kernel),-(rootfs) root=/dev/mtdblock3 rw rootfstype=jffs2 earlyprintk=serial,uart0,$baud_rate"
+set bootargs_param8      "root=/dev/mtdblock4 rw rootfstype=jffs2 earlyprintk=serial,uart0,57600"
+set bootargs_param9      "root=/dev/mtdblock0 rw earlyprintk=serial,uart0,$baud_rate console=/dev/null ip=$targetip" 
+set bootargs 		 $bootargs_param0
+
+set linux_version "not found"
+set gcc_version "not found"
+set map_text "not found"
+set map_data "not found"
+set map_bss "not found"
+set map_rootfs "not found"
+set map_stack "not found"
+set instruction_cache_boot_flag "not found"
+set data_cache_boot_flag "not found"
+set TITLE "undefined"
+
+set CACHE_ENABLED           "enabled"
+set CACHE_DISABLED          "disabled"
+
+proc log_file_name { file_name } {
+    
+  return [ exec echo "$file_name" | sed "s/.exp/_log/g" ]
+}
+
+proc title { file_name } {
+    
+  return [ exec echo "$file_name" | sed "s/_/ /g" | sed "s/\\.\\/\\(\.\*\\).exp/\\1/g" | tr 'a-z' 'A-Z' ]
+}
+
+set step_sequence_number    1
+
+proc step { message } {
+
+  global step_sequence_number
+
+  puts "\n*******************************************************************"
+  puts "STEP $step_sequence_number: $message\n\n"
+  send_log "\n************** STEP $step_sequence_number: $message\n\n"
+  incr step_sequence_number
+}
+
+
+proc case_pass { casenum } {
+  send_user "\nCase $casenum ...PASS\n"
+  send_log "\nCase $casenum ...PASS\n"
+}
+
+proc case_fail { casenum } {
+  global TITLE
+
+  send_user "\nCase $casenum ...FAIL\n"
+  send_log "\nCase $casenum ...FAIL\n"
+  send_user "\n$TITLE FAIL\n"
+  send_log "$TITLE ............\[FAIL\]\n"
+  exit
+}
+
+proc all_pass {} {
+  global TITLE
+
+  send_user "\n$TITLE PASS\n"
+  send_log "\n$TITLE ............\[PASS\]\n"
+}

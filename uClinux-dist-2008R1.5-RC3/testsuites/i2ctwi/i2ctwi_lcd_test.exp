@@ -1,0 +1,204 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+
+log_file [log_file_name "$argv0"]
+
+send_user "Starting $argv0\n"
+
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start testing."
+set case_num 0
+incr case_num
+
+sleep 5
+send "\r"
+
+expect ">"
+set timeout 8
+set flag 0
+
+send "modprobe bfin_twi_lcd\r"
+while 1 {
+   expect {
+      "TWI" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+expect ">"
+incr case_num
+send "lsmod\r"
+while 1 {
+   expect {
+      "bfin_twi_lcd" {
+         puts "insert module success."
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "cd sys/bus/i2c/devices\r" 
+while 1 {
+   expect {
+      ">" {
+         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "ls\r" 
+while 1 {
+   expect {
+     -re "0-0022.*0-002f" {
+         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+expect ">"
+send "cd 0-002f\r" 
+while 1 {
+   expect {
+      ">" {
+         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "echo 4 > write_w1\r" 
+while 1 {
+   expect {
+      ">" {
+         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "cat  read_w1\r" 
+while 1 {
+   expect {
+      ">" {
+         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "twilcd_test -h\r" 
+while 1 {
+   expect {
+     -re "Usage.*>" {         
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "twilcd_test -p 0 \"Hello World! \"\r"
+while 1 {
+   expect {
+     "Message" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+sleep 5
+send "twilcd_test -p 0 \"\`date\`\"\r" 
+while 1 {
+   expect {
+     "Message" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+ 
+         }
+     }
+}
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+
+log_file

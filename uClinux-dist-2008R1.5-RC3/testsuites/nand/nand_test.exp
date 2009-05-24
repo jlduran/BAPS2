@@ -1,0 +1,270 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set TEST_PASS               "pass"
+set TEST_FAIL               "fail"
+
+set case_num 0
+
+step "Mount modules"
+
+if { $board_type == "BF537-STAMP" } {
+
+incr case_num
+set timeout 5
+
+send -s "modprobe bfin_nand\r"
+while 1 {
+    expect {
+        -re "NAND device.*Creating .* MTD partitions" {
+		expect ">"
+                case_pass $case_num
+                break;
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+}  
+
+step "Show file systems."
+incr case_num
+
+send -s "cat /proc/filesystems \r"
+while 1 {
+    expect {
+
+        -re "yaffs" {
+                case_pass $case_num
+		expect ">"
+                break;
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+
+incr case_num
+
+step "MTD test"
+
+set timeout 5
+set mtd_temp_result $TEST_FAIL
+set mtd_result $TEST_FAIL
+#send -s "\r"
+send -s "cat /proc/mtd \r"
+while 1 {
+    expect {
+
+	"mtd$nand_rootfs_num" {
+		set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+	}
+
+	  -re $kernel_prompt {
+                break
+        }
+
+
+	timeout {
+                case_fail $case_num
+		exit
+	}
+    }
+}
+
+sleep 1
+
+incr case_num
+
+step "Erase MTD "
+set mtd_temp_result $TEST_FAIL
+set timeout 180
+send -s "eraseall /dev/mtd$nand_rootfs_num\r"
+while 1 {
+    expect {
+	
+	 -re $kernel_prompt {
+		set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+	}
+
+	timeout {
+                case_fail $case_num
+		exit
+	}
+    }
+}
+
+step "Touch file"
+
+send_log " \n1)create file system directory\n"
+send -s "mkdir -p rootfs\r"
+expect  -re $kernel_prompt
+send_log " \n2)create test file\n"
+send -s "echo This is test for mtd driver > rootfs/test\r"
+expect  -re $kernel_prompt
+
+incr case_num
+
+step "Reading MTD "	
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "mount -t yaffs2 /dev/mtdblock$nand_rootfs_num /mnt\n"
+while 1 {
+    expect {
+                                                                                                                                                             
+         -re $kernel_prompt {
+                set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+        }
+                                                                                                                                                             
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+   
+step "cp pwd to YAFFS."
+set yaffs_temp_result $TEST_FAIL
+incr case_num
+
+set timeout 60
+send -s "cp /bin/pwd /mnt\r"
+while 1 {
+    expect {
+         -re $kernel_prompt {
+                case_pass $case_num
+                break
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+
+sleep 1
+
+step "YAFFS Validating data integrity"
+set yaffs_temp_result $TEST_FAIL
+incr case_num
+
+set timeout 60
+send "while \[ 1 \]; md5sum /mnt/pwd ; done\r"
+while 1 {
+   expect {
+      -re "\[0-9a-z]+  /mnt/pwd" {
+                sleep 3
+                send "\3"
+                case_pass $case_num
+                break
+      }
+
+      timeout {
+                case_fail $case_num
+		exit
+         }
+     }
+}
+
+expect ">"
+puts "Writing YAFFS......\n"
+
+incr case_num
+set timeout 60
+send -s "cp /rootfs/test /mnt\r"
+while 1 {
+    expect {
+
+       -re $kernel_prompt {
+                case_pass $case_num
+                break
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+
+incr case_num
+
+step "Verify "
+set timeout 2
+send -s "cmp /rootfs/test /mnt/test\r"
+while 1 {
+    expect {
+	
+	"differ" {
+                case_fail $case_num
+		exit
+	}
+	timeout {
+		set mtd_results $TEST_PASS
+                case_pass $case_num
+		break
+	}
+    }
+}
+
+incr case_num
+expect  -re $kernel_prompt
+send -s "umount /mnt\r"
+while 1 {
+    expect {
+
+       -re $kernel_prompt {
+                break
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+send -s "ls /mnt\r"
+while 1 {
+    expect {
+
+        "test" {
+                case_fail $case_num
+                exit
+        }
+
+        timeout {
+                case_pass $case_num
+                break
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 

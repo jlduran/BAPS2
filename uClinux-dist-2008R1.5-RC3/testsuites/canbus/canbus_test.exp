@@ -1,0 +1,128 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Starting test."
+set timeout 8
+set flag 0
+
+#expect  -re $kernel_prompt
+send -s "modprobe can\r" 
+while 1 {
+   expect {
+     -re "BlackFin-CAN CAN Driver" {
+         incr flag
+	 puts "module insert success.\n"
+         break
+      }
+
+      timeout { 
+         puts "module probe failed.\n"                  
+         break
+         }
+     }
+}
+expect  -re $kernel_prompt
+send -s "lsmod\r" 
+while 1 {
+   expect {
+      "can" {
+         incr flag
+	 puts "module ls success.\n"
+         break
+      }
+
+      timeout { 
+         puts "module ls failed.\n"                  
+         break
+         }
+     }
+}
+
+expect  -re $kernel_prompt
+send -s "can_send 10 01 02 03 04 05 06 07 08\r" 
+while 1 {
+   sleep 3
+   expect {
+       -re $kernel_prompt { 
+         incr flag
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+expect  -re $kernel_prompt
+send -s "can_send 10 01 02 03 04 05 06 07 08\r" 
+while 1 {
+   sleep 3
+   expect {
+       -re $kernel_prompt { 
+        incr flag
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+send -s "receive\r" 
+while 1 {
+   expect {
+     -re "Received with ret=1.*01 02 03 04 05 06 07.*" { 
+         incr flag
+         send -s "\3"
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+#send -s "lsmod\r" 
+expect  -re $kernel_prompt
+
+send -s "lsmod\r"
+
+while 1 {
+   expect {
+      "can" {
+         incr flag
+         puts "module ls success.\n"
+         break
+      }
+
+      timeout {
+         puts "module ls failed.\n"
+         break
+         }
+     }
+}
+
+if { $flag == 6 } {
+   all_pass
+} else {
+   puts "canbus test failed.\n"
+}
+
+
+send_user "Ending $argv0\n"
+log_file
+ 
+

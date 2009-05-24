@@ -1,0 +1,72 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step  "Reboot the kernel." 
+set bootargs  $bootargs_param3
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set case_num 0
+
+incr case_num
+
+set timeout 8
+set flag 0
+
+send "cd /bin\r" 
+while 1 {
+   expect {
+      "bin" {        
+         break
+      }
+
+      timeout {                   
+            break
+         }
+     }
+}
+
+set timeout 20
+set flag 0
+set num 0
+
+send -s  "./ad9960_test read 16\r" 
+while 1 {
+   expect {
+   
+       -re  "Found Q.*Validate 16 samples OK" {                  
+	        
+		puts "\nad9960 test success.\n"
+                case_pass $case_num
+		break
+      }    
+
+     "ERROR" {
+                case_fail $case_num
+	exit
+         }
+	 
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+
+
+

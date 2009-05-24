@@ -1,0 +1,121 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Linphone test
+#
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make clean."
+source  make_clean.exp
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+source  make_default_config.exp
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+        -re "AnalogDevices Products .*BF533-EZKIT, BF533-STAMP, BF537-STAMP.*\\\[.*]" {
+            send "$board_type\r"
+        }
+
+        -re "Customize Kernel Settings.*CONFIG_DEFAULTS_KERNEL.*\\\[././.]" {
+            send "y\r"
+        }
+
+        -re "Customize Vendor/User Settings.*CONFIG_DEFAULTS_VENDOR.*\\\[././.]" {
+            send "y\r"
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "m\r"
+        }
+
+        -re "Advanced Linux Sound Architecture.*SND.*\\\[.*]" {
+            send "m\r"
+        }
+
+        -re "OSS Mixer API.*SND_MIXER_OSS.*\\\[.*]" {
+            send "m\r"
+        }
+
+        -re "OSS PCM.*digital audio.*API.*SND_PCM_OSS\\\).*\\\[.*]" {
+            send "m\r"
+        }
+
+        -re "AD1836 Audio support for BF53x.*SND_BLACKFIN_AD1836.*\\\[.*]" {
+            send "m\r"
+        }
+
+        -re "Blackfin Audio SPORT port.*SND_BLACKFIN_SPORT.*\\\[.]" {
+            send "0\r"
+        }
+
+        -re "Blackfin Audio SPI channel selection bit.*SND_BLACKFIN_SPI_PFBIT.*\\\[.]" {
+            send "4\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            send "FDPIC\r"
+        }
+
+        -re "ALSA utils.*USER_ALSA_UTILS.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "tone.*USER_PLAY_TONE.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Build eXosip.*LIB_LIBEXOSIP_FORCE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Linphone, a SIP compatible VoIP phone.*USER_BLACKFIN_LINPHONE.*\\\[.*]" {
+            send "y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

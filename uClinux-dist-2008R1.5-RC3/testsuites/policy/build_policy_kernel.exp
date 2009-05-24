@@ -1,0 +1,303 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+source  ../board_info.exp
+
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+step "Change config file in /vender folder."
+
+cd $uclinux_path
+sleep 3
+ set timeout 2
+      spawn ex vendors/AnalogDevices/$board_type/Makefile
+      expect {
+         "Entering Ex mode*Normal mode." { }
+
+         "already exists!" {
+            send "e\r"
+            sleep 1
+         }
+      }
+      sleep 1
+      send "/BLOCKS\r"
+      expect "BLOCKS*="
+      send "d\r"
+      expect ":"
+      send "i\r"
+      sleep .5
+      if { $board_type == "BF548-EZKIT" } {
+
+      send "BLOCKS = 12288\r"
+
+      } else {
+
+      send "BLOCKS   = 8192\r"
+      }
+      sleep .5
+      send ".\r"
+      expect ":"
+      send "wq\r"
+      expect eof
+
+
+cd $uclinux_path/testsuites
+
+step "Make clean."
+
+source  make_clean.exp
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "AnalogDevices Products .*BF533-EZKIT, BF533-STAMP, BF537-STAMP.*\\\[.*]" {
+            send "$board_type\r"
+        }
+
+        -re "Customize Kernel Settings.*CONFIG_DEFAULTS_KERNEL.*\\\[././.]" {
+            send "y\r"
+        }
+
+        -re "Customize Vendor/User Settings.*CONFIG_DEFAULTS_VENDOR.*\\\[././.]" {
+            send "y\r"
+        }
+
+        -re "CPU.*BF531.*BF532.*BF533.*BF534.*BF536.*BF537.*BF561.*choice.*\\\[.*]" {
+            if { $cpu == "BF522" } {
+                send "1\r"
+            } elseif { $cpu == "BF525" } {
+                send "2\r"
+            } elseif { $cpu == "BF527" } {
+                send "3\r"
+            } elseif { $cpu == "BF531" } {
+                send "4\r"
+            } elseif { $cpu == "BF532" } {
+                send "5\r"
+            } elseif { $cpu == "BF533" } {
+                send "6\r"
+            } elseif { $cpu == "BF534" } {
+                send "7\r"
+            } elseif { $cpu == "BF536" } {
+                send "8\r"
+            } elseif { $cpu == "BF537" } {
+                send "9\r"
+            } elseif { $cpu == "BF542" } {
+                send "10\r"
+            } elseif { $cpu == "BF544" } {
+                send "11\r"
+            } elseif { $cpu == "BF547" } {
+                send "12\r"
+            } elseif { $cpu == "BF548" } {
+                send "13\r"
+            } elseif { $cpu == "BF549" } {
+                send "14\r"
+            } elseif { $cpu == "BF561" } {
+                send "15\r"
+            } elseif { $cpu == "BF5xx" } {
+                send "\r"
+            }
+        }
+
+        -re "Silicon Rev.*BF_REV.*BF_REV.*choice.*\\\[.*]" {
+            if { $cpu == "BF533" || $cpu == "BF561" } {
+                if { $revision == "0.3" } {
+                    send "1\r"
+                } elseif { $revision == "0.4" } {
+                    send "2\r"
+                } elseif { $revision == "0.5" } {
+                    send "3\r"
+                } elseif { $revision == "0.0" } {
+                    send "\r"
+                }
+            } else {
+                if { $revision == "0.2" } {
+                    send "1\r"
+                } elseif { $revision == "0.3" } {
+                    send "2\r"
+                } elseif { $revision == "0.4" } {
+                    send "3\r"
+                } elseif { $revision == "0.5" } {
+                    send "4\r"
+                } elseif { $revision == "0.0" } {
+                    send "\r"
+                }
+            }
+        }
+
+        -re "Choose SLAB allocator.*SLAB.*SLUB.*SLOB.*choice.*\\\[.*]" {
+            if { $allocator == "slab\(p2\)" } {
+                send "1\r"
+            } elseif { $allocator == "slab\(np2\)" } {
+                send "1\r"
+            } elseif { $allocator == "slob\(p2\)" } {
+                send "3\r"
+            } elseif { $allocator == "slob\(np2\)" } {
+                send "3\r"
+            } elseif { $allocator == "slub\(p2\)" } {
+                send "2\r"
+            } elseif { $allocator == "slub\(np2\)" } {
+                send "2\r"
+            }
+        }
+
+        -re "Allow non-power of 2 allocations.*NP2.*\\\[.*]" {
+            if { $allocator == "slab\(p2\)" } {
+                send "N\r"
+            } elseif { $allocator == "slab\(np2\)" } {
+                send "Y\r"
+            } elseif { $allocator == "slob\(p2\)" } {
+                send "N\r"
+            } elseif { $allocator == "slob\(np2\)" } {
+                send "Y\r"
+            }
+        }
+
+        -re "Kernel support for FDPIC ELF binaries.*BINFMT_ELF_FDPIC.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send  "Y\r"
+            } elseif { $binary_format == "flat" } {
+                send  "\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "\r"
+            }
+        }
+
+        -re "Kernel support for flat binaries.*BINFMT_FLAT.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send "\r"
+            } elseif { $binary_format == "flat" } {
+                send "Y\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "\r"
+            }
+        }
+
+        -re "Enable shared FLAT support.*BINFMT_SHARED_FLAT.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send "\r"
+            } elseif { $binary_format == "flat" } {
+                send  "\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "Y\r"
+            }
+        }
+
+        -re "Binary format.*FLAT.*Sep-Data.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            if { $binary_format == "flat" } {
+                send  "FLAT\r"
+            } elseif { $binary_format == "elf" } {
+                send  "FDPIC\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "Shared-FLAT\r"
+            }
+        }
+
+        -re "Install ELF shared libraries.*CONFIG_INSTALL_ELF_SHARED_LIBS.*\\\[.*]" {
+            send  "\r"
+        }
+
+        -re "Install FLAT shared libraries.*CONFIG_INSTALL_FLAT_SHARED_LIBS.*\\\[.*]" {
+            send  "\r"
+        }
+
+#        -re "build with stack overflow checking.*CONFIG_BLACKFIN_CHECK_STACKFLOW.*\\\[.*]" {
+#            send -s "Y\r"
+#        }
+
+#        -re "Trace user apps.*turn off hwtrace in kernel.*DEBUG_BFIN_NO_KERN_HWTRACE.*\\\[.*]" {
+#            send  "y\r"
+#        }
+
+        -re "Enable ICACHE.*BFIN_ICACHE.*\\\[.*]" {
+            if { $icache == "on" } {
+                send "Y\r"
+            } elseif { $icache == "off" } {
+                send "N\r"
+            }
+        }
+
+        -re "Enable DCACHE.*BFIN_DCACHE.*\\\[.*]" {
+            if { $dcache == "on" } {
+                send "Y\r"
+            } elseif { $dcache == "off" } {
+                send "N\r"
+            }
+        }
+
+        -re "Policy.*Write back.*BFIN_WB.*Write through.*BFIN_WT.*choice.*\\\[.*]" {
+            if { $policy == "write_through" } {
+                send "2\r"
+            } elseif { $policy == "write_back" } {
+                send "1\r"
+            }
+        }
+
+        -re "Blackfin serial port support.*SERIAL_BFIN.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "UART Mode.*DMA mode.*SERIAL_BFIN_DMA.*PIO mode.*SERIAL_BFIN_PIO.*choice\\\[.*]" {
+            if { $uart_mode == "dma" } {
+                send "1\r"
+            } elseif { $uart_mode == "pio" } {
+                send "2\r"
+            }
+        }
+
+        -re "Early printk.*EARLY_PRINTK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01 
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

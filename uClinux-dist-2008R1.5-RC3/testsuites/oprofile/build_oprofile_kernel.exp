@@ -1,0 +1,114 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Oprofile test
+#
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+step "Change config file in /vender folder."
+
+cd $uclinux_path
+sleep 3
+ set timeout 2
+      spawn ex vendors/AnalogDevices/$board_type/Makefile
+      expect {
+         "Entering Ex mode*Normal mode." { }
+
+         "already exists!" {
+            send "e\r"
+            sleep 1
+         }
+      }
+      sleep 1
+      send "/BLOCKS\r"
+      expect "BLOCKS*="
+      send "d\r"
+      expect ":"
+      send "i\r"
+      if { $board_type == "BF548-EZKIT" } {
+      send "BLOCKS = 18864\r"
+      } else {
+      send "BLOCKS = 12288\r"
+      }
+      send ".\r"
+      expect ":"
+      send "wq\r"
+      expect eof
+
+
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+source  make_default_config.exp
+# Following make specific configuration for this case.
+
+set timeout 300
+spawn make config
+
+while 1 {
+   expect {
+
+      -re "AnalogDevices Products .*BF533-EZKIT, BF533-STAMP, BF537-STAMP, BF561-EZKIT.*\\\[.*]" {
+         send "$board_type\r"
+      }
+
+      -re "Customize Kernel Settings.*CONFIG_DEFAULTS_KERNEL.*\\\[././.]" {
+         send "y\r"
+      }
+
+      -re "Customize Vendor/User Settings.*CONFIG_DEFAULTS_VENDOR.*\\\[././.]" {
+         send "y\r"
+      }
+
+      -re "Profiling support \\\(EXPERIMENTAL\\\) \\\(PROFILING\\\) \\\[././.]" {
+         send "y\r"
+      }
+
+      -re "OProfile system profiling \\\(EXPERIMENTAL\\\) \\\(OPROFILE\\\) \\\[./././.]" {
+         send "y\r"
+      }
+
+      -re "oprofile \\\(CONFIG_USER_OPROFILE\\\) \\\[././.]" {
+         send "y\r"
+      }
+
+      "\\\(*) \\\[*]" {
+       sleep .01
+         send "\r"
+      }
+
+      -re "\[cC]hoice\\\[.*]:" {
+         send "\r"
+      }
+
+      eof {
+         puts "End of configuration"
+         break
+      }
+      timeout {
+         puts "\n\nFATAL ERROR: config prompt timeout in make config"
+      }
+   }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+  
+
+send_user "Ending $argv0\n"
+
+log_file
