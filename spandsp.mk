@@ -11,11 +11,10 @@
 
 include rules.mk
 
-SPANDSP_SITE=http://www.soft-switch.org/downloads/spandsp
+SPANDSP_SITE=http://www.soft-switch.org/downloads/spandsp/old
 SPANDSP_VERSION=0.0.4
 SPANDSP_SOURCE=spandsp-0.0.4pre16.tgz
 TIFF_VERSION=3.8.2
-SPANDSP_UNZIP=zcat
 SPANDSP_DIR=$(BUILD_DIR)/spandsp-$(SPANDSP_VERSION)
 SPANDSP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --enable-fixed-point
 
@@ -42,8 +41,6 @@ $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
 	cp -v -f $(BUILD_DIR)/patch/config.sub-spandsp-$(SPANDSP_VERSION) $(SPANDSP_DIR)/config/config.sub
 	cp -v -f $(BUILD_DIR)/patch/configure-spandsp-$(SPANDSP_VERSION) $(SPANDSP_DIR)/configure
 	chmod a+x $(SPANDSP_DIR)/configure
-	LDFLAGS=$(TIFF_LDFLAGS); export LDFLAGS
-	CFLAGS=$(TIFF_CFLAGS); export CFLAGS
 	cd $(SPANDSP_DIR); LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) ./configure $(SPANDSP_CONFIGURE_OPTS)
 	touch $(SPANDSP_DIR)/.configured
 
@@ -53,18 +50,20 @@ $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
 
 
 spandsp: $(SPANDSP_DIR)/.configured
-	make -C $(SPANDSP_DIR)/ STAGEDIR=$(STAGING_DIR)
+	make LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) STAGEDIR=$(STAGING_DIR) -C $(SPANDSP_DIR)/
 	#copy header files to staging directory
 	mkdir -p $(STAGING_DIR)/usr/include/spandsp
 	cp -f $(SPANDSP_DIR)/src/spandsp/* $(STAGING_DIR)/usr/include/spandsp
 	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp* $(STAGING_DIR)/usr/lib/
 	#copy to the package location
 	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp.so.0 $(TARGET_DIR)/lib
+	cd $(TARGET_DIR)/lib; ln -sf libspandsp.so.0 libspandsp.so
+	$(TARGET_STRIP) $(TARGET_DIR)/lib/libspandsp.so.0
 	touch $(PKG_BUILD_DIR)/.built
 
 all: spandsp
 
-dirclean:
+spandsp-dirclean:
 	rm -rf $(SPANDSP_DIR)
 
 define Package/$(PKG_NAME)
