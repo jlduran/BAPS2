@@ -1,3 +1,0 @@
-more /etc/asterisk/networking.conf | tr ";" "#" | tr "[" "#" | tr -d ' ' > /tmp/network.conf.parsed
-. /tmp/network.conf.parsed
-rm -f /tmp/network.conf.parsed

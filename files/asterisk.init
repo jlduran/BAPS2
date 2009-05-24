@@ -6,9 +6,12 @@
 # starts Asterisk and the time will be messed up.
 
 case $1 in
-	start) export TZ=`cat /etc/TZ`;
-               asterisk -f >/dev/null 2>/dev/null & ;;
+	start)  export TZ=`cat /etc/TZ`; 
+		asterisk -f >/dev/null 2>/dev/null & ;;
 	stop) killall -9 asterisk;;
+	restart) killall -9 asterisk;
+		 export TZ=`cat /etc/TZ`;
+		 asterisk -f >/dev/null 2>/dev/null & ;;
 	enable) rm -f /etc/rc.d/S50asterisk; 
 	        ln -s /etc/init.d/asterisk /etc/rc.d/S50asterisk;;
 	disable) rm -f /etc/rc.d/S50asterisk;;
@@ -18,9 +21,8 @@ Syntax: /etc/init.d/asterisk [command]
 Available commands:
         start   Start the service
         stop    Stop the service
+        restart Restart the service
         enable  Enable service autostart
         disable Disable service autostart
 EOF
 esac
-
-        

@@ -1,5 +1,6 @@
 .DS_Store
 .svn/
+asterisk-1.4.21.2/*
 dl/*
 ipkg/*
 libxml2-2.7.3/*

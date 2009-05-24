@@ -1,5 +1,466 @@
---- asterisk-1.4.4-orig/utils/Makefile	2007-03-23 01:10:53.000000000 +1030
-+++ asterisk-1.4.4/utils/Makefile	2008-03-22 10:21:27.000000000 +1030
+diff -Naur asterisk/channels/chan_zap.c asterisk/channels/chan_zap.c
+--- asterisk/channels/chan_zap.c	2008-03-10 16:27:08.000000000 -0400
++++ asterisk/channels/chan_zap.c	2008-03-19 16:03:49.000000000 -0400
+@@ -115,6 +115,7 @@
+ 	.impl = ""
+ };
+ static struct ast_jb_conf global_jbconf;
++extern unsigned int cycles(void);
+ 
+ #if !defined(ZT_SIG_EM_E1) || (defined(HAVE_PRI) && !defined(ZT_SIG_HARDHDLC))
+ #error "Your zaptel is too old.  Please update"
+@@ -574,6 +575,9 @@
+ #endif	
+ 	int polarity;
+ 	int dsp_features;
++	int dsp_cycles_last;            /* DR: stats for DSP execution */
++        int dsp_cycles_worst;
++        int dsp_cycles_average;
+ 	char begindigit;
+ } *iflist = NULL, *ifend = NULL;
+ 
+@@ -4640,6 +4644,7 @@
+ 	int index;
+ 	void *readbuf;
+ 	struct ast_frame *f;
++	int before;
+ 	
+ 
+ 	ast_mutex_lock(&p->lock);
+@@ -4886,7 +4891,18 @@
+ 	}
+ 	if (p->dsp && (!p->ignoredtmf || p->callwaitcas || p->busydetect  || p->callprogress) && !index) {
+ 		/* Perform busy detection. etc on the zap line */
++		/* DR: measure some execution stats around this as it is a
++                computationally intensive part of the real time code */
++                before = cycles();
+ 		f = ast_dsp_process(ast, p->dsp, &p->subs[index].f);
++		p->dsp_cycles_last = cycles() - before;
++                if (p->dsp_cycles_last > p->dsp_cycles_worst) {
++                       p->dsp_cycles_worst = p->dsp_cycles_last;
++                }
++                p->dsp_cycles_average = (int)(0.1*(float)p->dsp_cycles_last + 
++                                             0.9*(float)p->dsp_cycles_average);
++
++               //f = 0;
+ 		if (f) {
+ 			if ((f->frametype == AST_FRAME_CONTROL) && (f->subclass == AST_CONTROL_BUSY)) {
+ 				if ((ast->_state == AST_STATE_UP) && !p->outgoing) {
+@@ -8660,6 +8676,9 @@
+ 								pri->pvts[x]->owner->_softhangup |= AST_SOFTHANGUP_DEV;
+ 							ast_mutex_unlock(&pri->pvts[x]->lock);
+ 						}
++						pri->pvts[x]->dsp_cycles_last = 0;
++                                                pri->pvts[x]->dsp_cycles_worst = 0;
++                                                pri->pvts[x]->dsp_cycles_average = 0;
+ 				}
+ 				break;
+ 			case PRI_EVENT_KEYPAD_DIGIT:
+@@ -9903,6 +9922,7 @@
+ 	return 0;
+ }
+ 
++extern int dsp_sample;
+ static int zap_show_channels(int fd, int argc, char **argv)
+ {
+ #define FORMAT "%7s %-10.10s %-15.15s %-10.10s %-20.20s\n"
+@@ -10043,6 +10063,8 @@
+ 			ast_cli(fd, "Fax Handled: %s\n", tmp->faxhandled ? "yes" : "no");
+ 			ast_cli(fd, "Pulse phone: %s\n", tmp->pulsedial ? "yes" : "no");
+ 			ast_cli(fd, "Echo Cancellation: %d taps%s, currently %s\n", tmp->echocancel, tmp->echocanbridged ? "" : " unless TDM bridged", tmp->echocanon ? "ON" : "OFF");
++			ast_cli(fd, "DSP cycles last: %d worst: %d average: %d sample: %d\n", 
++                               tmp->dsp_cycles_last, tmp->dsp_cycles_worst, tmp->dsp_cycles_average, dsp_sample);
+ 			if (tmp->master)
+ 				ast_cli(fd, "Master Channel: %d\n", tmp->master->channel);
+ 			for (x = 0; x < MAX_SLAVES; x++) {
+diff -Naur asterisk/configure asterisk/configure
+--- asterisk/configure	2008-03-11 10:33:45.000000000 -0400
++++ asterisk/configure	2008-03-19 16:04:51.000000000 -0400
+@@ -11895,7 +11895,7 @@
+ fi
+ if test "x$ac_cv_func_fork_works" = xcross; then
+   case $host in
+-    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* )
++    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
+       # Override, as these systems have only a dummy fork() stub
+       ac_cv_func_fork_works=no
+       ;;
+diff -Naur asterisk/main/config.c asterisk/main/config.c
+--- asterisk/main/config.c	2008-02-25 15:49:42.000000000 -0500
++++ asterisk/main/config.c	2008-03-19 16:05:27.000000000 -0400
+@@ -37,7 +37,6 @@
+ #include <errno.h>
+ #include <time.h>
+ #include <sys/stat.h>
+-#define AST_INCLUDE_GLOB 1
+ #ifdef AST_INCLUDE_GLOB
+ #if defined(__Darwin__) || defined(__CYGWIN__)
+ #define GLOB_ABORTED GLOB_ABEND
+diff -Naur asterisk/main/dsp.c asterisk/main/dsp.c
+--- asterisk/main/dsp.c	2007-12-07 18:29:01.000000000 -0500
++++ asterisk/main/dsp.c	2008-03-19 16:28:13.000000000 -0400
+@@ -60,6 +60,28 @@
+ #include "asterisk/alaw.h"
+ #include "asterisk/utils.h"
+ 
++unsigned int cycles(void);
++
++#ifdef __BLACKFIN__
++unsigned int cycles() {
++  int ret;
++
++   __asm__ __volatile__
++   (
++   "%0 = CYCLES;\n\t"
++   : "=&d" (ret)
++   :
++   : "R1"
++   );
++
++   return ret;
++}
++#else
++unsigned int cycles() {}
++#endif
++int dsp_sample;
++
++
+ /*! Number of goertzels for progress detect */
+ enum gsamp_size {
+ 	GSAMP_SIZE_NA = 183,			/*!< North America - 350, 440, 480, 620, 950, 1400, 1800 Hz */
+@@ -132,7 +154,7 @@
+ /*! All THRESH_XXX values are in GSAMP_SIZE chunks (us = 22ms) */
+ enum gsamp_thresh {
+ 	THRESH_RING = 8,        	/*!< Need at least 150ms ring to accept */
+-	THRESH_TALK = 2,        	/*!< Talk detection does not work continuously */
++	THRESH_TALK = 4,        	/*!< Talk detection does not work continuously */
+ 	THRESH_BUSY = 4,        	/*!< Need at least 80ms to accept */
+ 	THRESH_CONGESTION = 4,  	/*!< Need at least 80ms to accept */
+ 	THRESH_HANGUP = 60,     	/*!< Need at least 1300ms to accept hangup */
+@@ -194,6 +216,9 @@
+ 	float v2;
+ 	float v3;
+ 	float fac;
++	int16_t v2_fix;
++        int16_t v3_fix;
++        int16_t fac_fix;
+ #ifndef OLD_DSP_ROUTINES
+ 	int samples;
+ #endif	
+@@ -293,14 +318,28 @@
+ static char bell_mf_positions[] = "1247C-358A--69*---0B----#";
+ #endif
+ 
++#define AMP_SCALE 8
++#define FAC_SCALE 14
++
++extern int dsp_sample;
++
+ static inline void goertzel_sample(goertzel_state_t *s, short sample)
+ {
++#ifdef __FIXED_PT__
++        int16_t v1_fix;
++        int     mpy;
++        v1_fix = s->v2_fix;
++        s->v2_fix = s->v3_fix;
++        mpy = (int16_t)( ((int)s->fac_fix * (int)s->v2_fix) >> FAC_SCALE );
++        s->v3_fix = mpy - v1_fix + (sample>>AMP_SCALE);
++#else
+ 	float v1;
+-	float fsamp  = sample;
+-	
+-	v1 = s->v2;
+-	s->v2 = s->v3;
+-	s->v3 = s->fac * s->v2 - v1 + fsamp;
++	float fsamp = sample;
++
++        v1 = s->v2;
++        s->v2 = s->v3;
++        s->v3 = s->fac * s->v2 - v1 + fsamp;
++#endif
+ }
+ 
+ static inline void goertzel_update(goertzel_state_t *s, short *samps, int count)
+@@ -314,13 +353,19 @@
+ 
+ static inline float goertzel_result(goertzel_state_t *s)
+ {
+-	return s->v3 * s->v3 + s->v2 * s->v2 - s->v2 * s->v3 * s->fac;
++#ifdef __FIXED_PT__
++    s->v2 = (float)s->v2_fix * (1<<AMP_SCALE);
++    s->v3 = (float)s->v3_fix * (1<<AMP_SCALE);
++#endif
++    return s->v3 * s->v3 + s->v2 * s->v2 - s->v2 * s->v3 * s->fac;
+ }
+ 
+ static inline void goertzel_init(goertzel_state_t *s, float freq, int samples)
+ {
+ 	s->v2 = s->v3 = 0.0;
++	s->v2_fix = s->v3_fix = 0;
+ 	s->fac = 2.0 * cos(2.0 * M_PI * (freq / 8000.0));
++	s->fac_fix = (int16_t)(s->fac*(1<<FAC_SCALE) + 0.5);
+ #ifndef OLD_DSP_ROUTINES
+ 	s->samples = samples;
+ #endif
+@@ -329,6 +374,7 @@
+ static inline void goertzel_reset(goertzel_state_t *s)
+ {
+ 	s->v2 = s->v3 = 0.0;
++	s->v2_fix = s->v3_fix = 0;
+ }
+ 
+ struct ast_dsp {
+@@ -424,7 +470,9 @@
+ 	s->mhit = 0;
+ }
+ 
+-static int dtmf_detect (dtmf_detect_state_t *s, int16_t amp[], int samples, 
++static int dtmf_detect (dtmf_detect_state_t *s,
++                 int16_t amp[],
++                 int samples,
+ 		 int digitmode, int *writeback, int faxdetect)
+ {
+ 	float row_energy[4];
+@@ -435,64 +483,88 @@
+ 	float fax_energy_2nd;
+ #endif	
+ #endif /* FAX_DETECT */
+-	float famp;
+-	float v1;
+-	int i;
+-	int j;
+-	int sample;
+-	int best_row;
+-	int best_col;
+-	int hit;
+-	int limit;
+-
+-	hit = 0;
+-	for (sample = 0;  sample < samples;  sample = limit) {
+-		/* 102 is optimised to meet the DTMF specs. */
+-		if ((samples - sample) >= (102 - s->current_sample))
+-			limit = sample + (102 - s->current_sample);
+-		else
+-			limit = samples;
++    	int i;
++    	int j;
++    	int sample;
++    	int best_row;
++    	int best_col;
++    	int hit;
++    	int limit,before;
++
++    	before = cycles();
++    	hit = 0;
++    	//printf("dtmf_detect\n");
++    	for (sample = 0;  sample < samples;  sample = limit)
++    	{
++        	/* 102 is optimised to meet the DTMF specs. */
++        	if ((samples - sample) >= (102 - s->current_sample))
++            		limit = sample + (102 - s->current_sample);
++        	else
++            		limit = samples;
+ #if defined(USE_3DNOW)
+-		_dtmf_goertzel_update (s->row_out, amp + sample, limit - sample);
+-		_dtmf_goertzel_update (s->col_out, amp + sample, limit - sample);
++			_dtmf_goertzel_update (s->row_out, amp + sample, limit - sample);
++        		_dtmf_goertzel_update (s->col_out, amp + sample, limit - sample);
++#elif defined(__FIXED_PT__)
++       for(j=0; j<4; j++) {
++         goertzel_update(&s->row_out[j], amp + sample, limit - sample);
++         goertzel_update(&s->col_out[j], amp + sample, limit - sample);
++       }
++       {
++           int acc;
++
++           acc = 0;
++           for (j = sample;  j < limit;  j++) {
++               acc += (amp[j] >> AMP_SCALE)*(amp[j] >> AMP_SCALE);
++           }
++           s->energy += (float)acc * ((float)(1<<AMP_SCALE)) * ((float)(1<<AMP_SCALE));
++       }
+ #ifdef OLD_DSP_ROUTINES
+-		_dtmf_goertzel_update (s->row_out2nd, amp + sample, limit2 - sample);
+-		_dtmf_goertzel_update (s->col_out2nd, amp + sample, limit2 - sample);
++	_dtmf_goertzel_update (s->row_out2nd, amp + sample, limit2 - sample);
++        _dtmf_goertzel_update (s->col_out2nd, amp + sample, limit2 - sample);
+ #endif		
+ 		/* XXX Need to fax detect for 3dnow too XXX */
+-		#warning "Fax Support Broken"
+ #else
+-		/* The following unrolled loop takes only 35% (rough estimate) of the 
+-		   time of a rolled loop on the machine on which it was developed */
+-		for (j=sample;j<limit;j++) {
+-			famp = amp[j];
+-			s->energy += famp*famp;
+-			/* With GCC 2.95, the following unrolled code seems to take about 35%
+-			   (rough estimate) as long as a neat little 0-3 loop */
+-			v1 = s->row_out[0].v2;
+-			s->row_out[0].v2 = s->row_out[0].v3;
+-			s->row_out[0].v3 = s->row_out[0].fac*s->row_out[0].v2 - v1 + famp;
+-			v1 = s->col_out[0].v2;
+-			s->col_out[0].v2 = s->col_out[0].v3;
+-			s->col_out[0].v3 = s->col_out[0].fac*s->col_out[0].v2 - v1 + famp;
+-			v1 = s->row_out[1].v2;
+-			s->row_out[1].v2 = s->row_out[1].v3;
+-			s->row_out[1].v3 = s->row_out[1].fac*s->row_out[1].v2 - v1 + famp;
+-			v1 = s->col_out[1].v2;
+-			s->col_out[1].v2 = s->col_out[1].v3;
+-			s->col_out[1].v3 = s->col_out[1].fac*s->col_out[1].v2 - v1 + famp;
+-			v1 = s->row_out[2].v2;
+-			s->row_out[2].v2 = s->row_out[2].v3;
+-			s->row_out[2].v3 = s->row_out[2].fac*s->row_out[2].v2 - v1 + famp;
+-			v1 = s->col_out[2].v2;
+-			s->col_out[2].v2 = s->col_out[2].v3;
+-			s->col_out[2].v3 = s->col_out[2].fac*s->col_out[2].v2 - v1 + famp;
+-			v1 = s->row_out[3].v2;
+-			s->row_out[3].v2 = s->row_out[3].v3;
+-			s->row_out[3].v3 = s->row_out[3].fac*s->row_out[3].v2 - v1 + famp;
+-			v1 = s->col_out[3].v2;
+-			s->col_out[3].v2 = s->col_out[3].v3;
+-			s->col_out[3].v3 = s->col_out[3].fac*s->col_out[3].v2 - v1 + famp;
++	/* The following unrolled loop takes only 35% (rough estimate) of the 
++           time of a rolled loop on the machine on which it was developed */
++        for (j = sample;  j < limit;  j++)
++        {
++            famp = amp[j];
++           
++           s->energy += famp*famp;
++           
++            /* With GCC 2.95, the following unrolled code seems to take about 35%
++               (rough estimate) as long as a neat little 0-3 loop */
++            v1 = s->row_out[0].v2;
++            s->row_out[0].v2 = s->row_out[0].v3;
++            s->row_out[0].v3 = s->row_out[0].fac*s->row_out[0].v2 - v1 + famp;
++    
++            v1 = s->col_out[0].v2;
++            s->col_out[0].v2 = s->col_out[0].v3;
++            s->col_out[0].v3 = s->col_out[0].fac*s->col_out[0].v2 - v1 + famp;
++    
++            v1 = s->row_out[1].v2;
++            s->row_out[1].v2 = s->row_out[1].v3;
++            s->row_out[1].v3 = s->row_out[1].fac*s->row_out[1].v2 - v1 + famp;
++    
++            v1 = s->col_out[1].v2;
++            s->col_out[1].v2 = s->col_out[1].v3;
++            s->col_out[1].v3 = s->col_out[1].fac*s->col_out[1].v2 - v1 + famp;
++    
++            v1 = s->row_out[2].v2;
++            s->row_out[2].v2 = s->row_out[2].v3;
++            s->row_out[2].v3 = s->row_out[2].fac*s->row_out[2].v2 - v1 + famp;
++    
++            v1 = s->col_out[2].v2;
++            s->col_out[2].v2 = s->col_out[2].v3;
++            s->col_out[2].v3 = s->col_out[2].fac*s->col_out[2].v2 - v1 + famp;
++    
++            v1 = s->row_out[3].v2;
++            s->row_out[3].v2 = s->row_out[3].v3;
++            s->row_out[3].v3 = s->row_out[3].fac*s->row_out[3].v2 - v1 + famp;
++
++            v1 = s->col_out[3].v2;
++            s->col_out[3].v2 = s->col_out[3].v3;
++            s->col_out[3].v3 = s->col_out[3].fac*s->col_out[3].v2 - v1 + famp;
+ #ifdef FAX_DETECT
+ 			/* Update fax tone */
+ 			v1 = s->fax_tone.v2;
+@@ -1031,7 +1103,7 @@
+ 	/* Amplify ignored stuff */
+ 	i2 *= TONE_THRESH;
+ 	i1 *= TONE_THRESH;
+-	e *= TONE_THRESH;
++	e *= TONE_THRESH/2;
+ 	/* Check first tone */
+ 	if ((p1 < i1) || (p1 < i2) || (p1 < e))
+ 		return 0;
+@@ -1080,9 +1152,18 @@
+ 		if (pass > dsp->gsamp_size - dsp->gsamps) 
+ 			pass = dsp->gsamp_size - dsp->gsamps;
+ 		for (x=0;x<pass;x++) {
+-			for (y=0;y<dsp->freqcount;y++) 
++			int acc = 0;
++                        for (y=0;y<dsp->freqcount;y++){
+ 				goertzel_sample(&dsp->freqs[y], s[x]);
++#ifdef __FIXED_PT__
++                               acc += (s[x] >> AMP_SCALE)* (s[x] >> AMP_SCALE);
++                       }
++                               dsp->genergy += (float)acc * ((float)(1<<AMP_SCALE)) * ((float)(1<<AMP_SCALE));
++#else
++          }
++
+ 			dsp->genergy += s[x] * s[x];
++#endif
+ 		}
+ 		s += pass;
+ 		dsp->gsamps += pass;
+@@ -1192,7 +1273,11 @@
+ 			
+ 			/* Reset goertzel */						
+ 			for (x=0;x<7;x++)
+-				dsp->freqs[x].v2 = dsp->freqs[x].v3 = 0.0;
++#ifdef __FIXED_PT__
++                               goertzel_reset( &(dsp->freqs[x]) );
++#else
++                               dsp->freqs[x].v2 = dsp->freqs[x].v3 = 0.0;
++#endif
+ 			dsp->gsamps = 0;
+ 			dsp->genergy = 0.0;
+ 		}
+@@ -1481,6 +1566,8 @@
+ 		ast_log(LOG_WARNING, "Inband DTMF is not supported on codec %s. Use RFC2833\n", ast_getformatname(af->subclass));
+ 		return af;
+ 	}
++#define TMP_DR
++#ifdef TMP_DR
+ 	silence = __ast_dsp_silence(dsp, shortdata, len, NULL);
+ 	if ((dsp->features & DSP_FEATURE_SILENCE_SUPPRESS) && silence) {
+ 		memset(&dsp->f, 0, sizeof(dsp->f));
+@@ -1614,6 +1701,7 @@
+ 			}
+ 		}
+ 	}
++#endif
+ 	FIX_INF(af);
+ 	return af;
+ }
+diff -Naur asterisk/main/loader.c asterisk/main/loader.c
+--- asterisk/main/loader.c	2008-02-27 12:07:33.000000000 -0500
++++ asterisk/main/loader.c	2008-03-19 16:29:11.000000000 -0400
+@@ -556,6 +556,11 @@
+ 		ast_verbose("The previous reload command didn't finish yet\n");
+ 		return -1;	/* reload already in progress */
+ 	}
++	if (ast_lastreloadtime && time(NULL) - ast_lastreloadtime < 5) {
++                        ast_verbose("The previous reload was less than 5 seconds ago.\n");
++                        ast_mutex_unlock(&reloadlock);
++                        return -1;
++       }
+ 	ast_lastreloadtime = time(NULL);
+ 
+ 	/* Call "predefined" reload here first */
+diff -Naur asterisk/main/manager.c asterisk/main/manager.c
+--- asterisk/main/manager.c	2008-03-07 01:36:33.000000000 -0500
++++ asterisk/main/manager.c	2008-03-19 16:30:33.000000000 -0400
+@@ -1125,7 +1125,7 @@
+ 		astman_send_error(s, m, "Filename not specified");
+ 		return 0;
+ 	}
+-	if (!(cfg = ast_config_load_with_comments(fn))) {
++	if (!(cfg = ast_config_load(fn))) {
+ 		astman_send_error(s, m, "Config file not found");
+ 		return 0;
+ 	}
+@@ -1235,7 +1235,7 @@
+ 		astman_send_error(s, m, "Filename not specified");
+ 		return 0;
+ 	}
+-	if (!(cfg = ast_config_load_with_comments(sfn))) {
++	if (!(cfg = ast_config_load(sfn))) {
+ 		astman_send_error(s, m, "Config file not found");
+ 		return 0;
+ 	}
+diff -Naur asterisk/utils/Makefile asterisk/utils/Makefile
+--- asterisk/utils/Makefile	2008-03-11 07:04:29.000000000 -0400
++++ asterisk/utils/Makefile	2008-03-19 16:31:39.000000000 -0400
 @@ -16,7 +16,7 @@
  .PHONY: clean all uninstall
  
@@ -9,247 +470,24 @@
  UTILS:=$(ALL_UTILS)
  
  include $(ASTTOPDIR)/Makefile.rules
---- asterisk-1.4.4-orig/main/config.c	2007-04-26 10:57:18.000000000 +0930
-+++ asterisk-1.4.4/main/config.c	2008-03-22 10:21:27.000000000 +1030
-@@ -37,7 +37,6 @@
- #include <errno.h>
- #include <time.h>
- #include <sys/stat.h>
--#define AST_INCLUDE_GLOB 1
- #ifdef AST_INCLUDE_GLOB
- #if defined(__Darwin__) || defined(__CYGWIN__)
- #define GLOB_ABORTED GLOB_ABEND
---- asterisk-1.4.4-orig/configure	2007-04-07 06:28:43.000000000 +0930
-+++ asterisk-1.4.4/configure	2008-03-22 10:21:27.000000000 +1030
-@@ -12577,7 +12577,7 @@
- fi
- if test "x$ac_cv_func_fork_works" = xcross; then
-   case $host in
--    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* )
-+    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
-       # Override, as these systems have only a dummy fork() stub
-       ac_cv_func_fork_works=no
-       ;;
---- asterisk-1.4.4-orig/main/frame.c	2007-01-20 04:19:38.000000000 +1030
-+++ asterisk-1.4.4/main/frame.c	2008-03-22 10:21:27.000000000 +1030
-@@ -113,7 +113,7 @@
- 	{ 1, AST_FORMAT_SLINEAR, "slin", "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE },	/*!< 7 */
- 	{ 1, AST_FORMAT_LPC10, "lpc10", "LPC10", 7, 20, 20, 20, 20 },		/*!<  8: codec_lpc10.c */ 
- 	{ 1, AST_FORMAT_G729A, "g729", "G.729A", 10, 10, 230, 10, 20, AST_SMOOTHER_FLAG_G729 },	/*!<  9: Binary commercial distribution */
--	{ 1, AST_FORMAT_SPEEX, "speex", "SpeeX", 10, 10, 60, 10, 20 },		/*!< 10: codec_speex.c */
-+	{ 1, AST_FORMAT_SPEEX, "speex", "SpeeX", 38, 20, 300, 20, 20 },		/*!< 10: codec_speex.c */
- 	{ 1, AST_FORMAT_ILBC, "ilbc", "iLBC", 50, 30, 30, 30, 30 },		/*!< 11: codec_ilbc.c */ /* inc=30ms - workaround */
- 	{ 1, AST_FORMAT_G726_AAL2, "g726aal2", "G.726 AAL2", 40, 10, 300, 10, 20 },	/*!<  12: codec_g726.c */
- 	{ 1, AST_FORMAT_G722, "g722", "G722"},					/*!< 13 */
-@@ -1467,7 +1467,11 @@
- 	int samples=0;
- 	switch(f->subclass) {
- 	case AST_FORMAT_SPEEX:
--		samples = speex_samples(f->data, f->datalen);
-+		//samples = speex_samples(f->data, f->datalen);
-+		/* DR: hard coded for quality=8 mode.  
-+		   300 bits (38 bytes) converted to 160 samples */
-+		samples = 160 * (f->datalen / 38);
-+		//ast_log(LOG_WARNING, "f->datalen: %d  samples: %d\n", f->datalen, samples);
- 		break;
- 	case AST_FORMAT_G723_1:
-                 samples = g723_samples(f->data, f->datalen);
---- asterisk-1.4.4-orig/configs/modules.conf.sample	2006-08-25 23:44:27.000000000 +0930
-+++ asterisk-1.4.4//configs/modules.conf.sample	2008-03-22 10:21:27.000000000 +1030
-@@ -36,3 +36,5 @@
- ;
- noload => chan_alsa.so
- ;noload => chan_oss.so
+--- asterisk/codecs/Makefile	2008-11-02 08:15:08.000000000 -0500
++++ asterisk/codecs/Makefile	2008-11-02 08:16:09.000000000 -0500
+@@ -45,6 +45,8 @@
+ 	$(MAKE) -C gsm clean
+ 	$(MAKE) -C lpc10 clean
+ 	$(MAKE) -C ilbc clean
++	$(MAKE) -C g722 clean
 +
-+noload => codec_g729.so
---- asterisk-1.4.4-orig/main/callerid.c	2007-01-24 05:28:27.000000000 +1030
-+++ asterisk-1.4.4/main/callerid.c	2008-03-22 10:21:27.000000000 +1030
-@@ -45,7 +45,32 @@
- #include "asterisk/options.h"
- #include "asterisk/utils.h"
  
-+#ifdef USE_SPANDSP_CALLERID
-+#include <inttypes.h>
-+#include <assert.h>
-+#include "spandsp/telephony.h"
-+#include "spandsp/logging.h"
-+#include "spandsp/complex.h"
-+#include "spandsp/dds.h"
-+#include "spandsp/power_meter.h"
-+#include "spandsp/async.h"
-+#include "spandsp/crc.h"
-+#include "spandsp/fsk.h"
-+#include "spandsp/tone_detect.h"
-+#include "spandsp/tone_generate.h"
-+#include "spandsp/super_tone_rx.h"
-+#include "spandsp/queue.h"
-+#include "spandsp/dtmf.h"
-+#include "spandsp/adsi.h"
-+#endif
+ gsm/lib/libgsm.a:
+ 	@mkdir -p gsm/lib
+@@ -59,3 +61,9 @@
+ 	@$(MAKE) -C ilbc all ASTCFLAGS="$(filter-out -Wmissing-prototypes -Wmissing-declarations,$(ASTCFLAGS)) $(AST_NO_STRICT_OVERFLOW)"
+ 
+ $(if $(filter codec_ilbc,$(EMBEDDED_MODS)),modules.link,codec_ilbc.so): $(LIBILBC)
 +
++LIBG722:=g722/libg722.a
++$(LIBG722):
++	@$(MAKE) -C g722 all
 +
- struct callerid_state {
-+#ifdef USE_SPANDSP_CALLERID	
-+	adsi_rx_state_t adsi;
-+	char adsi_output[256];
-+	int  adsi_len;
-+#endif 
- 	fsk_data fskd;
- 	char rawdata[256];
- 	short oldstuff[160];
-@@ -61,6 +86,8 @@
- 
- 	int skipflag; 
- 	unsigned short crc;
-+	/*jfk: debug*/
-+	FILE* fpdebug;
- };
- 
- 
-@@ -77,6 +104,29 @@
- 
- #define AST_CALLERID_UNKNOWN	"<unknown>"
- 
-+#ifdef USE_SPANDSP_CALLERID	
-+void cid_put_msg_func_t(void *user_data, const uint8_t *msg, int len)
-+{
-+	/*given the nature of calling adsi_rx for each sample, we'll always
-+	* only have one byte at a time here */
-+	struct callerid_state *cid = (struct callerid_state *)user_data;
-+	cid->adsi_len = len;
-+	memcpy(cid->adsi_output,msg,len > sizeof(cid->adsi_output) ? sizeof(cid->adsi_output) : len);
-+}
-+
-+int fsk_serie_spandsp(struct callerid_state *cid, short *buffer, int *len)
-+{
-+
-+	cid->adsi_len = 0;
-+	adsi_rx(&cid->adsi,buffer,*len);
-+	*len = 0;
-+	if (cid->adsi_len >= 0) {
-+		return 1;
-+	}
-+	return 0;
-+}
-+#endif
-+
- static inline void gen_tones(unsigned char *buf, int len, int codec, float ddr1, float ddi1, float ddr2, float ddi2, float *cr1, float *ci1, float *cr2, float *ci2)
- {
- 	int x;
-@@ -134,6 +184,12 @@
- 	struct callerid_state *cid;
- 
- 	if ((cid = ast_calloc(1, sizeof(*cid)))) {
-+#ifdef USE_SPANDSP_CALLERID
-+		adsi_rx_init(&cid->adsi, 
-+				(cid_signalling == 2) ? ADSI_STANDARD_CLIP : ADSI_STANDARD_CLASS, 
-+				cid_put_msg_func_t,
-+				cid);
-+#endif		
- 		cid->fskd.spb = 7.0;          	/* 1200 baud */
- 		/* cid->fskd.hdlc = 0; */     	/* Async */
- 		cid->fskd.nbit = 8;           	/* 8 bits */
-@@ -153,6 +209,9 @@
- 		/* cid->fskd.state = 0; */
- 		cid->flags = CID_UNKNOWN_NAME | CID_UNKNOWN_NUMBER;
- 		/* cid->pos = 0; */
-+
-+		/*jfk: debug, open a temp file*/
-+		/*cid->fpdebug = fopen("/tmp/audio.raw","wb");*/
- 	}
- 
- 	return cid;
-@@ -550,6 +609,11 @@
- 	if (!(buf = ast_calloc(1, 2 * len + cid->oldlen))) {
- 		return -1;
- 	}
-+	/*jfk: debug: write out to a temp file*/
-+	/*
-+	if (cid->fpdebug) {
-+		fwrite(ubuf,1,len,cid->fpdebug);
-+	}*/
- 
- 	obuf = buf;
- 	memcpy(buf, cid->oldstuff, cid->oldlen);
-@@ -559,7 +623,11 @@
- 		buf[x+cid->oldlen/2] = AST_XLAW(ubuf[x]);
- 	while(mylen >= 160) {
- 		olen = mylen;
-+#ifdef USE_SPANDSP_CALLERID
-+		res = fsk_serie_spandsp(cid, buf, &mylen);
-+#else
- 		res = fsk_serie(&cid->fskd, buf, &mylen, &b);
-+#endif
- 		if (mylen < 0) {
- 			ast_log(LOG_ERROR, "fsk_serie made mylen < 0 (%d)\n", mylen);
- 			free(obuf);
-@@ -572,6 +640,13 @@
- 			return -1;
- 		}
- 		if (res == 1) {
-+#ifdef USE_SPANDSP_CALLERID
-+			int index;
-+			cid->sawflag = 2;
-+			for (index = 0;index < cid->adsi_len;index++)
-+			{
-+				b = cid->adsi_output[index] & 0x00ff;
-+#endif
- 			/* Ignore invalid bytes */
- 			if (b > 0xff)
- 				continue;
-@@ -606,6 +681,7 @@
- 				if (!cid->len) {
- 					cid->rawdata[cid->pos] = '\0';
- 					cid->sawflag = 5;
-+#ifndef USE_SPANDSP_CALLERID
- 				}
- 				break;
- 			case 5: /* Check checksum */
-@@ -615,6 +691,7 @@
- 					cid->sawflag = 0;
- 					break;
- 				}
-+#endif			
- 		
- 				cid->number[0] = '\0';
- 				cid->name[0] = '\0';
-@@ -685,10 +762,16 @@
- 				}
- 				free(obuf);
- 				return 1;
-+#ifdef USE_SPANDSP_CALLERID	
-+				}
-+#endif
- 				break;
- 			default:
- 				ast_log(LOG_ERROR, "Dunno what to do with a digit in sawflag %d\n", cid->sawflag);
- 			}
-+#ifdef USE_SPANDSP_CALLERID	
-+		} /*for*/
-+#endif
- 		}
- 	}
- 	if (mylen) {
-@@ -702,6 +785,11 @@
- 
- void callerid_free(struct callerid_state *cid)
- {
-+	/*jfk
-+	  if (cid->fpdebug) {
-+		fclose(cid->fpdebug);
-+		cid->fpdebug = 0;
-+	}*/
- 	free(cid);
- }
- 
---- asterisk-1.4.4-orig/res/res_agi.c	2007-02-16 22:09:55.000000000 +1030
-+++ asterisk-1.4.4/res/res_agi.c	2008-03-22 10:25:14.000000000 +1030
-@@ -286,7 +286,7 @@
- 	/* Block SIGHUP during the fork - prevents a race */
- 	sigfillset(&signal_set);
- 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
--	pid = fork();
-+	pid = vfork();
- 	if (pid < 0) {
- 		ast_log(LOG_WARNING, "Failed to fork(): %s\n", strerror(errno));
- 		pthread_sigmask(SIG_SETMASK, &old_set, NULL);
++$(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): $(LIBG722)
