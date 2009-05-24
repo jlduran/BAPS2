@@ -2,5 +2,6 @@
 .svn/
 dl/*
 opt/*
+uClinux-dist/*
 *~
 
