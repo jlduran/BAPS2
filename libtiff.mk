@@ -14,7 +14,6 @@ include rules.mk
 LIBTIFF_SITE=http://dl.maptools.org/dl/libtiff
 LIBTIFF_VERSION=3.8.2
 LIBTIFF_SOURCE=tiff-3.8.2.tar.gz
-LIBTIFF_UNZIP=zcat
 LIBTIFF_DIR=$(BUILD_DIR)/tiff-$(LIBTIFF_VERSION)
 LIBTIFF_CONFIGURE_OPTS=--host=bfin-linux-uclibc 
 
@@ -46,11 +45,13 @@ libtiff: $(LIBTIFF_DIR)/.configured
 
 	#copy tp package location
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff.so.3 $(TARGET_DIR)/lib
+	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtiff.so.3
+	cd $(TARGET_DIR)/lib/; ln -sf libtiff.so.3 libtiff.so
 	touch $(PKG_BUILD_DIR)/.built
 
 all: libtiff
 
-dirclean:
+libtiff-dirclean:
 	rm -rf $(LIBTIFF_DIR)
 
 
