@@ -1,61 +1,106 @@
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/Kconfig	2007-04-05 07:37:03.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2008-03-10 06:54:18.000000000 +1030
-@@ -245,10 +245,35 @@
- 	depends on (BFIN561_BLUETECHNIX_CM)
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/Kconfig	2008-01-31 02:12:59.000000000 +1030
++++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2008-03-23 06:28:15.000000000 +1030
+@@ -260,9 +260,12 @@
  	default y
  
-+config MEM_MT48LC32M16A2TG_75
-+	bool "32Mx16 MT48LC32M16A2TG_75"
+ config MEM_MT48LC32M16A2TG_75
+-	bool
+-	depends on (BFIN527_EZKIT)
++        bool
++        depends on (BFIN527_EZKIT || BFIN532_IP0X)
+ 	default y
 +	help
-+		refresh period 64mS, 8192 row addresses, CAS Latency 3, 10 col addresses
++	  refresh period 64mS, 8192 row addresses, CAS Latency 3, 10 col addresses
 +
- config BFIN_SHARED_FLASH_ENET
- 	bool
- 	depends on (BFIN533_STAMP)
--	default y
-+	default n
-+
+ 
+ source "arch/blackfin/mach-bf527/Kconfig"
+ source "arch/blackfin/mach-bf533/Kconfig"
+@@ -293,6 +296,7 @@
+ 	default "25000000" if (BFIN537_STAMP || BFIN527_EZKIT || H8606_HVSISTEMAS)
+ 	default "30000000" if BFIN561_EZKIT
+ 	default "24576000" if PNAV10
++	default "10000000" if BFIN532_IP0X
+ 	help
+ 	  The frequency of CLKIN crystal oscillator on the board in Hz.
+ 
+@@ -425,6 +429,7 @@
+ 	default 128 if BFIN533_STAMP
+ 	default  64 if PNAV10
+ 	default  32 if H8606_HVSISTEMAS
++	default  64 if BFIN532_IP0X
+ 
+ config MEM_ADD_WIDTH
+ 	int "SDRAM Memory Address Width"
+@@ -436,6 +441,7 @@
+ 	default 10 if BFIN537_STAMP
+ 	default 11 if BFIN533_STAMP
+ 	default 10 if PNAV10
++	default 10 if BFIN532_IP0X
+ 
+ 
+ choice
+@@ -460,6 +466,27 @@
+ 	  code.
+ 	  For example: PF0 --> 0,PF1 --> 1,PF2 --> 2, etc.
+ 
 +comment "Hardware addresses"
 +
-+config BF1_NET1
++config IP0X_NET1
 +	hex "DM9000 eth0 hardware address"
 +	default 0x20100000
 +	help
 +	  Base address of DM9000A Ethernet chip used for eth0
 +
-+config BF1_NET2
++config IP0X_NET2
 +	hex "DM9000 eth1 hardware address"
 +	default 0x20200000
 +	help
 +	  Base address of DM9000A Ethernet chip used for eth1
 +
-+config BF1_USB
++config IP0X_USB
 +	hex "ISP1362 address"
 +	default 0x20300000
 +	help
 +	  Base address of ISP1362 USB controller
++
++
+ config BOOT_LOAD
+ 	hex "Kernel load address for booting"
+ 	default "0x1000"
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2007-11-04 05:22:49.000000000 +1030
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2008-03-23 06:11:01.000000000 +1030
+@@ -26,6 +26,12 @@
+ 	help
+ 	  HV Sistemas H8606 board support.
  
- source "arch/blackfin/mach-bf533/Kconfig"
- source "arch/blackfin/mach-bf561/Kconfig"
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/bf1.c	1970-01-01 09:30:00.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/bf1.c	2008-03-10 06:54:18.000000000 +1030
++config BFIN532_IP0X
++	bool "IP04/IP08 IP-PBX"
++	depends on (BF532)
++	help
++	  Core support for IP04/IP04 open hardware IP-PBX.
++
+ config GENERIC_BF533_BOARD
+ 	bool "Generic"
+ 	help
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	1970-01-01 09:30:00.000000000 +0930
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	2008-03-23 06:18:00.000000000 +1030
 @@ -0,0 +1,288 @@
 +/*
-+ * File:         arch/blackfin/mach-bf533/bf1.c
++ * File:         arch/blackfin/mach-bf533/ip0x.c
++ * Based on:     arch/blackfin/mach-bf533/bf1.c
 + * Based on:     arch/blackfin/mach-bf533/stamp.c
 + * Author:       Ivan Danov <idanov@gmail.com>
++ *               Modified for IP0X David Rowe
 + *
-+ * Created:      2006
-+ * Description:  Board Info File for the BlackfinOne boards
-+ *
-+ * Rev:          $Id: bf1.c,v 1.1 2006/10/23 09:54:16 danov Exp $
++ * Created:      2007
++ * Description:  Board info file for the IP04/IP08 boards, which
++ *               are derived from the BlackfinOne V2.0 boards.
 + *
 + * Modified:
++ *               COpyright 2007 David Rowe     
 + *               Copyright 2006 Intratrade Ltd.
 + *               Copyright 2005 National ICT Australia (NICTA)
 + *               Copyright 2004-2006 Analog Devices Inc.
-+ *
-+ * Bugs:         Enter bugs at http://blackfin.uclinux.org/projects/bf1
 + *
 + * This program is free software; you can redistribute it and/or modify
 + * it under the terms of the GNU General Public License as published by
@@ -80,7 +125,7 @@
 +#include <linux/spi/spi.h>
 +#include <linux/spi/flash.h>
 +#if defined(CONFIG_USB_ISP1362_HCD) || defined(CONFIG_USB_ISP1362_HCD_MODULE)
-+#include <linux/usb_isp1362.h>
++#include <linux/usb/isp1362.h>
 +#endif
 +#include <asm/irq.h>
 +#include <asm/bfin5xx_spi.h>
@@ -88,8 +133,8 @@
 +/*
 + * Name the Board for the /proc/cpuinfo
 + */
-+#if defined (CONFIG_BFIN533_STAMP)
-+char *bfin_board_name = "IP04/IP08";
++#if defined (CONFIG_BFIN532_IP0X)
++const char bfin_board_name[] = "IP04/IP08";
 +#else
 +#error Unknown board
 +#endif
@@ -97,20 +142,20 @@
 +/*
 + *  Driver needs to know address, irq and flag pin.
 + */
-+#if defined (CONFIG_BFIN533_STAMP)
++#if defined (CONFIG_BFIN532_IP0X)
 +#if defined(CONFIG_DM9000) || defined(CONFIG_DM9000_MODULE)
 +
 +#include <linux/dm9000.h>
 +
 +static struct resource dm9000_resource1[] = {
 +	[0] = {
-+		.start = CONFIG_BF1_NET1,
-+		.end   = CONFIG_BF1_NET1 + 1,
++		.start = CONFIG_IP0X_NET1,
++		.end   = CONFIG_IP0X_NET1 + 1,
 +		.flags = IORESOURCE_MEM
 +	},
 +	[1] = {
-+		.start = CONFIG_BF1_NET1 + 2,
-+		.end   = CONFIG_BF1_NET1 + 3,
++		.start = CONFIG_IP0X_NET1 + 2,
++		.end   = CONFIG_IP0X_NET1 + 3,
 +		.flags = IORESOURCE_MEM
 +	},
 +	[2] = {
@@ -122,13 +167,13 @@
 +
 +static struct resource dm9000_resource2[] = {
 +       [0] = {
-+               .start = CONFIG_BF1_NET2,
-+               .end   = CONFIG_BF1_NET2 + 1,
++               .start = CONFIG_IP0X_NET2,
++               .end   = CONFIG_IP0X_NET2 + 1,
 +               .flags = IORESOURCE_MEM
 +       },
 +       [1] = {
-+               .start = CONFIG_BF1_NET2 + 2,
-+               .end   = CONFIG_BF1_NET2 + 3,
++               .start = CONFIG_IP0X_NET2 + 2,
++               .end   = CONFIG_IP0X_NET2 + 3,
 +               .flags = IORESOURCE_MEM
 +       },
 +       [2] = {
@@ -171,7 +216,7 @@
 +};
 +
 +#endif
-+#endif // #if defined (CONFIG_BLACKFIN_ONE_V2)
++#endif // #if defined (CONFIG_BF532_IP0X)
 +
 +
 +#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
@@ -247,12 +292,12 @@
 +#if defined(CONFIG_USB_ISP1362_HCD) || defined(CONFIG_USB_ISP1362_HCD_MODULE)
 +static struct resource isp1362_hcd_resources[] = {
 +	{
-+		.start = CONFIG_BF1_USB,
-+		.end   = CONFIG_BF1_USB + 1,
++		.start = CONFIG_IP0X_USB,
++		.end   = CONFIG_IP0X_USB + 1,
 +		.flags = IORESOURCE_MEM,
 +	},{
-+		.start = CONFIG_BF1_USB + 2,
-+		.end   = CONFIG_BF1_USB + 3,
++		.start = CONFIG_IP0X_USB + 2,
++		.end   = CONFIG_IP0X_USB + 3,
 +		.flags = IORESOURCE_MEM,
 +	},{
 +		.start = IRQ_PF11,
@@ -284,8 +329,8 @@
 +#endif
 +
 +
-+static struct platform_device *bf1_devices[] __initdata = {
-+#if defined (CONFIG_BFIN533_STAMP)
++static struct platform_device *ip0x_devices[] __initdata = {
++#if defined (CONFIG_BFIN532_IP0X)
 +#if defined(CONFIG_DM9000) || defined(CONFIG_DM9000_MODULE)
 +	&dm9000_device1,
 +	&dm9000_device2,
@@ -304,7 +349,7 @@
 +#endif
 +};
 +
-+static int __init bf1_init(void)
++static int __init ip0x_init(void)
 +{
 +        u_int i, j;
 +
@@ -314,7 +359,7 @@
 +		bfin_read_DSPID());
 +
 +	printk(KERN_INFO "%s(): registering device resources\n", __FUNCTION__);
-+	platform_add_devices(bf1_devices, ARRAY_SIZE(bf1_devices));
++	platform_add_devices(ip0x_devices, ARRAY_SIZE(ip0x_devices));
 +#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 +        for (i = 0; i < ARRAY_SIZE(bfin_spi_board_info); i ++) {
 +               j = 1 << bfin_spi_board_info [i]. chip_select;
@@ -327,9 +372,9 @@
 +	return 0;
 +}
 +
-+arch_initcall(bf1_init);
---- uClinux-dist-orig/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2006-09-26 08:47:45.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2008-03-10 06:54:18.000000000 +1030
++arch_initcall(ip0x_init);
+--- uClinux-dist-orig/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2007-05-17 20:27:29.000000000 +0930
++++ uClinux-dist/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2008-03-22 13:44:14.000000000 +1030
 @@ -29,7 +29,15 @@
   * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
@@ -361,18 +406,18 @@
  #if (CONFIG_MEM_GENERIC_BOARD)
    /*SDRAM INFORMATION: Modify this for your board */
  #define SDRAM_Tref  64		/* Refresh period in milliseconds   */
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2006-07-29 15:06:15.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2008-03-10 06:54:18.000000000 +1030
-@@ -3,6 +3,6 @@
- #
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2007-11-04 05:22:49.000000000 +1030
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2008-03-23 05:48:03.000000000 +1030
+@@ -4,6 +4,7 @@
  
- obj-$(CONFIG_GENERIC_BOARD)            += generic_board.o
--obj-$(CONFIG_BFIN533_STAMP)            += stamp.o
-+obj-$(CONFIG_BFIN533_STAMP)            += bf1.o
+ obj-$(CONFIG_GENERIC_BF533_BOARD)      += generic_board.o
+ obj-$(CONFIG_BFIN533_STAMP)            += stamp.o
++obj-$(CONFIG_BFIN532_IP0X)             += ip0x.o
  obj-$(CONFIG_BFIN533_EZKIT)            += ezkit.o
  obj-$(CONFIG_BFIN533_BLUETECHNIX_CM)   += cm_bf533.o
---- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2007-02-07 04:11:48.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-03-10 06:54:18.000000000 +1030
+ obj-$(CONFIG_H8606_HVSISTEMAS)         += H8606.o
+--- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-01-16 17:52:34.000000000 +1030
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-03-22 13:44:14.000000000 +1030
 @@ -56,21 +56,13 @@
  	{
  		.name = "linux kernel",
@@ -398,9 +443,9 @@
  };
  
  /*
---- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/Kconfig	2007-01-11 22:43:09.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2008-03-10 06:54:18.000000000 +1030
-@@ -41,10 +41,20 @@
+--- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/Kconfig	2007-11-04 06:09:40.000000000 +1030
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2008-03-22 13:44:14.000000000 +1030
+@@ -47,10 +47,20 @@
  config BFIN_NAND_BASE
  	hex "NAND Flash Base Address"
  	depends on MTD_NAND_BFIN
@@ -422,8 +467,8 @@
  config BFIN_NAND_CLE
  	int "NAND Flash Command Latch Enable (CLE) Address strobe A[x]"
  	depends on MTD_NAND_BFIN
-@@ -67,7 +77,7 @@
- 	range 0 15 if (BF533 || BF532 || BF531) 
+@@ -73,7 +83,7 @@
+ 	range 0 15 if (BF533 || BF532 || BF531)
  	range 0 47 if (BF534 || BF536 || BF537)
  	range 0 47 if BF561
 -	default 3
@@ -431,9 +476,9 @@
  	help
  	  NAND Flash Ready Strobe PF[x]
  
---- uClinux-dist-orig/linux-2.6.x/drivers/net/dm9000.c	2007-07-10 15:00:06.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2008-03-10 06:54:18.000000000 +1030
-@@ -395,6 +395,32 @@
+--- uClinux-dist-orig/linux-2.6.x/drivers/net/dm9000.c	2007-10-23 03:13:17.000000000 +0930
++++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2008-03-22 13:44:14.000000000 +1030
+@@ -392,6 +392,32 @@
  	}
  }
  
@@ -466,7 +511,7 @@
  #define res_size(_r) (((_r)->end - (_r)->start) + 1)
  
  /*
-@@ -411,6 +437,9 @@
+@@ -408,6 +434,9 @@
  	int iosize;
  	int i;
  	u32 id_val;
@@ -476,7 +521,7 @@
  
  	/* Init network device */
  	ndev = alloc_etherdev(sizeof (struct board_info));
-@@ -588,6 +617,18 @@
+@@ -585,6 +614,18 @@
  	for (i = 0; i < 6; i++)
  		ndev->dev_addr[i] = db->srom[i];
  
@@ -495,34 +540,14 @@
  	if (!is_valid_ether_addr(ndev->dev_addr)) {
  		/* try reading from mac */
  
---- uClinux-dist-orig/linux-2.6.x/drivers/serial/bfin_5xx.c	2007-06-12 11:40:15.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-10 07:50:32.000000000 +1030
-@@ -968,7 +968,7 @@
- bfin_serial_console_setup(struct console *co, char *options)
+--- uClinux-dist-orig/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-11 13:37:19.000000000 +1030
++++ uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-22 13:44:14.000000000 +1030
+@@ -1021,7 +1021,7 @@
  {
  	struct bfin_serial_port *uart;
+ # ifdef CONFIG_SERIAL_BFIN_CONSOLE
 -	int baud = 57600;
 +	int baud = 115200;
  	int bits = 8;
  	int parity = 'n';
- #ifdef CONFIG_SERIAL_BFIN_CTSRTS
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mm/blackfin_sram.c	2007-06-06 10:20:44.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mm/blackfin_sram.c	2008-03-18 14:28:54.000000000 +1030
-@@ -132,6 +132,8 @@
- 	l1_inst_sram[0].paddr = (void*)L1_CODE_START + (_etext_l1 - _stext_l1);
- 	l1_inst_sram[0].size = L1_CODE_LENGTH - (_etext_l1 - _stext_l1);
- 	l1_inst_sram[0].flag = SRAM_SLT_FREE;
-+	printk(KERN_INFO "Blackfin Instruction SRAM size: %d Bytes\n",
-+	       l1_inst_sram[0].size);
- #endif
- 
- 	/* mutex initialize */
-@@ -396,7 +398,7 @@
- 
- void *l1_inst_sram_alloc(size_t size)
- {
--#if L1_DATA_A_LENGTH != 0
-+#if L1_CODE_LENGTH != 0
- 	unsigned flags;
- 	void *addr;
- 
+ #  ifdef CONFIG_SERIAL_BFIN_CTSRTS

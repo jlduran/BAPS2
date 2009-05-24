@@ -16,12 +16,14 @@ MKFS_YAFFS2 = $(ROOTDIR)/user/blkfin-apps/yaffs-utils/utils/mkyaffs2image
 LINUXBOOTDIR = $(ROOTDIR)/$(LINUXDIR)/arch/$(ARCH)/boot
 
 # Blocks must be a multiple of 1024
-BLOCKS   = 3072
+BLOCKS   = 4096
 INODES   = 1024
 
 ROMFS_DIRS = bin etc etc/dhcpc etc/init.d etc/rc.d home lib mnt proc sys usr var root home tmp home/httpd home/httpd/cgi-bin etc/boa etc/config var/run var/lib/misc var/log/boa
 
 all::
+
+romfs.post:: romfs.shared.libs
 
 romfs::
 	mkdir -p $(ROMFSDIR)
@@ -173,3 +175,5 @@ clean::
 .PHONY: all clean image romfs
 
 -include Makefile.local
+
+include ../vendor.mak
