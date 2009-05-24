@@ -1,7 +1,9 @@
 .DS_Store
 .svn/
 dl/*
+ipkg/*
 opt/*
+tmp/*
 uClinux-dist/*
 *~
 
