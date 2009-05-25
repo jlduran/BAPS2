@@ -2,6 +2,7 @@
 .svn/
 asterisk-1.4.21.2/*
 dl/*
+dropbear-0.52/*
 ipkg/*
 libxml2-2.7.3/*
 opt/*
