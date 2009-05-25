@@ -13,8 +13,7 @@ ZAPTEL_SOURCE=$(ZAPTEL_NAME).tar.gz
 ZAPTEL_SITE=http://downloads.digium.com/pub/zaptel/releases
 ZAPTEL_UNZIP=zcat
 ZAPTEL_TOPDIR_MODULES:="zaptel bfsi wcfxs sport_interface ztdummy"
-ZAPTEL_EXTRA_CFLAGS=-DCONFIG_4FX_SPORT_INTERFACE
-ZAPTEL_EXTRA_CFLAGS+=-DCONFIG_CALC_XLAW
+ZAPTEL_EXTRA_CFLAGS=-DCONFIG_4FX_SPORT_INTERFACE -DCONFIG_CALC_XLAW
 OSLEC_DIR=$(BUILD_DIR)/oslec
 
 STAGING_INC=$(STAGING_DIR)/usr/include
@@ -26,8 +25,8 @@ MOD_DIR:=$(shell ls $(UCLINUX_DIST)/root/lib/modules)
 PKG_VERSION:=1.4.9.2
 PKG_RELEASE:=1
 
-PKG_NAME:=zaptel-gsm-sport
-COMMENT:=SPI-over-SPORT1 version (later Atcom IP04s, IP08s). 
+PKG_NAME:=zaptel
+COMMENT:=SPI-over-SPORT1 version with GSM module support. 
 
 TARGET_DIR=$(TOPDIR)/tmp/$(PKG_NAME)/ipkg/$(PKG_NAME)
 
@@ -61,7 +60,7 @@ $(ZAPTEL_DIR)/.configured: $(ZAPTEL_DIR)/.unpacked
 
 	# patch for Zaptel
 
-	patch -p0 < patch/zaptel-gsm.patch
+	patch -p0 < patch/zaptel.patch
 
 	# patch for Oslec
 
@@ -69,7 +68,7 @@ $(ZAPTEL_DIR)/.configured: $(ZAPTEL_DIR)/.unpacked
 	patch -p1 < $(OSLEC_DIR)/kernel/zaptel-$(ZAPTEL_VERSION).patch
 	touch $(ZAPTEL_DIR)/.configured
 
-zaptel-gsm: $(ZAPTEL_DIR)/.configured
+zaptel: $(ZAPTEL_DIR)/.configured
 
 	# build libtonezone, reqd for Asterisk
 
@@ -128,19 +127,18 @@ zaptel-gsm: $(ZAPTEL_DIR)/.configured
 	cp files/zaptel.init $(TARGET_DIR)/etc/init.d/zaptel
 	chmod a+x $(TARGET_DIR)/etc/init.d/zaptel
 	cp -f files/zaptel.conf.in $(TARGET_DIR)/etc/zaptel.conf
-	cp -f files/zapata.conf.in $(TARGET_DIR)/etc/asterisk
 
 	touch $(PKG_BUILD_DIR)/.built
 
-all: zaptel-gsm
+all: zaptel
 
-dirclean:
+zaptel-dirclean:
 	rm -Rf $(ZAPTEL_DIR)
 
 ZO = zaptel-$(ZAPTEL_VERSION)-orig
 Z = zaptel-$(ZAPTEL_VERSION)
 
-zaptel-gsm-make-patch:
+zaptel-make-patch:
 
         # untar original, to save time we check if the orig is already there
 
@@ -153,12 +151,12 @@ zaptel-gsm-make-patch:
 	-cd $(BUILD_DIR); diff -uN \
 	$(ZO)/Makefile \
 	$(Z)/Makefile \
-	> $(PWD)/patch/zaptel-gsm.patch
+	> $(PWD)/patch/zaptel.patch
 
 define Package/$(PKG_NAME)
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=Zaptel-GSM
+  TITLE:=Zaptel
   DESCRIPTION:=\
         Telephony hardware drivers for IP04 with support for Astfin GSM module $(COMMENT) 
   DEPENDS:=oslec
@@ -178,7 +176,7 @@ cat modules.tmp1 | sed '/.*sport_interface.ko:/ d' > modules.dep
 rm -f modules.tmp modules.tmp1
 echo /lib/modules/$(MOD_DIR)/misc/bfsi.ko: >> modules.dep
 echo /lib/modules/$(MOD_DIR)/misc/sport_interface.ko: >> modules.dep
-echo /lib/modules/$(MOD_DIR)/misc/zaptel.ko: /lib/modules/$(MOD_DIR)/oslec.ko >> modules.dep
+echo /lib/modules/$(MOD_DIR)/misc/zaptel.ko: /lib/modules/$(MOD_DIR)/misc/oslec.ko >> modules.dep
 rm -Rf /dev/zap
 mkdir -p /dev/zap
 mknod /dev/zap/ctl c 196 0
@@ -216,5 +214,5 @@ endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
 
-zaptel-gsm-package: zaptel-gsm $(PACKAGE_DIR)/$(PKG_NAME)_$(VERSION)_$(PKGARCH).ipk
+zaptel-package: zaptel $(PACKAGE_DIR)/$(PKG_NAME)_$(VERSION)_$(PKGARCH).ipk
 

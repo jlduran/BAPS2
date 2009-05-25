@@ -1,4 +1,21 @@
 [trunkgroups]
 
 [channels]
-
+context=default
+usecallerid=yes
+hidecallerid=no
+callwaiting=yes
+callwaitingcallerid=yes
+useincomingcalleridonzaptransfer=yes
+threewaycalling=yes
+transfer=yes
+canpark=yes
+cancallforward=yes
+callreturn=yes
+echocancel=yes
+echocancelwhenbridged=yes
+callerid=asreceived
+answeronpolarityswitch=yes
+group=1
+callgroup=1
+pickupgroup=1

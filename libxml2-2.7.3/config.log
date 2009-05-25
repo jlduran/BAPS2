@@ -1487,7 +1487,7 @@ configure:25911: result: yes
 configure:25929: checking for finite
 configure:25985: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:81: warning: conflicting types for built-in function 'finite'
-/tmp/cc4LvakF.o: In function `main':
+/tmp/ccqvDKKi.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:92: undefined reference to `_finite'
 collect2: ld returned 1 exit status
 configure:25991: $? = 1
@@ -1590,7 +1590,7 @@ configure: failed program was:
 configure:26009: result: no
 configure:25929: checking for isnand
 configure:25985: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccIRF5T1.o: In function `main':
+/tmp/cce66mTz.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:92: undefined reference to `_isnand'
 collect2: ld returned 1 exit status
 configure:25991: $? = 1
@@ -1693,7 +1693,7 @@ configure: failed program was:
 configure:26009: result: no
 configure:25929: checking for fp_class
 configure:25985: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccg6jZzk.o: In function `main':
+/tmp/cco0sjgT.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:92: undefined reference to `_fp_class'
 collect2: ld returned 1 exit status
 configure:25991: $? = 1
@@ -1796,7 +1796,7 @@ configure: failed program was:
 configure:26009: result: no
 configure:25929: checking for class
 configure:25985: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccYZ4ubA.o: In function `main':
+/tmp/ccKuOfQb.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:92: undefined reference to `_class'
 collect2: ld returned 1 exit status
 configure:25991: $? = 1
@@ -1899,7 +1899,7 @@ configure: failed program was:
 configure:26009: result: no
 configure:25929: checking for fpclass
 configure:25985: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccKr89kT.o: In function `main':
+/tmp/ccgdCAse.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:92: undefined reference to `_fpclass'
 collect2: ld returned 1 exit status
 configure:25991: $? = 1
@@ -2020,7 +2020,7 @@ configure:26184: $? = 0
 configure:26202: result: yes
 configure:26122: checking for _stat
 configure:26178: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccgH4ATs.o: In function `main':
+/tmp/ccSycnN5.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:97: undefined reference to `__stat'
 collect2: ld returned 1 exit status
 configure:26184: $? = 1
@@ -2204,7 +2204,7 @@ configure:27042: result: yes
 configure:27131: checking for isnan
 configure:27187: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:99: warning: conflicting types for built-in function 'isnan'
-/tmp/ccGx9KkE.o: In function `main':
+/tmp/ccMRJ0yG.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:110: undefined reference to `_isnan'
 collect2: ld returned 1 exit status
 configure:27193: $? = 1
@@ -2331,7 +2331,7 @@ configure:27278: result: yes
 configure:27291: checking for isinf
 configure:27347: bfin-linux-uclibc-gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:100: warning: conflicting types for built-in function 'isinf'
-/tmp/ccEkWwBd.o: In function `main':
+/tmp/ccKel5ee.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:111: undefined reference to `_isinf'
 collect2: ld returned 1 exit status
 configure:27353: $? = 1
@@ -2460,7 +2460,7 @@ configure:27715: checking for shl_load
 configure:27771: bfin-linux-uclibc-gcc -o conftest -g -O2 -pedantic -W -Wformat -Wunused -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wtrigraphs -Wformat -Wchar-subscripts -Wuninitialized -Wparentheses -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls   conftest.c  >&5
 conftest.c:101: warning: function declaration isn't a prototype
 conftest.c:111: warning: function declaration isn't a prototype
-/tmp/ccwbyTCp.o: In function `main':
+/tmp/ccErcCiF.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:112: undefined reference to `_shl_load'
 collect2: ld returned 1 exit status
 configure:27777: $? = 1
@@ -2686,7 +2686,7 @@ configure:27867: checking for dlopen
 configure:27923: bfin-linux-uclibc-gcc -o conftest -g -O2 -pedantic -W -Wformat -Wunused -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wtrigraphs -Wformat -Wchar-subscripts -Wuninitialized -Wparentheses -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls   conftest.c  >&5
 conftest.c:101: warning: function declaration isn't a prototype
 conftest.c:111: warning: function declaration isn't a prototype
-/tmp/ccae6EWR.o: In function `main':
+/tmp/ccs7nDy7.o: In function `main':
 /usr/local/src/BAPS2/libxml2-2.7.3/conftest.c:112: undefined reference to `_dlopen'
 collect2: ld returned 1 exit status
 configure:27929: $? = 1

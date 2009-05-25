@@ -21,9 +21,7 @@ STAGING_LIB=$(STAGING_DIR)/usr/lib
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ \
 -D__BLACKFIN__ -I$(STAGING_INC) -fno-jump-tables \
 -DUSE_SPANDSP_CALLERID
-ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl \
--ltonezone -lsqlite3 \
--lspandsp -ltiff
+ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -lspandsp -ltiff
 ASTERISK_CONFIGURE_OPTS=--host=bfin-linux-uclibc --disable-largefile \
 --without-pwlib --without-curl CFLAGS="$(ASTERISK_CFLAGS)" \
 LDFLAGS="$(ASTERISK_LDFLAGS)"
@@ -43,7 +41,7 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 #	ln -sf $(BUILD_DIR)/src/cdr_sqlite3.c $(ASTERISK_DIR)/cdr
 	touch $(ASTERISK_DIR)/.unpacked
 
-$(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
+$(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked $(STAGING_LIB)/libgsm.a
 	ln -sf $(BUILD_DIR)/patch/menuselect.makeopts $(ASTERISK_DIR)/
 #	ln -sf $(SOURCES_DIR)/res_sqlite3.c $(ASTERISK_DIR)/res/
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
@@ -88,11 +86,11 @@ asterisk: $(ASTERISK_DIR)/.configured $(ASTERISK_DIR)
 	$(TARGET_STRIP) $(TARGET_DIR)/usr/lib/asterisk/modules/*.so
 
 	mkdir -p $(TARGET_DIR)/etc/asterisk
-	cp files/asterisk-defaults/etc/asterisk/* $(TARGET_DIR)/etc/asterisk
-	mkdir -p $(TARGET_DIR)/etc/asterisk/tools
-	cp files/asterisk-defaults/etc/asterisk/tools/* $(TARGET_DIR)/etc/asterisk/tools
-	mkdir -p $(TARGET_DIR)/etc/asterisk/scripts
-	cp files/asterisk-defaults/etc/asterisk/scripts/* $(TARGET_DIR)/etc/asterisk/scripts
+	cp -Rf files/asterisk-defaults/etc/asterisk/* $(TARGET_DIR)/etc/asterisk
+	#mkdir -p $(TARGET_DIR)/etc/asterisk/tools
+	#cp files/asterisk-defaults/etc/asterisk/tools/* $(TARGET_DIR)/etc/asterisk/tools
+	#mkdir -p $(TARGET_DIR)/etc/asterisk/scripts
+	#cp files/asterisk-defaults/etc/asterisk/scripts/* $(TARGET_DIR)/etc/asterisk/scripts
 	#mkdir -p $(TARGET_DIR)/var/lib/asterisk/sounds
 	#cp files/asterisk-defaults/var/lib/asterisk/sounds/*.gsm \
 	#$(TARGET_DIR)/var/lib/asterisk/sounds

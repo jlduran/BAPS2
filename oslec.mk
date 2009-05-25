@@ -22,14 +22,14 @@ $(OSLEC_DIR):
 
 oslec: $(OSLEC_DIR)
 	make -C $(UCLINUX_DIST) SUBDIRS=$(OSLEC_DIR)/kernel modules
-#	make -C $(OSLEC_DIR)/user
+	make -C $(OSLEC_DIR)/user
 
 	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 	cp -f $(OSLEC_DIR)/kernel/oslec.ko \
         $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 
-#	mkdir -p $(TARGET_DIR)/bin
-#	cp -f $(OSLEC_DIR)/user/sample $(TARGET_DIR)/bin
+	mkdir -p $(TARGET_DIR)/bin
+	cp -f $(OSLEC_DIR)/user/sample $(TARGET_DIR)/bin
 
 	touch $(PKG_BUILD_DIR)/.built
 
