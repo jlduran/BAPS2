@@ -16,7 +16,7 @@ MKFS_YAFFS2 = $(ROOTDIR)/user/blkfin-apps/yaffs-utils/utils/mkyaffs2image
 LINUXBOOTDIR = $(ROOTDIR)/$(LINUXDIR)/arch/$(ARCH)/boot
 
 # Blocks must be a multiple of 1024
-BLOCKS   = 4096
+BLOCKS   = 16384
 INODES   = 1024
 
 ROMFS_DIRS = bin etc etc/dhcpc etc/init.d etc/rc.d home lib mnt proc sys usr var root home tmp home/httpd home/httpd/cgi-bin etc/boa etc/config var/run var/lib/misc var/log/boa
