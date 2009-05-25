@@ -58,7 +58,7 @@ uClinux: $(UCLINUX_DEP) $(UCLINUX_DIR)/.configured
 
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
 	gcc src/zeropad.c -o src/zeropad -Wall
-	./src/zeropad uClinux-dist/images/uImage uClinux-dist/images/uImage.ip08 0x20000
+	./src/zeropad uClinux-dist/images/uImage uClinux-dist/images/uImage_r3.ip08 0x20000
 
 uClinux-unpacked: $(UCLINUX_DIR)/.unpacked
 

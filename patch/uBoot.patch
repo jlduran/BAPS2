@@ -1,0 +1,2399 @@
+diff -ruN u-boot-1.1.5-bf1-orig/board/bf1/config.mk u-boot-1.1.5-bf1/board/bf1/config.mk
+--- u-boot-1.1.5-bf1-orig/board/bf1/config.mk	2006-11-06 08:11:56.000000000 +1030
++++ u-boot-1.1.5-bf1/board/bf1/config.mk	2007-05-04 11:14:40.000000000 +0930
+@@ -21,5 +21,6 @@
+ # MA 02111-1307 USA
+ #
+ 
+-TEXT_BASE = 0x01FE0000
++#TEXT_BASE = 0x01FE0000
++TEXT_BASE = 0x03fe0000
+ PLATFORM_CPPFLAGS += -I$(TOPDIR) -Werror
+diff -ruN u-boot-1.1.5-bf1-orig/board/bf1/spi.c.stamp u-boot-1.1.5-bf1/board/bf1/spi.c.stamp
+--- u-boot-1.1.5-bf1-orig/board/bf1/spi.c.stamp	2006-12-11 02:59:42.000000000 +1030
++++ u-boot-1.1.5-bf1/board/bf1/spi.c.stamp	1970-01-01 09:30:00.000000000 +0930
+@@ -1,490 +0,0 @@
+-/****************************************************************************
+- *  SPI flash driver for M25P64
+- ****************************************************************************/
+-#include <common.h>
+-#include <linux/ctype.h>
+-
+-#if defined(CONFIG_SPI)
+-
+-//Application definitions
+-
+-#define	NUM_SECTORS 	128	/* number of sectors */
+-#define SECTOR_SIZE		0x10000
+-#define NOP_NUM		1000
+-
+-#define COMMON_SPI_SETTINGS (SPE|MSTR|CPHA|CPOL) //Settings to the SPI_CTL
+-#define TIMOD01 (0x01)		//stes the SPI to work with core instructions
+-
+-//Flash commands
+-#define SPI_WREN            (0x06)  //Set Write Enable Latch
+-#define SPI_WRDI            (0x04)  //Reset Write Enable Latch
+-#define SPI_RDSR            (0x05)  //Read Status Register
+-#define SPI_WRSR            (0x01)  //Write Status Register
+-#define SPI_READ            (0x03)  //Read data from memory
+-#define SPI_PP              (0x02)  //Program Data into memory
+-#define SPI_SE              (0xD8)  //Erase one sector in memory
+-#define SPI_BE              (0xC7)  //Erase all memory
+-#define WIP					(0x1)	//Check the write in progress bit of the SPI status register
+-#define WEL					(0x2)	//Check the write enable bit of the SPI status register
+-
+-#define TIMEOUT 350000000
+-
+-typedef enum
+-{
+-	NO_ERR,
+-	POLL_TIMEOUT,
+-	INVALID_SECTOR,
+-	INVALID_BLOCK,
+-}ERROR_CODE;
+-
+-
+-void spi_init_f (void);
+-void spi_init_r (void);
+-ssize_t spi_read (uchar *, int, uchar *, int);
+-ssize_t spi_write (uchar *, int, uchar *, int);
+-
+-char ReadStatusRegister(void);
+-void Wait_For_SPIF(void);
+-void SetupSPI( const int spi_setting );
+-void SPI_OFF(void);
+-void SendSingleCommand( const int iCommand );
+-
+-ERROR_CODE GetSectorNumber( unsigned long ulOffset, int *pnSector );
+-ERROR_CODE EraseBlock( int nBlock );
+-ERROR_CODE ReadData(  unsigned long ulStart, long lCount,int *pnData  );
+-ERROR_CODE WriteData( unsigned long ulStart, long lCount, int *pnData );
+-ERROR_CODE Wait_For_Status( char Statusbit );
+-ERROR_CODE Wait_For_WEL(void);
+-
+-/* -------------------
+- * Variables
+- * ------------------- */
+-
+-/* **************************************************************************
+- *
+- *  Function:    spi_init_f
+- *
+- *  Description: Init SPI-Controller (ROM part)
+- *
+- *  return:      ---
+- *
+- * *********************************************************************** */
+-void spi_init_f (void)
+-{
+-}
+-
+-/* **************************************************************************
+- *
+- *  Function:    spi_init_r
+- *
+- *  Description: Init SPI-Controller (RAM part) -
+- *		 The malloc engine is ready and we can move our buffers to
+- *		 normal RAM
+- *
+- *  return:      ---
+- *
+- * *********************************************************************** */
+-void spi_init_r (void)
+-{
+-	return;
+-}
+-
+-/****************************************************************************
+- *  Function:    spi_write
+- **************************************************************************** */
+-ssize_t spi_write (uchar *addr, int alen, uchar *buffer, int len)
+-{
+-	unsigned long offset;
+-	int	start_block,end_block;
+-	int start_byte,end_byte;
+-	ERROR_CODE result = NO_ERR;
+-	uchar temp[SECTOR_SIZE];
+-	int i,num;
+-
+-	offset = addr[0]<<16 | addr[1] <<8 | addr[2];
+-	/* Get the start block number */
+-	GetSectorNumber(offset, &start_block);
+-	/* Get the end block number */
+-	GetSectorNumber(offset + len, &end_block);
+-
+-	for(num = start_block;num <= end_block;num ++){
+-		ReadData(num*SECTOR_SIZE,SECTOR_SIZE,(int *)temp);
+-		start_byte = num*SECTOR_SIZE;
+-		end_byte   = (num+1) * SECTOR_SIZE -1;
+-		if(start_byte < offset) start_byte = offset;
+-		if( end_byte > (offset+len)) end_byte = (offset+len-1);
+-		for(i=start_byte;i<=end_byte;i++)
+-			temp[i-num*SECTOR_SIZE] = buffer[i - offset];
+-		EraseBlock(num);
+-		result = WriteData(num*SECTOR_SIZE, SECTOR_SIZE, (int *)temp);
+-		if(result != NO_ERR)
+-			return 0;
+-		printf(".");
+-	}
+-	return len;
+-}
+-
+-/****************************************************************************
+- *  Function:    spi_read
+- **************************************************************************** */
+-ssize_t spi_read (uchar *addr, int alen, uchar *buffer, int len)
+-{
+-	unsigned long offset;
+-	offset = addr[0]<<16 | addr[1] <<8 | addr[2];
+-	ReadData ( offset, len, (int *)buffer );
+-	return len;
+-}
+-
+-void SendSingleCommand( const int iCommand )
+-{
+-	unsigned short dummy;
+-
+-	/*turns on the SPI in single write mode*/
+-	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) );
+-
+-	/*sends the actual command to the SPI TX register*/
+-	*pSPI_TDBR = iCommand;
+-	 __builtin_bfin_ssync();
+-
+-	/*The SPI status register will be polled to check the SPIF bit*/
+-	Wait_For_SPIF();
+-
+-	dummy = *pSPI_RDBR;
+-
+-	/*The SPI will be turned off*/
+-	SPI_OFF();
+-
+-}
+-
+-void SetupSPI( const int spi_setting )
+-{
+-
+-	if(icache_status()||dcache_status())
+-                udelay(CONFIG_CCLK_HZ/50000000);
+-	/*sets up the PF2 to be the slave select of the SPI */
+-	*pSPI_FLG = 0xFB04;
+-	*pSPI_BAUD = CONFIG_SPI_BAUD;
+-	*pSPI_CTL = spi_setting;
+-	 __builtin_bfin_ssync();
+-}
+-
+-void SPI_OFF(void)
+-{
+-
+-	*pSPI_CTL = 0x0400;	/* disable SPI*/
+-	*pSPI_FLG = 0;
+-	*pSPI_BAUD = 0;
+-	 __builtin_bfin_ssync();
+-//	udelay(CONFIG_CCLK_HZ/50000000);
+-}
+-
+-void Wait_For_SPIF(void)
+-{
+-	unsigned short dummyread;
+-	while( (*pSPI_STAT&TXS));
+-	while(!(*pSPI_STAT&SPIF));
+-	while(!(*pSPI_STAT&RXS));
+-	dummyread = *pSPI_RDBR;			// Read dummy to empty the receive register
+-
+-}
+-
+-ERROR_CODE Wait_For_WEL(void)
+-{
+-	int i;
+-	char status_register = 0;
+-	ERROR_CODE ErrorCode = NO_ERR;	/* tells us if there was an error erasing flash*/
+-
+-		for(i = 0; i < TIMEOUT; i++)
+-		{
+-			status_register = ReadStatusRegister();
+-			if( (status_register & WEL) )
+-			{
+-				ErrorCode = NO_ERR;	/* tells us if there was an error erasing flash*/
+-				break;
+-			}
+-			ErrorCode = POLL_TIMEOUT;	/* Time out error*/
+-		};
+-
+-	return ErrorCode;
+-}
+-
+-ERROR_CODE Wait_For_Status( char Statusbit )
+-{
+-	int i;
+-	char status_register = 0xFF;
+-	ERROR_CODE ErrorCode = NO_ERR;	/* tells us if there was an error erasing flash */
+-
+-		for(i = 0; i < TIMEOUT; i++)
+-		{
+-			status_register = ReadStatusRegister();
+-			if( !(status_register & Statusbit) )
+-			{
+-				ErrorCode = NO_ERR;	/* tells us if there was an error erasing flash */
+-				break;
+-			}
+-			ErrorCode = POLL_TIMEOUT;	/* Time out error */
+-		};
+-
+-
+-	return ErrorCode;
+-}
+-
+-
+-char ReadStatusRegister(void)
+-{
+-	char status_register = 0;
+-
+-	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) ); /* Turn on the SPI */
+-
+-	*pSPI_TDBR = SPI_RDSR;	/* send instruction to read status register */
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		/*wait until the instruction has been sent*/
+-	*pSPI_TDBR = 0;			/*send dummy to receive the status register*/
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		/*wait until the data has been sent*/
+-	status_register = *pSPI_RDBR;	/*read the status register*/
+-
+-	SPI_OFF();		/* Turn off the SPI */
+-
+-	return status_register;
+-}
+-
+-ERROR_CODE GetSectorNumber( unsigned long ulOffset, int *pnSector )
+-{
+-	int nSector = 0;
+-	ERROR_CODE ErrorCode = NO_ERR;
+-
+-	if(ulOffset > (NUM_SECTORS*0x10000 -1)){
+-		ErrorCode = INVALID_SECTOR;
+-		return ErrorCode;
+-	}
+-
+-	nSector = (int)ulOffset/0x10000;
+-	*pnSector = nSector;
+-
+-	// ok
+-	return ErrorCode;
+-}
+-
+-ERROR_CODE EraseBlock( int nBlock )
+-{
+-	unsigned long ulSectorOff = 0x0, ShiftValue;
+-	ERROR_CODE ErrorCode = NO_ERR;
+-
+-
+-	// if the block is invalid just return
+-	if ( (nBlock < 0) || (nBlock > NUM_SECTORS) )
+-	{
+-		ErrorCode = INVALID_BLOCK;	// tells us if there was an error erasing flash
+-		return ErrorCode;
+-	}
+-
+-	// figure out the offset of the block in flash
+-	if ( (nBlock >= 0) && (nBlock < NUM_SECTORS) )
+-	{
+-		ulSectorOff = (nBlock * SECTOR_SIZE);
+-
+-	}
+-	else
+-	{
+-		ErrorCode = INVALID_BLOCK;	// tells us if there was an error erasing flash
+-		return ErrorCode;
+-	}
+-
+-	// A write enable instruction must previously have been executed
+-	SendSingleCommand(SPI_WREN);
+-
+-	//The status register will be polled to check the write enable latch "WREN"
+-	ErrorCode = Wait_For_WEL();
+-
+-	if( POLL_TIMEOUT == ErrorCode )
+-	{
+-		printf("SPI Erase block error\n");
+-		return ErrorCode;
+-	}
+-	else
+-
+-
+-	//Turn on the SPI to send single commands
+-	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) );
+-
+-	// Send the erase block command to the flash followed by the 24 address
+-	// to point to the start of a sector.
+-	*pSPI_TDBR = SPI_SE;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();
+-	ShiftValue = (ulSectorOff >> 16);	// Send the highest byte of the 24 bit address at first
+-	*pSPI_TDBR = ShiftValue;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();					// Wait until the instruction has been sent
+-	ShiftValue = (ulSectorOff >> 8);	// Send the middle byte of the 24 bit address  at second
+-	*pSPI_TDBR = ShiftValue;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();					// Wait until the instruction has been sent
+-	*pSPI_TDBR = ulSectorOff;			// Send the lowest byte of the 24 bit address finally
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();					// Wait until the instruction has been sent
+-
+-	//Turns off the SPI
+-	SPI_OFF();
+-
+-	// Poll the status register to check the Write in Progress bit
+-	// Sector erase takes time
+-	ErrorCode = Wait_For_Status(WIP);
+-
+-	// block erase should be complete
+-	return ErrorCode;
+-}
+-
+-/*****************************************************************************
+-* ERROR_CODE ReadData()
+-*
+-* Read a value from flash for verify purpose
+-*
+-* Inputs:	unsigned long ulStart - holds the SPI start address
+-*			int pnData - pointer to store value read from flash
+-*			long lCount - number of elements to read
+-***************************************************************************** */
+-ERROR_CODE ReadData(  unsigned long ulStart, long lCount,int *pnData  )
+-{
+-	unsigned long ShiftValue;
+-	char *cnData;
+-	int i;
+-
+-	cnData = (char *)pnData; /* Pointer cast to be able to increment byte wise */
+-
+-	// Start SPI interface
+-	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) );
+-
+-	*pSPI_TDBR = SPI_READ;			// Send the read command to SPI device
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();				// Wait until the instruction has been sent
+-	ShiftValue = (ulStart >> 16);	// Send the highest byte of the 24 bit address at first
+-	*pSPI_TDBR = ShiftValue;		// Send the byte to the SPI device
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();				// Wait until the instruction has been sent
+-	ShiftValue = (ulStart >> 8);	// Send the middle byte of the 24 bit address  at second
+-	*pSPI_TDBR = ShiftValue;		// Send the byte to the SPI device
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();				// Wait until the instruction has been sent
+-	*pSPI_TDBR = ulStart;			// Send the lowest byte of the 24 bit address finally
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();				// Wait until the instruction has been sent
+-
+-
+-	// After the SPI device address has been placed on the MOSI pin the data can be
+-	// received on the MISO pin.
+-	for (i=0; i<lCount; i++)
+-	{
+-		*pSPI_TDBR = 0;			//send dummy
+-		 __builtin_bfin_ssync();
+-		while(!(*pSPI_STAT&RXS));
+-		*cnData++  = *pSPI_RDBR;	//read
+-
+-		if((i>=SECTOR_SIZE)&&(i%SECTOR_SIZE == 0))
+-			printf(".");
+-	}
+-
+-	SPI_OFF();					// Turn off the SPI
+-*pFIO_FLAG_S = PF6;
+-*pFIO_FLAG_C = PF7;
+-asm ("ssync;");
+-
+-	return NO_ERR;
+-}
+-
+-ERROR_CODE WriteFlash ( unsigned long ulStartAddr, long lTransferCount, int *iDataSource, long *lWriteCount )
+-{
+-
+-	unsigned long ulWAddr;
+-	long lWTransferCount = 0;
+-	int i;
+-	char iData;
+-	char *temp = (char *)iDataSource;
+-	ERROR_CODE ErrorCode = NO_ERR;	// tells us if there was an error erasing flash
+-
+-	// First, a Write Enable Command must be sent to the SPI.
+-	SendSingleCommand(SPI_WREN);
+-
+-	// Second, the SPI Status Register will be tested whether the
+-	//         Write Enable Bit has been set.
+-	ErrorCode = Wait_For_WEL();
+-	if( POLL_TIMEOUT == ErrorCode )
+-		{
+-		printf("SPI Write Time Out\n");
+-		return ErrorCode;
+-		}
+-	else
+-	// Third, the 24 bit address will be shifted out the SPI MOSI bytewise.
+-	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) ); // Turns the SPI on
+-	*pSPI_TDBR = SPI_PP;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		//wait until the instruction has been sent
+-	ulWAddr = (ulStartAddr >> 16);
+-	*pSPI_TDBR = ulWAddr;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		//wait until the instruction has been sent
+-	ulWAddr = (ulStartAddr >> 8);
+-	*pSPI_TDBR = ulWAddr;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		//wait until the instruction has been sent
+-	ulWAddr = ulStartAddr;
+-	*pSPI_TDBR = ulWAddr;
+-	 __builtin_bfin_ssync();
+-	Wait_For_SPIF();		//wait until the instruction has been sent
+-	// Fourth, maximum number of 256 bytes will be taken from the Buffer
+-	// and sent to the SPI device.
+-	for (i=0; (i < lTransferCount) && (i < 256); i++, lWTransferCount++)
+-	{
+-		iData = *temp;
+-		*pSPI_TDBR = iData;
+-		__builtin_bfin_ssync();
+-		Wait_For_SPIF();		//wait until the instruction has been sent
+-		temp++;
+-	}
+-
+-	SPI_OFF(); // Turns the SPI off
+-
+-	// Sixth, the SPI Write in Progress Bit must be toggled to ensure the
+-	// programming is done before start of next transfer.
+-	ErrorCode = Wait_For_Status(WIP);
+-
+-	if( POLL_TIMEOUT == ErrorCode )
+-		{
+-		printf("SPI Program Time out!\n");
+-		return ErrorCode;
+-		}
+-	else
+-
+-	*lWriteCount = lWTransferCount;
+-
+-	return ErrorCode;
+-}
+-
+-
+-ERROR_CODE WriteData( unsigned long ulStart, long lCount, int *pnData )
+-{
+-
+-	unsigned long ulWStart = ulStart;
+-	long lWCount = lCount, lWriteCount;
+-	long *pnWriteCount = &lWriteCount;
+-
+-	ERROR_CODE ErrorCode = NO_ERR;
+-
+-	while (lWCount != 0)
+-	{
+-		ErrorCode = WriteFlash(ulWStart, lWCount, pnData, pnWriteCount);
+-
+-		// After each function call of WriteFlash the counter must be adjusted
+-		lWCount -= *pnWriteCount;
+-
+-		// Also, both address pointers must be recalculated.
+-		ulWStart += *pnWriteCount;
+-		pnData += *pnWriteCount/4;
+-	}
+-
+-	// return the appropriate error code
+-	return ErrorCode;
+-}
+-
+-#endif	/* CONFIG_SPI */
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/config.mk u-boot-1.1.5-bf1/board/ip04/config.mk
+--- u-boot-1.1.5-bf1-orig/board/ip04/config.mk	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/config.mk	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,28 @@
++#
++# (C) Copyright 2001
++# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++#
++# See file CREDITS for list of people who contributed to this
++# project.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++# This defines where u-boot lives in memory. 
++# 64M setting, use 0x01FE0000 for 32M
++
++TEXT_BASE = 0x03FE0000
++PLATFORM_CPPFLAGS += -I$(TOPDIR) -Werror
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/ip04.c u-boot-1.1.5-bf1/board/ip04/ip04.c
+--- u-boot-1.1.5-bf1-orig/board/ip04/ip04.c	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/ip04.c	2007-05-04 11:27:57.000000000 +0930
+@@ -0,0 +1,69 @@
++/*
++ * U-boot - ip04.c IP04 IP-PBX board specific routines
++ *
++ * Copyright (c) 2007 David Rowe, 
++ *           (c) 2006 Ivan Danov
++ *
++ * (C) Copyright 2000-2004
++ * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <common.h>
++#include <asm/mem_init.h>
++#include "ip04.h"
++
++DECLARE_GLOBAL_DATA_PTR;
++
++int checkboard (void) {
++
++	printf ("CPU:   ADSP BF532 Rev.: 0.%d\n", *pCHIPID >> 28);
++	printf ("Board: IP04 IP-PBX\n");
++	printf ("       http://www.rowetel.com/ucasterisk/ip04.html\n");
++	return 0;
++}
++
++long int initdram (int board_type) {
++#ifdef DEBUG
++	printf ("SDRAM attributes:\n");
++	printf ("  tRCD:%d Cycles; tRP:%d Cycles; "
++		"tRAS:%d Cycles; tWR:%d Cycles; "
++		"CAS Latency:%d cycles\n",
++		(SDRAM_tRCD >> 15),
++		(SDRAM_tRP >> 11),
++		(SDRAM_tRAS >> 6),
++		(SDRAM_tWR >> 19),
++		(SDRAM_CL >> 2));
++	printf ("SDRAM Begin: 0x%x\n", CFG_SDRAM_BASE);
++	printf ("Bank size = %d MB\n", 32);
++#endif
++	gd-> bd-> bi_memstart = CFG_SDRAM_BASE;
++	gd-> bd-> bi_memsize = CFG_MAX_RAM_SIZE;
++	return (gd-> bd-> bi_memsize);
++}
++
++#if defined(CONFIG_MISC_INIT_R)
++// miscellaneous platform dependent initialisations
++int misc_init_r (void) {
++
++	return 1;
++}
++#endif
++
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/ip04.h u-boot-1.1.5-bf1/board/ip04/ip04.h
+--- u-boot-1.1.5-bf1-orig/board/ip04/ip04.h	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/ip04.h	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,42 @@
++/*
++ * U-boot - ip04.h
++ *
++ * Copyright (c) 2006 Intratrade Ltd., Ivan Danov
++ * Copyright (c) 2007 David Rowe
++ *
++ * (C) Copyright 2000-2004
++ * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#ifndef __IP04_H__
++#define __IP04_H__
++
++extern void init_Flags (void);
++
++extern volatile unsigned long *ambctl0;
++extern volatile unsigned long *ambctl1;
++extern volatile unsigned long *amgctl;
++
++extern unsigned long pll_div_fact;
++extern void serial_setbrg (void);
++extern void pll_set (int vco, int crystal_frq, int pll_div);
++
++#endif
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/Makefile u-boot-1.1.5-bf1/board/ip04/Makefile
+--- u-boot-1.1.5-bf1-orig/board/ip04/Makefile	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/Makefile	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,74 @@
++#
++# U-boot - Makefile
++#
++# Copyright (c) 2006 Intratrade ltd., Ivan Danov
++#
++# (C) Copyright 2000-2006
++# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++#
++# See file CREDITS for list of people who contributed to this
++# project.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++#
++# (C) Copyright 2001-2006
++# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++#
++# See file CREDITS for list of people who contributed to this
++# project.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++include $(TOPDIR)/config.mk
++
++LIB	= $(obj)lib$(BOARD).a
++
++COBJS	= $(BOARD).o spi.o nand.o
++
++SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
++OBJS	:= $(addprefix $(obj),$(COBJS))
++SOBJS	:= $(addprefix $(obj),$(SOBJS))
++
++$(LIB):	.depend $(OBJS)
++	$(AR) $(ARFLAGS) $@ $(OBJS)
++
++#########################################################################
++
++# DR - copied this out of BF537 STAMP board Makefile, not sure exactly
++# how it works!
++
++.depend:        Makefile $(SOBJS:.o=.S) $(OBJS:.o=.c)
++	$(CC) -M $(CFLAGS) $(SOBJS:.o=.S) $(OBJS:.o=.c) > $@
++
++sinclude .depend
++
++#########################################################################
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/nand.c u-boot-1.1.5-bf1/board/ip04/nand.c
+--- u-boot-1.1.5-bf1-orig/board/ip04/nand.c	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/nand.c	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,95 @@
++/*
++ * nand.c copied from BF537-STAMP board directory, just modified
++ * for BF532-style PF input setup. David Rowe 2007.
++ *
++ * (C) Copyright 2006 Aubrey.Li, aubrey.li@analog.com
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <common.h>
++
++
++#if (CONFIG_COMMANDS & CFG_CMD_NAND)
++
++#include <nand.h>
++
++/*
++ *	hardware specific access to control-lines
++ */
++static void bfin_hwcontrol(struct mtd_info *mtd, int cmd)
++{
++        register struct nand_chip *this = mtd->priv;
++
++        switch(cmd){
++
++        case NAND_CTL_SETCLE: this->IO_ADDR_W = (void*)(CFG_NAND_BASE + BFIN_NAND_CLE); break;
++        case NAND_CTL_CLRCLE: this->IO_ADDR_W = (void*)(CFG_NAND_BASE); break;
++
++        case NAND_CTL_SETALE: this->IO_ADDR_W = (void*)(CFG_NAND_BASE + BFIN_NAND_ALE); break;
++        case NAND_CTL_CLRALE: this->IO_ADDR_W = (void*)(CFG_NAND_BASE); break;
++        case NAND_CTL_SETNCE:
++        case NAND_CTL_CLRNCE: break;
++        }
++
++        this->IO_ADDR_R = this->IO_ADDR_W;
++
++        /* Drain the writebuffer */
++        __builtin_bfin_ssync();
++}
++
++int bfin_device_ready(struct mtd_info *mtd)
++{
++        int ret = (*pFIO_FLAG_D & BFIN_NAND_READY)? 1 : 0;
++        __builtin_bfin_ssync();
++        return ret;
++}
++
++/*
++ * Board-specific NAND initialization. The following members of the
++ * argument are board-specific (per include/linux/mtd/nand.h):
++ * - IO_ADDR_R?: address to read the 8 I/O lines of the flash device
++ * - IO_ADDR_W?: address to write the 8 I/O lines of the flash device
++ * - hwcontrol: hardwarespecific function for accesing control-lines
++ * - dev_ready: hardwarespecific function for  accesing device ready/busy line
++ * - enable_hwecc?: function to enable (reset)  hardware ecc generator. Must
++ *   only be provided if a hardware ECC is available
++ * - eccmode: mode of ecc, see defines
++ * - chip_delay: chip dependent delay for transfering data from array to
++ *   read regs (tR)
++ * - options: various chip options. They can partly be set to inform
++ *   nand_scan about special functionality. See the defines for further
++ *   explanation
++ * Members with a "?" were not set in the merged testing-NAND branch,
++ * so they are not set here either.
++ */
++void board_nand_init(struct nand_chip *nand)
++{
++        *pFIO_DIR   &= ~BFIN_NAND_READY;       
++        *pFIO_INEN  |= BFIN_NAND_READY;
++        *pFIO_EDGE  &= ~BFIN_NAND_READY;
++        *pFIO_POLAR &= ~BFIN_NAND_READY;
++        __builtin_bfin_ssync();
++
++	nand->hwcontrol = bfin_hwcontrol;
++	nand->eccmode = NAND_ECC_SOFT;
++	nand->dev_ready = bfin_device_ready;
++        nand->chip_delay = 30;
++}
++#endif /* (CONFIG_COMMANDS & CFG_CMD_NAND) */
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/spi.c u-boot-1.1.5-bf1/board/ip04/spi.c
+--- u-boot-1.1.5-bf1-orig/board/ip04/spi.c	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/spi.c	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,424 @@
++/****************************************************************************
++ *  SPI flash driver for M25P20 and M25P64
++ ****************************************************************************/
++#include <common.h>
++#include <linux/ctype.h>
++
++#if defined(CONFIG_SPI)
++
++//Application definitions
++
++#if defined(CONFIG_M25P64)
++#define	NUM_SECTORS 	128	/* number of sectors in M25P64 */
++#else
++#define	NUM_SECTORS 	  4	/* number of sectors in M25P20 */
++#endif
++
++#define SECTOR_SIZE	0x10000
++#define FLASH_PAGE_SIZE	0x100
++#define NOP_NUM		1000
++
++#define COMMON_SPI_SETTINGS (SPE|MSTR|CPHA|CPOL) //Settings to the SPI_CTL
++#define TIMOD01 (0x01)		//stes the SPI to work with core instructions
++#define BAUD_RATE_DIVISOR	CONFIG_SPI_BAUD
++
++//Flash commands
++#define SPI_WREN            (0x06)  //Set Write Enable Latch
++#define SPI_WRDI            (0x04)  //Reset Write Enable Latch
++#define SPI_RDSR            (0x05)  //Read Status Register
++#define SPI_WRSR            (0x01)  //Write Status Register
++#define SPI_READ            (0x03)  //Read data from memory
++#define SPI_PP              (0x02)  //Program Data into memory
++#define SPI_SE              (0xD8)  //Erase one sector in memory
++#define SPI_BE              (0xC7)  //Erase all memory
++#define WIP					(0x1)	//Check the write in progress bit of the SPI status register
++#define WEL					(0x2)	//Check the write enable bit of the SPI status register
++
++#define TIMEOUT 350000000
++
++typedef enum
++{
++	NO_ERR,
++	POLL_TIMEOUT,
++	INVALID_SECTOR,
++	INVALID_BLOCK,
++}ERROR_CODE;
++
++
++/* -------------------
++ * Variables
++ * ------------------- */
++
++static inline void Send_Byte(unsigned char ch)
++{
++	unsigned short dummyread;
++
++	*pSPI_TDBR = ch;
++	 __builtin_bfin_ssync();
++	while( (*pSPI_STAT & TXS) != 0);
++	while((*pSPI_STAT & SPIF) == 0);
++	while((*pSPI_STAT & RXS) == 0);
++	dummyread = *pSPI_RDBR;			// Read dummy to empty the receive register
++
++}
++
++static void SetupSPI( const int spi_setting )
++{
++
++	if(icache_status()||dcache_status())
++                udelay(CONFIG_CCLK_HZ/50000000);
++	/*sets up the PF2 to be the slave select of the SPI */
++	*pSPI_FLG = 0xFB04;
++	*pSPI_BAUD = BAUD_RATE_DIVISOR;
++	*pSPI_CTL = spi_setting;
++	 __builtin_bfin_ssync();
++	udelay(CONFIG_CCLK_HZ/50000000);
++}
++
++static void ReleaseSPI(void)
++{
++
++//	*pSPI_CTL = 0x0400;	/* disable SPI*/
++	*pSPI_CTL = 0xff00;	/* disable SPI*/
++	*pSPI_FLG = 0;
++	*pSPI_BAUD = 0;
++	 __builtin_bfin_ssync();
++	udelay(CONFIG_CCLK_HZ/50000000);
++
++}
++
++static void SPI_ON(void)
++{
++	/*sets up the PF2 to be the slave select of the SPI */
++	*pSPI_FLG = 0xFB04;
++	 __builtin_bfin_ssync();
++	udelay(CONFIG_CCLK_HZ/50000000);
++}
++
++static void SPI_OFF(void)
++{
++	/*sets up the PF2 to be the slave select of the SPI */
++	*pSPI_FLG = 0xFF04;
++	 __builtin_bfin_ssync();
++	udelay(CONFIG_CCLK_HZ/50000000);
++}
++
++
++static void SendSingleCommand( const int iCommand )
++{
++	/*turns on the SPI in single write mode*/
++	SPI_ON();
++
++	/* sends the actual command to the SPI TX register*/
++	Send_Byte(iCommand);
++
++	/*The SPI will be turned off*/
++	SPI_OFF();
++
++}
++
++static inline void Send_Long_Command(unsigned char ch,
++				     unsigned long addr)
++{
++	/*turns on the SPI in single write mode*/
++	SPI_ON();
++
++	Send_Byte(ch);
++	// Send Command
++	Send_Byte(addr >> 16);
++	// Send the highest byte of the 24 bit address first
++	Send_Byte((addr >> 8) & 0X0000FF);
++	// Send the middle byte of the 24 bit address  second
++	Send_Byte(addr & 0X0000FF);
++	// Send the lowest byte of the 24 bit address last
++}
++
++static char ReadStatusRegister(void)
++{
++	char status_register;
++
++	/*turns on the SPI in single write mode*/
++	SPI_ON();
++
++	Send_Byte(SPI_RDSR);	/* send instruction to read status register */
++	*pSPI_TDBR = 0;		/*send dummy to receive the status register*/
++	 __builtin_bfin_ssync();
++	while((*pSPI_STAT & TXS) != 0);
++	while((*pSPI_STAT & SPIF) == 0);
++	while((*pSPI_STAT & RXS) == 0);
++	status_register = *pSPI_RDBR;	/* read the status register*/
++
++	SPI_OFF();		/* Turn off the SPI */
++
++	return status_register;
++}
++
++static ERROR_CODE Wait_For_WEL(void)
++{
++	int i;
++	char status_register;
++
++	for (i = 0; i < TIMEOUT; i++) {
++		status_register = ReadStatusRegister();
++		if ((status_register & WEL) != 0)
++			return NO_ERR;
++	};
++	printf("Timeout in Wait_For_WEL\n");
++	return POLL_TIMEOUT;
++}
++
++static ERROR_CODE Wait_For_WIP_Zero(void)
++{
++	int i;
++	char status_register;
++
++	for (i = 0; i < TIMEOUT; i++) {
++		status_register = ReadStatusRegister();
++		if( (status_register & WIP) == 0)
++			return NO_ERR;
++	};
++	printf("Timeout in Wait_For_WIP_Zero\n");
++	return POLL_TIMEOUT;
++}
++
++
++static ERROR_CODE GetSectorNumber(unsigned long ulOffset, int *pnSector )
++{
++	int nSector = 0;
++	ERROR_CODE ErrorCode = NO_ERR;
++
++	if(ulOffset > (NUM_SECTORS * SECTOR_SIZE - 1)){
++		ErrorCode = INVALID_SECTOR;
++		return ErrorCode;
++	}
++
++	nSector = (int)ulOffset / SECTOR_SIZE;
++	*pnSector = nSector;
++
++	// ok
++	return ErrorCode;
++}
++
++static ERROR_CODE EraseBlock( int nBlock )
++{
++	unsigned long ulSectorOff;
++	ERROR_CODE ErrorCode = NO_ERR;
++
++	// if the block is invalid just return
++	if ( (nBlock < 0) || (nBlock > NUM_SECTORS) )
++	{
++		ErrorCode = INVALID_BLOCK;	// tells us if there was an error erasing flash
++		return ErrorCode;
++	}
++
++	ulSectorOff = (nBlock * SECTOR_SIZE);
++
++	// A write enable instruction must previously have been executed
++	SendSingleCommand(SPI_WREN);
++
++	//The status register will be polled to check the write enable latch "WREN"
++	ErrorCode = Wait_For_WEL();
++
++	if( POLL_TIMEOUT == ErrorCode )
++	{
++		printf("SPI Erase block error\n");
++		return ErrorCode;
++	}
++
++	// Send the erase block command to the flash followed by the 24 address
++	// to point to the start of a sector.
++	Send_Long_Command(SPI_SE, ulSectorOff);
++
++	//Turns off the SPI
++	SPI_OFF();
++
++	// Poll the status register to check the Write in Progress bit
++	// Sector erase takes time
++	ErrorCode = Wait_For_WIP_Zero();
++
++	// block erase should be complete
++	return ErrorCode;
++}
++
++static ERROR_CODE WritePage ( unsigned long ulStartAddr, uchar *temp)
++{
++
++	int i;
++	ERROR_CODE ErrorCode = NO_ERR;	// tells us if there was an error erasing flash
++
++	// First, a Write Enable Command must be sent to the SPI.
++	SendSingleCommand(SPI_WREN);
++
++	// Second, the SPI Status Register will be tested whether the
++	//         Write Enable Bit has been set.
++	ErrorCode = Wait_For_WEL();
++	if( POLL_TIMEOUT == ErrorCode ) {
++		printf("SPI Write Time Out\n");
++		return ErrorCode;
++	}
++	// Third, the 24 bit address will be shifted out the SPI MOSI bytewise.
++	Send_Long_Command(SPI_PP, ulStartAddr);
++	// Fourth, maximum number of 256 bytes will be taken from the Buffer
++	// and sent to the SPI device.
++	for (i = 0; i < FLASH_PAGE_SIZE; i++) {
++		Send_Byte(*temp++);
++	}
++
++	SPI_OFF(); // Turns the SPI off
++
++	// Sixth, the SPI Write in Progress Bit must be toggled to ensure the
++	// programming is done before start of next transfer.
++	ErrorCode = Wait_For_WIP_Zero();
++
++	if( POLL_TIMEOUT == ErrorCode )
++		printf("SPI Program Time out!\n");
++
++	return ErrorCode;
++}
++
++static ERROR_CODE WriteSector( unsigned long ulStart, uchar *pnData )
++{
++
++	int lwCount;
++
++	ERROR_CODE ErrorCode = NO_ERR;
++
++	lwCount = SECTOR_SIZE;
++
++	while (lwCount != 0)
++	{
++		ErrorCode = WritePage(ulStart, pnData);
++
++		// After each function call of WritePage the counter must be adjusted
++		lwCount -= FLASH_PAGE_SIZE;
++
++		// Also, both address pointers must be recalculated.
++		ulStart += FLASH_PAGE_SIZE;
++		pnData  += FLASH_PAGE_SIZE;
++	}
++
++	// return the appropriate error code
++	return ErrorCode;
++}
++
++/*****************************************************************************
++* ERROR_CODE ReadData()
++*
++* Read a value from flash
++*
++* Inputs:	unsigned long ulStart - holds the SPI start address
++*			 long lCount - number of elements to read
++*			 char * cnData - pointer to store value read from flash
++***************************************************************************** */
++static ERROR_CODE ReadData(unsigned long ulStart, long lCount, uchar * cnData)
++{
++	int i;
++
++	Send_Long_Command(SPI_READ, ulStart);	// Send the read command to SPI device
++
++	// After the SPI device address has been placed on the MOSI pin the data can be
++	// received on the MISO pin.
++	for (i = 0; i < lCount; i++) {
++		*pSPI_TDBR = 0;			//send dummy
++		 __builtin_bfin_ssync();
++		while((*pSPI_STAT & RXS) == 0);
++		*cnData++  = *pSPI_RDBR;	//read
++	}
++	SPI_OFF();				// Turn off the SPI
++
++	return NO_ERR;
++}
++
++/****************************************************************************
++ *  Function:    spi_read
++ **************************************************************************** */
++ssize_t spi_read (uchar *addr, int alen, uchar *buffer, int len)
++{
++	unsigned long offset;
++
++	SetupSPI( (COMMON_SPI_SETTINGS|TIMOD01) );
++
++	offset = (((addr[0] << 8) | addr[1]) << 8) | addr[2];
++	ReadData ( offset, len, buffer );
++	ReleaseSPI();
++	return len;
++}
++
++/****************************************************************************
++ *  Function:    spi_write
++ **************************************************************************** */
++ssize_t spi_write (uchar *addr, int alen, uchar *buffer, int len)
++{
++	unsigned long offset;
++	int	start_block,end_block;
++	int start_byte,end_byte;
++	ERROR_CODE result = NO_ERR;
++	uchar temp [SECTOR_SIZE];
++	int i,num;
++
++	SetupSPI((COMMON_SPI_SETTINGS|TIMOD01));
++
++	offset = addr[0]<<16 | addr[1] <<8 | addr[2];
++	/* Get the start block number */
++	if (GetSectorNumber(offset, &start_block) != NO_ERR) {
++		printf ("Invalid start offset 0x%08X\n", addr);
++		return 0;
++	}
++
++	/* Get the end block number */
++	if (GetSectorNumber(offset + len - 1, &end_block) != NO_ERR) {
++		printf ("Invalid end offset 0x%08X\n", offset + len - 1);
++		return 0;
++	}
++
++	for(num = start_block; num <= end_block; num ++){
++		start_byte = num * SECTOR_SIZE;
++		ReadData (start_byte, SECTOR_SIZE, temp);
++		end_byte = (num+1) * SECTOR_SIZE -1;
++		if(start_byte < offset)
++			start_byte = offset;
++		if( end_byte >= (offset+len))
++			end_byte = (offset+len-1);
++		for (i = start_byte; i <= end_byte; i++)
++			temp [i - num * SECTOR_SIZE] = buffer [i - offset];
++		EraseBlock (num);
++		result = WriteSector (num * SECTOR_SIZE, temp);
++		if (result != NO_ERR)
++			return 0;
++		printf("\r0x%08X", start_byte);
++	}
++	printf("\r0x%08X", offset + len - 1);
++	printf("\n");
++	ReleaseSPI();
++	return len;
++}
++
++/* **************************************************************************
++ *
++ *  Function:    spi_init_f
++ *
++ *  Description: Init SPI-Controller (ROM part)
++ *
++ *  return:      ---
++ *
++ * *********************************************************************** */
++void spi_init_f (void)
++{
++}
++
++/* **************************************************************************
++ *
++ *  Function:    spi_init_r
++ *
++ *  Description: Init SPI-Controller (RAM part) -
++ *		 The malloc engine is ready and we can move our buffers to
++ *		 normal RAM
++ *
++ *  return:      ---
++ *
++ * *********************************************************************** */
++void spi_init_r (void)
++{
++	return;
++}
++#endif	/* CONFIG_SPI */
+diff -ruN u-boot-1.1.5-bf1-orig/board/ip04/u-boot.lds u-boot-1.1.5-bf1/board/ip04/u-boot.lds
+--- u-boot-1.1.5-bf1-orig/board/ip04/u-boot.lds	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/board/ip04/u-boot.lds	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,146 @@
++/*
++ * U-boot - u-boot.lds
++ *
++ * Copyright (c) 2005 blackfin.uclinux.org
++ *
++ * (C) Copyright 2000-2004
++ * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++OUTPUT_ARCH(bfin)
++SEARCH_DIR(/lib); SEARCH_DIR(/usr/lib); SEARCH_DIR(/usr/local/lib);
++/* Do we need any of these for elf?
++   __DYNAMIC = 0;    */
++SECTIONS
++{
++  /* Read-only sections, merged into text segment: */
++  . = + SIZEOF_HEADERS;
++  .interp : { *(.interp) }
++  .hash          : { *(.hash)		}
++  .dynsym        : { *(.dynsym)		}
++  .dynstr        : { *(.dynstr)		}
++  .rel.text      : { *(.rel.text)	}
++  .rela.text     : { *(.rela.text) 	}
++  .rel.data      : { *(.rel.data)	}
++  .rela.data     : { *(.rela.data) 	}
++  .rel.rodata    : { *(.rel.rodata) 	}
++  .rela.rodata   : { *(.rela.rodata) 	}
++  .rel.got       : { *(.rel.got)	}
++  .rela.got      : { *(.rela.got)	}
++  .rel.ctors     : { *(.rel.ctors)	}
++  .rela.ctors    : { *(.rela.ctors)	}
++  .rel.dtors     : { *(.rel.dtors)	}
++  .rela.dtors    : { *(.rela.dtors)	}
++  .rel.bss       : { *(.rel.bss)	}
++  .rela.bss      : { *(.rela.bss)	}
++  .rel.plt       : { *(.rel.plt)	}
++  .rela.plt      : { *(.rela.plt)	}
++  .init          : { *(.init)		}
++  .plt : { *(.plt) }
++  .text      :
++  {
++    /* WARNING - the following is hand-optimized to fit within	*/
++    /* the sector before the environment sector. If it throws 	*/
++    /* an error during compilation remove an object here to get	*/
++    /* it linked after the configuration sector.		*/
++
++    cpu/bf533/start.o		(.text)
++    cpu/bf533/start1.o		(.text)
++    cpu/bf533/traps.o		(.text)
++    cpu/bf533/interrupt.o	(.text)
++    cpu/bf533/serial.o		(.text)
++    common/dlmalloc.o		(.text)
++    lib_generic/crc32.o		(.text)
++    lib_generic/zlib.o		(.text)
++
++    . = DEFINED(env_offset) ? env_offset : .;
++    common/environment.o	(.text)
++
++    *(.text)
++    *(.fixup)
++    *(.got1)
++  }
++  _etext = .;
++  PROVIDE (etext = .);
++  .rodata    :
++  {
++    *(.rodata)
++    *(.rodata1)
++    *(.rodata.str1.4)
++  }
++  .fini      : { *(.fini)    } =0
++  .ctors     : { *(.ctors)   }
++  .dtors     : { *(.dtors)   }
++
++  /* Read-write section, merged into data segment: */
++  . = (. + 0x00FF) & 0xFFFFFF00;
++  _erotext = .;
++  PROVIDE (erotext = .);
++  .reloc   :
++  {
++    *(.got)
++    _GOT2_TABLE_ = .;
++    *(.got2)
++    _FIXUP_TABLE_ = .;
++    *(.fixup)
++  }
++  __got2_entries = (_FIXUP_TABLE_ - _GOT2_TABLE_) >>2;
++  __fixup_entries = (. - _FIXUP_TABLE_)>>2;
++
++  .data    :
++  {
++    *(.data)
++    *(.data1)
++    *(.sdata)
++    *(.sdata2)
++    *(.dynamic)
++    CONSTRUCTORS
++  }
++  _edata  =  .;
++  PROVIDE (edata = .);
++
++  ___u_boot_cmd_start = .;
++  .u_boot_cmd : { *(.u_boot_cmd) }
++  ___u_boot_cmd_end = .;
++
++
++  __start___ex_table = .;
++  __ex_table : { *(__ex_table) }
++  __stop___ex_table = .;
++
++  . = ALIGN(256);
++  __init_begin = .;
++  .text.init : { *(.text.init) }
++  .data.init : { *(.data.init) }
++  . = ALIGN(256);
++  __init_end = .;
++
++  __bss_start = .;
++  .bss       :
++  {
++   *(.sbss) *(.scommon)
++   *(.dynbss)
++   *(.bss)
++   *(COMMON)
++  }
++  _end = . ;
++  PROVIDE (end = .);
++}
+diff -ruN u-boot-1.1.5-bf1-orig/common/cmd_bootm.c u-boot-1.1.5-bf1/common/cmd_bootm.c
+--- u-boot-1.1.5-bf1-orig/common/cmd_bootm.c	2006-11-24 06:48:51.000000000 +1030
++++ u-boot-1.1.5-bf1/common/cmd_bootm.c	2007-05-04 11:14:40.000000000 +0930
+@@ -142,9 +142,9 @@
+ extern void lynxkdi_boot( image_header_t * );
+ #endif
+ 
+-#ifndef CFG_BOOTM_LEN
+-#define CFG_BOOTM_LEN	0x800000	/* use 8MByte as default max gunzip size */
+-#endif
++//#ifndef CFG_BOOTM_LEN
++//#define CFG_BOOTM_LEN	0x800000	/* use 8MByte as default max gunzip size */
++//#endif
+ 
+ image_header_t header;
+ 
+@@ -156,7 +156,14 @@
+ 	ulong	addr;
+ 	ulong	data, len, checksum;
+ 	ulong  *len_ptr;
+-	uint	unc_len = CFG_BOOTM_LEN;
++
++
++#ifdef CFG_LARGE_IMAGE_LEN
++	uint unc_len = CFG_LARGE_IMAGE_LEN;
++#else
++	uint unc_len = 0x400000;
++#endif
++
+ 	int	i, verify;
+ 	char	*name, *s;
+ 	int	(*appl)(int, char *[]);
+diff -ruN u-boot-1.1.5-bf1-orig/cpu/bf533/init_sdram.S.old u-boot-1.1.5-bf1/cpu/bf533/init_sdram.S.old
+--- u-boot-1.1.5-bf1-orig/cpu/bf533/init_sdram.S.old	2006-12-06 06:41:39.000000000 +1030
++++ u-boot-1.1.5-bf1/cpu/bf533/init_sdram.S.old	1970-01-01 09:30:00.000000000 +0930
+@@ -1,193 +0,0 @@
+-#define ASSEMBLY
+-
+-#include <linux/config.h>
+-#include <config.h>
+-#include <asm/blackfin.h>
+-#include <asm/mem_init.h>
+-.global init_sdram;
+-
+-#ifndef BF537_UART_BOOT
+-#if (CONFIG_CCLK_DIV == 1)
+-#define CONFIG_CCLK_ACT_DIV   CCLK_DIV1
+-#endif
+-#if (CONFIG_CCLK_DIV == 2)
+-#define CONFIG_CCLK_ACT_DIV   CCLK_DIV2
+-#endif
+-#if (CONFIG_CCLK_DIV == 4)
+-#define CONFIG_CCLK_ACT_DIV   CCLK_DIV4
+-#endif
+-#if (CONFIG_CCLK_DIV == 8)
+-#define CONFIG_CCLK_ACT_DIV   CCLK_DIV8
+-#endif
+-#ifndef CONFIG_CCLK_ACT_DIV
+-#define CONFIG_CCLK_ACT_DIV   CONFIG_CCLK_DIV_not_defined_properly
+-#endif
+-#endif
+-
+-init_sdram:
+-	[--SP] = ASTAT;
+-	[--SP] = RETS;
+-	[--SP] = (R7:0);
+-	[--SP] = (P5:0);
+-
+-#if 0 //defined(CONFIG_SERIAL_STAMP) || defined(EXEC_FROM_SPI)
+-	p0.h = hi(SPI_BAUD);
+-	p0.l = lo(SPI_BAUD);
+-	r0.l = CONFIG_SPI_BAUD;
+-	w[p0] = r0.l;
+-    SSYNC;
+-#endif
+-
+-#ifdef CONFIG_BF537
+-	/* Enable PHY CLK buffer output */
+-	p0.h = hi(VR_CTL);
+-	p0.l = lo(VR_CTL);
+-	r0.l = w[p0];
+-	bitset(r0, 14);
+-	w[p0] = r0.l;
+-	ssync;
+-#endif
+-#if 1
+-	/*
+-         * PLL_LOCKCNT - how many SCLK Cycles to delay while PLL becomes stable
+-         */
+-	p0.h = hi(PLL_LOCKCNT);
+-	p0.l = lo(PLL_LOCKCNT);
+-	r0 = 0x300(Z);
+-	w[p0] = r0.l;
+-	ssync;
+-
+-	/*
+-         * Put SDRAM in self-refresh, incase anything is running
+-         */
+-        P2.H = hi(EBIU_SDGCTL);
+-        P2.L = lo(EBIU_SDGCTL);
+-        R0 = [P2];
+-        BITSET (R0, 24);
+-        [P2] = R0;
+-        SSYNC;
+-#endif
+-        /*
+-         *  Set PLL_CTL with the value that we calculate in R0
+-         *   - [14:09] = MSEL[5:0] : CLKIN / VCO multiplication factors
+-         *   - [8]     = BYPASS    : BYPASS the PLL, run CLKIN into CCLK/SCLK
+-         *   - [7]     = output delay (add 200ps of delay to mem signals)
+-         *   - [6]     = input delay (add 200ps of input delay to mem signals)
+-         *   - [5]     = PDWN      : 1=All Clocks off
+-         *   - [3]     = STOPCK    : 1=Core Clock off
+-         *   - [1]     = PLL_OFF   : 1=Disable Power to PLL
+-         *   - [0]     = DF        : 1=Pass CLKIN/2 to PLL / 0=Pass CLKIN to PLL
+-         *   all other bits set to zero
+-         */
+-
+-        r0 = CONFIG_VCO_MULT & 63;      /* Load the VCO multiplier         */
+-        r0 = r0 << 9;                   /* Shift it over,                  */
+-        r1 = CONFIG_CLKIN_HALF;        /* Do we need to divide CLKIN by 2?*/
+-        r0 = r1 | r0;
+-        r1 = CONFIG_PLL_BYPASS;         /* Bypass the PLL?                 */
+-        r1 = r1 << 8;                   /* Shift it over                   */
+-        r0 = r1 | r0;                   /* add them all together           */
+-
+-        p0.h = hi(PLL_CTL);
+-        p0.l = lo(PLL_CTL);             /* Load the address                */
+-        cli r2;                         /* Disable interrupts              */
+-	ssync;
+-        w[p0] = r0.l;                   /* Set the value                   */
+-        idle;                           /* Wait for the PLL to stablize    */
+-        sti r2;                         /* Enable interrupts               */
+-	ssync;
+-
+-check_again:
+-	p0.h = hi(PLL_STAT);
+-	p0.l = lo(PLL_STAT);
+-	R0 = W[P0](Z);
+-	CC = BITTST(R0,5);
+-	if ! CC jump check_again;
+-
+-	/* Configure SCLK & CCLK Dividers */
+-       	r0 = (CONFIG_CCLK_ACT_DIV | CONFIG_SCLK_DIV);
+-        p0.h = hi(PLL_DIV);
+-        p0.l = lo(PLL_DIV);
+-        w[p0] = r0.l;
+-        ssync;
+-
+-	/*
+-         * We now are running at speed, time to set the Async mem bank wait states
+-	 * This will speed up execution, since we are normally running from FLASH.
+-	 */
+-
+-        p2.h = (EBIU_AMBCTL1 >> 16);
+-        p2.l = (EBIU_AMBCTL1 & 0xFFFF);
+-        r0.h = (AMBCTL1VAL >> 16);
+-        r0.l = (AMBCTL1VAL & 0xFFFF);
+-        [p2] = r0;
+-        ssync;
+-
+-        p2.h = (EBIU_AMBCTL0 >> 16);
+-        p2.l = (EBIU_AMBCTL0 & 0xFFFF);
+-        r0.h = (AMBCTL0VAL >> 16);
+-        r0.l = (AMBCTL0VAL & 0xFFFF);
+-        [p2] = r0;
+-        ssync;
+-
+-        p2.h = (EBIU_AMGCTL >> 16);
+-        p2.l = (EBIU_AMGCTL & 0xffff);
+-        r0 = AMGCTLVAL;
+-        w[p2] = r0;
+-        ssync;
+-
+-	/*
+-	 * Now, Initialize the SDRAM,
+-	 * start with the SDRAM Refresh Rate Control Register
+-         */
+-	p0.l = lo(EBIU_SDRRC);
+-        p0.h = hi(EBIU_SDRRC);
+-        r0 = mem_SDRRC;
+-        w[p0] = r0.l;
+-        ssync;
+-
+-	/*
+-	 * SDRAM Memory Bank Control Register - bank specific parameters
+-	 */
+-	p0.l = (EBIU_SDBCTL & 0xFFFF);
+-	p0.h = (EBIU_SDBCTL >> 16);
+-	r0 = mem_SDBCTL;
+-	w[p0] = r0.l;
+-	ssync;
+-
+-	/*
+-	 * SDRAM Global Control Register - global programmable parameters
+-	 * Disable self-refresh
+-	 */
+-	P2.H = hi(EBIU_SDGCTL);
+-        P2.L = lo(EBIU_SDGCTL);
+-        R0 = [P2];
+-        BITCLR (R0, 24);
+-
+-	/*
+-         * Check if SDRAM is already powered up, if it is, enable self-refresh
+-         */
+-	p0.h = hi(EBIU_SDSTAT);
+-	p0.l = lo(EBIU_SDSTAT);
+-	r2.l = w[p0];
+-	cc = bittst(r2,3);
+-	if !cc jump skip;
+-    	NOP;
+-	BITSET (R0, 23);
+-skip:
+-	[P2] = R0;
+-        SSYNC;
+-
+-	/* Write in the new value in the register */
+-        R0.L = lo(mem_SDGCTL);
+-        R0.H = hi(mem_SDGCTL);
+-	[P2] = R0;
+-        SSYNC;
+-	nop;
+-
+-	(P5:0) = [SP++];
+-	(R7:0) = [SP++];
+-	RETS   = [SP++];
+-	ASTAT  = [SP++];
+-	RTS;
+-
+diff -ruN u-boot-1.1.5-bf1-orig/cpu/bf533/interrupts.c u-boot-1.1.5-bf1/cpu/bf533/interrupts.c
+--- u-boot-1.1.5-bf1-orig/cpu/bf533/interrupts.c	2006-12-11 03:15:51.000000000 +1030
++++ u-boot-1.1.5-bf1/cpu/bf533/interrupts.c	2007-05-04 11:14:40.000000000 +0930
+@@ -163,3 +163,8 @@
+ 
+ 	return (milisec - base);
+ }
++
++void reset_timer (void)
++{
++        timestamp = 0;
++}
+diff -ruN u-boot-1.1.5-bf1-orig/drivers/dm9000x.c u-boot-1.1.5-bf1/drivers/dm9000x.c
+--- u-boot-1.1.5-bf1-orig/drivers/dm9000x.c	2006-12-05 03:28:20.000000000 +1030
++++ u-boot-1.1.5-bf1/drivers/dm9000x.c	2007-05-04 11:14:40.000000000 +0930
+@@ -97,6 +97,7 @@
+ 	unsigned char mac [6];	/* Ethernet adress */
+ 	int media_mode;
+ 	u8 nfloor;
++	struct eth_device *dev;
+ } dm9000x_info_t;
+ 
+ dm9000x_info_t dmfe_info;
+@@ -367,16 +368,20 @@
+ 	DM9000_iow (dm, DM9000_ISR, 0x0f);
+ 
+ #ifdef CONFIG_DM9000_HAVE_EEPROM
++	printf("have eeprom..\n");
+ 	/* Set Node address */
+-	for (i = 0; i < 6; i++)
+-		((u16 *) dm-> mac) [i] = read_srom_word (i);
++	for (i = 0; i < 6; i++) {
++		((u16 *) dm-> mac) [i] = read_srom_word (dm, i);
++	}
+ #endif
+ 	printf ("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+ 		dm-> mac [0], dm-> mac [1],
+ 		dm-> mac [2], dm-> mac [3],
+ 		dm-> mac [4], dm-> mac [5]);
+-	for (i = 0, oft = 0x10; i < 6; i++, oft++)
++	for (i = 0, oft = 0x10; i < 6; i++, oft++) {
+ 		DM9000_iow (dm, oft, dm-> mac [i]);
++		dm->dev->enetaddr [i] = dm-> mac [i];
++	}
+ 	for (i = 0, oft = 0x16; i < 8; i++, oft++)
+ 		DM9000_iow (dm, oft, 0xff);
+ 
+@@ -674,6 +679,7 @@
+ 	dm-> data = DM9000_DATA;
+ 	dm-> media_mode = DM9000_AUTO;
+ 	dm-> nfloor = 0;
++	dm-> dev = dev;
+ 	memcpy (dm-> mac, bis-> bi_enetaddr, sizeof (dm-> mac));
+ 	dev-> init = dm_init;
+ 	dev-> halt = dm_halt;
+@@ -693,6 +699,7 @@
+ 	dm-> data = DM9000_2_DATA;
+ 	dm-> media_mode = DM9000_AUTO;
+ 	dm-> nfloor = 0;
++	dm-> dev = dev;
+ 	memcpy (dm-> mac, bis-> bi_enet1addr, sizeof (dm-> mac));
+ 	dev-> init = dm_init;
+ 	dev-> halt = dm_halt;
+diff -ruN u-boot-1.1.5-bf1-orig/include/asm-blackfin/mem_init.h u-boot-1.1.5-bf1/include/asm-blackfin/mem_init.h
+--- u-boot-1.1.5-bf1-orig/include/asm-blackfin/mem_init.h	2006-11-06 08:10:43.000000000 +1030
++++ u-boot-1.1.5-bf1/include/asm-blackfin/mem_init.h	2007-05-04 11:14:40.000000000 +0930
+@@ -23,6 +23,7 @@
+  */
+ 
+ #if ( CONFIG_MEM_MT48LC16M16A2TG_75  || \
++	CONFIG_MEM_MT48LC32M16A2TG_75  || \
+ 	CONFIG_MEM_MT48LC16M16A2TG_7E  || \
+ 	CONFIG_MEM_MT48LC8M16A2TG_7E  || \
+ 	CONFIG_MEM_MT48LC64M4A2FB_7E || \
+@@ -109,6 +110,13 @@
+ 	#define SDRAM_CL	CL_3
+ #endif
+ 
++#if (CONFIG_MEM_MT48LC32M16A2TG_75)
++        /*SDRAM INFORMATION: */
++        #define SDRAM_Tref      64       /* Refresh period in milliseconds   */
++        #define SDRAM_NRA       8192     /* Number of row addresses in SDRAM */
++        #define SDRAM_CL        CL_3
++#endif
++
+ #if (CONFIG_MEM_MT48LC16M16A2TG_7E)
+ 	/*SDRAM INFORMATION: */
+ 	#define SDRAM_Tref	64       /* Refresh period in milliseconds   */
+diff -ruN u-boot-1.1.5-bf1-orig/include/cmd_confdefs.h u-boot-1.1.5-bf1/include/cmd_confdefs.h
+--- u-boot-1.1.5-bf1-orig/include/cmd_confdefs.h	2006-11-06 08:10:16.000000000 +1030
++++ u-boot-1.1.5-bf1/include/cmd_confdefs.h	2007-05-04 11:14:40.000000000 +0930
+@@ -118,6 +118,7 @@
+ 			CFG_CMD_FDC	| \
+ 			CFG_CMD_FAT	| \
+ 			CFG_CMD_FDOS	| \
++                        CFG_CMD_FLASH   | \
+ 			CFG_CMD_HWFLOW	| \
+ 			CFG_CMD_I2C	| \
+ 			CFG_CMD_IDE	| \
+@@ -125,6 +126,8 @@
+ 			CFG_CMD_IRQ	| \
+ 			CFG_CMD_JFFS2	| \
+ 			CFG_CMD_KGDB	| \
++                        CFG_CMD_LOADB   | \
++                        CFG_CMD_LOADS   | \
+ 			CFG_CMD_MII	| \
+ 			CFG_CMD_MMC	| \
+ 			CFG_CMD_NAND	| \
+@@ -141,7 +144,7 @@
+ 			CFG_CMD_SPI	| \
+ 			CFG_CMD_UNIVERSE | \
+ 			CFG_CMD_USB	| \
+-			CFG_CMD_VFD	)
++			CFG_CMD_VFD)
+ 
+ /* Default configuration
+  */
+diff -ruN u-boot-1.1.5-bf1-orig/include/configs/bf1.h u-boot-1.1.5-bf1/include/configs/bf1.h
+--- u-boot-1.1.5-bf1-orig/include/configs/bf1.h	2006-12-11 06:34:50.000000000 +1030
++++ u-boot-1.1.5-bf1/include/configs/bf1.h	2007-05-04 11:14:40.000000000 +0930
+@@ -88,10 +88,10 @@
+  * Network Settings
+  */
+ /* network support */
+-#define CONFIG_IPADDR		10.120.81.139
++#define CONFIG_IPADDR		192.168.1.30
+ #define CONFIG_NETMASK		255.255.255.0
+-#define CONFIG_GATEWAYIP	10.120.81.1
+-#define CONFIG_SERVERIP		10.120.81.129
++#define CONFIG_GATEWAYIP	192.168.1.1
++#define CONFIG_SERVERIP		192.168.1.2
+ #define CONFIG_HOSTNAME		BF1
+ #define CONFIG_ROOTPATH		/bf1/rootfs
+ 
+@@ -108,16 +108,24 @@
+  *
+  */
+ 
+-#define CONFIG_MEM_SIZE			32		/* 128, 64, 32, 16 */
+-#define CONFIG_MEM_ADD_WDTH		9	       /* 8, 9, 10, 11	  */
+-#define CONFIG_MEM_MT48LC16M16A2TG_7E	1
++#define CONFIG_MEM_SIZE			64		/* 128, 64, 32, 16 */
+ 
+ #define CFG_MEMTEST_START		0x00000000	/* memtest works on */
+-#define CFG_MEMTEST_END			0x01EFFFFF	/* 1 ... 31 MB in DRAM */
+-#define CFG_LOAD_ADDR			0x01000000	/* default load address */
+-
+ #define CFG_SDRAM_BASE			0x00000000
+-#define CFG_MAX_RAM_SIZE		0x02000000
++#define CFG_LOAD_ADDR           	0x01000000      /* default load address */
++
++#if (CONFIG_MEM_SIZE == 64 )
++	#define CONFIG_MEM_ADD_WDTH		10	       /* 8, 9, 10, 11	  */
++	#define CONFIG_MEM_MT48LC32M16A2TG_75	1
++	#define CFG_MAX_RAM_SIZE       	 	0x04000000
++	#define CFG_MEMTEST_END         	0x03EFFFFF      /* 1 ... 63 MB in DRAM */
++#endif
++#if (CONFIG_MEM_SIZE == 32 )
++	#define CONFIG_MEM_ADD_WDTH		9	       /* 8, 9, 10, 11	  */
++	#define CONFIG_MEM_MT48LC16M16A2TG_7E	1
++	#define CFG_MAX_RAM_SIZE        	0x02000000
++	#define CFG_MEMTEST_END         	0x01EFFFFF      /* 1 ... 31 MB in DRAM */
++#endif
+ 
+ 
+ /*
+@@ -161,8 +169,7 @@
+ #define CONFIG_EXTRA_ENV_SETTINGS1					\
+ 	"addnet=setenv bootargs $(bootargs) "				\
+ 		"ip=$(ipaddr):$(serverip):$(gatewayip):"		\
+-		"$(netmask):$(hostname):eth0:off "			\
+-		" ethaddr=$(ethaddr) ethaddr1=$(eth1addr)\0"		\
++		"$(netmask):$(hostname):eth0:off\0"			\
+ 	"nfsargs=setenv bootargs root=/dev/nfs rw "			\
+ 		"nfsroot=$(serverip):$(rootpath);run addnet;\0"		\
+ 	"ramboot=tftp "STR(CFG_LOAD_ADDR)" vmImage;run addnet;bootm\0"	\
+@@ -224,7 +231,7 @@
+ #define CONFIG_DRIVER_ETHER             1
+ #define CONFIG_DRIVER_DM9000            1
+ #define CONFIG_DRIVER_DM9000A           1
+-#undef CONFIG_DM9000_HAVE_EEPROM        /* MAC address is in environment */
++#undef CONFIG_DM9000_HAVE_EEPROM       
+ #define CONFIG_NET_RETRY_COUNT          50
+ #define CONFIG_TFTP_TIMEOUT             250
+ #define CONFIG_DM9000_BASE              0x20000010
+@@ -360,7 +367,7 @@
+ #define CFG_ATA_STRIDE			2
+ #endif
+ 
+-#define CFG_MONITOR_LEN			(128 << 10)	/* Reserve 256 kB for Monitor	*/
++#define CFG_MONITOR_LEN			(128 << 10)	/* Reserve 128 kB for Monitor	*/
+ #define CFG_MONITOR_BASE		(CFG_MAX_RAM_SIZE - CFG_MONITOR_LEN)
+ 
+ #if ( CONFIG_CLKIN_HALF == 0 )
+diff -ruN u-boot-1.1.5-bf1-orig/include/configs/DB64360.h u-boot-1.1.5-bf1/include/configs/DB64360.h
+--- u-boot-1.1.5-bf1-orig/include/configs/DB64360.h	2006-11-06 08:10:28.000000000 +1030
++++ u-boot-1.1.5-bf1/include/configs/DB64360.h	2007-05-04 11:14:40.000000000 +0930
+@@ -40,7 +40,7 @@
+  *	$Log: DB64360.h,v $
+  *	Revision 1.1.1.1  2006/11/05 21:40:28  danov
+  *	First release
+- *
++ *	
+  *	Revision 1.3  2003/04/26 04:58:13  brad
+  *	Cosmetic changes and compiler warning cleanups
+  *
+diff -ruN u-boot-1.1.5-bf1-orig/include/configs/ip04.h u-boot-1.1.5-bf1/include/configs/ip04.h
+--- u-boot-1.1.5-bf1-orig/include/configs/ip04.h	1970-01-01 09:30:00.000000000 +0930
++++ u-boot-1.1.5-bf1/include/configs/ip04.h	2007-05-04 11:14:40.000000000 +0930
+@@ -0,0 +1,468 @@
++/*
++ * U-boot - bf1.h  Configuration file for BlackfinOne board
++ *			having BF532 processor
++ *
++ * Copyright (c) 2006 Intratrade Ltd., Ivan Danov, idanov@gmail.com
++ *
++ * Copyright (c) 2005 blackfin.uclinux.org
++ *
++ * (C) Copyright 2000-2004
++ * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#ifndef __CONFIG_BF1_H__
++#define __CONFIG_BF1_H__
++
++/*
++ * Board settings
++ *
++ */
++
++#define __ADSPLPBLACKFIN__		1
++#define __ADSPBF532__			1
++#define __ADSPBF533__			1
++#define CONFIG_STAMP			1
++#define CONFIG_BF1			1
++#define CONFIG_RTC_BF533		1
++#define CONFIG_SPI			1
++#define CONFIG_IP04                     1
++
++// To execute u-boot from SPI flash
++#define EXEC_FROM_SPI			1
++
++// See cmd_eeprom.c
++#ifdef CONFIG_M25P64
++#define CONFIG_SPI_PAGE_WRITE_SIZE	0x800000
++#else
++#define CONFIG_SPI_PAGE_WRITE_SIZE	0x40000
++#endif
++// for M25P64 - display properties only
++#define CONFIG_SPI_PAGE_READ_SIZE	0x1000
++
++/* IP04: FLASH/ETHERNET do not use the same address range */
++#undef SHARED_RESOURCES		
++
++#define CONFIG_VDSP			0
++
++/*
++ * Clock settings
++ *
++ */
++
++/* CONFIG_CLKIN_HZ is any value in Hz				 */
++#define CONFIG_CLKIN_HZ			10000000
++/* CONFIG_CLKIN_HALF controls what is passed to PLL 0=CLKIN	 */
++/*						    1=CLKIN/2	 */
++#define CONFIG_CLKIN_HALF		0
++/* CONFIG_PLL_BYPASS controls if the PLL is used 0=don't bypass	 */
++/*						 1=bypass PLL	 */
++#define CONFIG_PLL_BYPASS		0
++/* CONFIG_VCO_MULT controls what the multiplier of the PLL is.	 */
++/* Values can range from 1-64					 */
++#define CONFIG_VCO_MULT			40
++/* CONFIG_CCLK_DIV controls what the core clock divider is	 */
++/* Values can be 1, 2, 4, or 8 ONLY				 */
++#define CONFIG_CCLK_DIV			1
++/* CONFIG_SCLK_DIV controls what the peripheral clock divider is */
++/* Values can range from 1-15					 */
++#define CONFIG_SCLK_DIV			3
++/* CONFIG_SPI_BAUD controls the SPI peripheral clock divider     */
++/* Values can range from 2-65535                                 */
++/* SCK Frequency = SCLK / (2 * CONFIG_SPI_BAUD)                  */
++#define CONFIG_SPI_BAUD			2
++
++/*
++ * Network Settings
++ */
++/* network support */
++#define CONFIG_IPADDR		192.168.1.30
++#define CONFIG_NETMASK		255.255.255.0
++#define CONFIG_GATEWAYIP	192.168.1.1
++#define CONFIG_SERVERIP		192.168.1.2
++#define CONFIG_HOSTNAME		BF1
++#define CONFIG_ROOTPATH		/bf1/rootfs
++
++#define CONFIG_ENV_OVERWRITE	1
++#undef CONFIG_HAS_ETH1		
++
++/* To remove hardcoding and enable MAC storage in EEPROM  */
++#define CONFIG_ETHADDR		02:80:ad:20:31:b8
++#define CONFIG_ETH1ADDR		02:80:ad:20:31:b9
++#define CONFIG_NET_MULTI	1
++
++/*
++ * SDRAM settings
++ *
++ */
++
++#define CONFIG_MEM_SIZE			64		/* 128, 64, 32, 16 */
++
++#define CFG_MEMTEST_START		0x00000000	/* memtest works on */
++#define CFG_SDRAM_BASE			0x00000000
++#define CFG_LOAD_ADDR           	0x01000000      /* default load address */
++
++#if (CONFIG_MEM_SIZE == 64 )
++	#define CONFIG_MEM_ADD_WDTH		10	       /* 8, 9, 10, 11	  */
++	#define CONFIG_MEM_MT48LC32M16A2TG_75	1
++	#define CFG_MAX_RAM_SIZE       	 	0x04000000
++	#define CFG_MEMTEST_END         	(CFG_MAX_RAM_SIZE - 0x80000 - 1)
++#endif
++#if (CONFIG_MEM_SIZE == 32 )
++	#define CONFIG_MEM_ADD_WDTH		9	       /* 8, 9, 10, 11	  */
++	#define CONFIG_MEM_MT48LC16M16A2TG_7E	1
++	#define CFG_MAX_RAM_SIZE        	0x02000000
++	#define CFG_MEMTEST_END         	(CFG_MAX_RAM_SIZE - 0x80000 - 1)
++#endif
++
++
++/*
++ * Command settings
++ *
++ */
++
++#define CFG_LONGHELP			1
++
++#define CONFIG_BOOTDELAY		3
++
++/* Enable this if bootretry required, currently its disabled */
++#define CONFIG_BOOT_RETRY_TIME		-1
++
++#ifdef EXEC_FROM_SPI
++#define CONFIG_BOOTCOMMAND		"run spiboot"
++#else
++#define CONFIG_BOOTCOMMAND		"run flashboot"
++#endif
++
++#define CONFIG_AUTOBOOT_PROMPT		"autoboot in %d seconds\n"
++
++#define CONFIG_COMMANDS			(CONFIG_CMD_DFL | \
++					 CFG_CMD_PING	| \
++					 CFG_CMD_EEPROM	| \
++					 CFG_CMD_NAND	| \
++					 CFG_CMD_NET)
++
++#ifdef EXEC_FROM_SPI
++#define CONFIG_BOOTARGS "root=/dev/mtdblock5 rootfstype=jffs2 rw"
++#else
++#define CONFIG_BOOTARGS "root=/dev/mtdblock2 rootfstype=jffs2 rw"
++#endif
++
++#define STR2(x) #x
++#define STR(x) STR2(x)
++#define CONFIG_EXTRA_ENV_SETTINGS1					\
++	"addnet=setenv bootargs $(bootargs) "				\
++		"ip=$(ipaddr):$(serverip):$(gatewayip):"		\
++		"$(netmask):$(hostname):eth0:off\0"			\
++	"nfsargs=setenv bootargs root=/dev/nfs rw "			\
++		"nfsroot=$(serverip):$(rootpath);run addnet;\0"		\
++	"ramboot=tftp "STR(CFG_LOAD_ADDR)" vmImage;run addnet;bootm\0"	\
++	"nfsboot=tftp "STR(CFG_LOAD_ADDR)" vmImage;run nfsargs;bootm\0"	\
++	"flashboot=run addnet;bootm 20020000\0"				\
++	"spiboot=eeprom read " STR(CFG_LOAD_ADDR) " 30000 110000;" 	\
++		"run addnet;bootm " STR(CFG_LOAD_ADDR) "\0"		\
++        "update=tftpboot " STR(CFG_LOAD_ADDR) " u-boot.bin;"		\
++                "protect off 0x20000000 0x2001FFFF;"			\
++		"erase 0x20000000 0x2001FFFF;"				\
++                "cp.b " STR(CFG_LOAD_ADDR) " 0x20000000 $(filesize)\0"	\
++	"\0"
++
++#ifdef CONFIG_NET_MULTI
++
++#define CONFIG_EXTRA_ENV_SETTINGS				\
++	CONFIG_EXTRA_ENV_SETTINGS1				\
++	"ethprime=DM9000#0\0"					\
++	"ethact=DM9000#0\0"
++
++#else
++
++#define CONFIG_EXTRA_ENV_SETTINGS				\
++	CONFIG_EXTRA_ENV_SETTINGS1
++
++#endif
++
++/* This must be included AFTER the definition of CONFIG_COMMANDS (if any) */
++#include <cmd_confdefs.h>
++
++/*
++ * Console settings
++ *
++ */
++
++#define CONFIG_BAUDRATE			115200
++#define CFG_BAUDRATE_TABLE		{ 9600, 19200, 38400, 57600, 115200 }
++
++#ifdef EXEC_FROM_SPI
++#define CFG_PROMPT			"ip04>"	/* Monitor Command Prompt */
++#else
++#define CFG_PROMPT			"ip04>"	/* Monitor Command Prompt */
++#endif
++#if (CONFIG_COMMANDS & CFG_CMD_KGDB)
++#define CFG_CBSIZE			1024	/* Console I/O Buffer Size */
++#else
++#define CFG_CBSIZE			256	/* Console I/O Buffer Size */
++#endif
++#define CFG_PBSIZE			(CFG_CBSIZE+sizeof(CFG_PROMPT)+16)	/* Print Buffer Size */
++#define CFG_MAXARGS			16	/* max number of command args */
++#define CFG_BARGSIZE			CFG_CBSIZE	/* Boot Argument Buffer Size */
++
++#define CONFIG_LOADS_ECHO		1
++
++/*
++ * Network settings
++ *
++ */
++#define CONFIG_DRIVER_ETHER             1
++#define CONFIG_DRIVER_DM9000            1
++#define CONFIG_DRIVER_DM9000A           1
++#undef CONFIG_DM9000_HAVE_EEPROM       
++#define CONFIG_NET_RETRY_COUNT          50
++#define CONFIG_TFTP_TIMEOUT             250
++#define CONFIG_DM9000_BASE              0x20100000
++#define DM9000_IO                       CONFIG_DM9000_BASE
++#define DM9000_DATA                     (CONFIG_DM9000_BASE+2)
++#define CONFIG_DM9000_2_BASE            0x20000020
++#define DM9000_2_IO                     CONFIG_DM9000_2_BASE
++#define DM9000_2_DATA                   (CONFIG_DM9000_2_BASE+2)
++#undef  CONFIG_DM9000_USE_8BIT
++#define CONFIG_DM9000_USE_16BIT         1
++#undef  CONFIG_DM9000_USE_32BIT
++#undef  CONFIG_DM9000_DEBUG
++//#define CONFIG_DM9000_DEBUG           1
++
++/* To remove hardcoding and enable MAC storage in EEPROM */
++/* #define HARDCODE_MAC			1 */
++
++/*
++ * Flash settings
++ *
++ */
++
++#define CFG_FLASH_CFI				/* The flash is CFI compatible	*/
++#define CFG_FLASH_CFI_DRIVER			/* Use common CFI driver	*/
++#define CFG_FLASH_CFI_AMD_RESET
++
++
++#define CFG_FLASH_BASE			0x20000000
++#define CFG_MAX_FLASH_BANKS		1		/* max number of memory banks */
++#define CFG_MAX_FLASH_SECT		71		/* max number of sectors on one chip */
++
++#ifdef EXEC_FROM_SPI
++
++#define CFG_ENV_IS_IN_EEPROM		1
++#define CONFIG_PREBOOT			"echo starting from spi flash"
++#define CFG_ENV_OFFSET                  0x30000 
++#define CFG_ENV_HEADER                  (CFG_ENV_OFFSET + 0x12A)        /* 0x12A is the length of LDR file header */
++#define CFG_ENV_SIZE                    0x10000
++#define CFG_ENV_SECT_SIZE               0x10000 /* Total Size of Environment Sector */
++
++#else
++
++#define CFG_ENV_IS_IN_FLASH		1
++#define CONFIG_PREBOOT			"echo starting from nor flash"
++#define CFG_ENV_ADDR			0x203fe000
++#define CFG_ENV_SIZE			0x2000
++#define CFG_ENV_SECT_SIZE		0x2000 /* Total Size of Environment Sector */
++
++#endif
++
++#define CFG_FLASH_ERASE_TOUT		30000	/* Timeout for Chip Erase (in ms) */
++#define CFG_FLASH_ERASEBLOCK_TOUT	5000	/* Timeout for Block Erase (in ms) */
++#define CFG_FLASH_WRITE_TOUT		1	/* Timeout for Flash Write (in ms) */
++
++/* JFFS Partition offset set  */
++#define CFG_JFFS2_FIRST_BANK 0
++#define CFG_JFFS2_NUM_BANKS  1
++/* 512k reserved for u-boot */
++#define CFG_JFFS2_FIRST_SECTOR		11
++
++/*
++ * following timeouts shall be used once the
++ * Flash real protection is enabled
++ */
++#define CFG_FLASH_LOCK_TOUT		5	/* Timeout for Flash Set Lock Bit (in ms) */
++#define CFG_FLASH_UNLOCK_TOUT		10000	/* Timeout for Flash Clear Lock Bits (in ms) */
++
++/*
++ * Board NAND Infomation
++ */
++
++/* DR NOTE: I am not sure how much of this is used, I just copied it from
++   u-boot-1.1.6 include/configs/bf537-stamp.h, then modified the NAND_ADDR
++   & PF to match the IP04.  */
++
++#define CFG_NAND_ADDR          0x20000000
++#define CFG_NAND_BASE          CFG_NAND_ADDR
++#define CFG_MAX_NAND_DEVICE    1
++#define SECTORSIZE             512
++#define ADDR_COLUMN             1
++#define ADDR_PAGE               2
++#define ADDR_COLUMN_PAGE        3
++#define NAND_ChipID_UNKNOWN    0x00
++#define NAND_MAX_FLOORS        1
++#define NAND_MAX_CHIPS         1
++#define BFIN_NAND_READY	       PF10
++
++#define NAND_WAIT_READY(nand)  			\
++	do { 					\
++		int timeout = 0; 		\
++		while(!(*pPORTFIO & PF10)) 	\
++			if (timeout++ > 100000)	\
++				break;		\
++	} while (0)
++
++#define BFIN_NAND_CLE          (1<<2)                  /* A2 -> Command Enable */
++#define BFIN_NAND_ALE          (1<<1)                  /* A1 -> Address Enable */
++
++#define WRITE_NAND_COMMAND(d, adr) do{ *(volatile __u8 *)((unsigned long)adr | BFIN_NAND_CLE) = (__u8)(d); } while(0)
++#define WRITE_NAND_ADDRESS(d, adr) do{ *(volatile __u8 *)((unsigned long)adr | BFIN_NAND_ALE) = (__u8)(d); } while(0)
++#define WRITE_NAND(d, adr) do{ *(volatile __u8 *)((unsigned long)adr) = (__u8)d; } while(0)
++#define READ_NAND(adr) ((volatile unsigned char)(*(volatile __u8 *)(unsigned long)adr))
++
++/*
++ * I2C settings
++ * By default PF2 is used as SDA and PF3 as SCL on the Stamp board
++ */
++#undef CONFIG_SOFT_I2C
++/*
++ * Software (bit-bang) I2C driver configuration
++ */
++#define PF_SCL				PF3
++#define PF_SDA				PF2
++
++#define I2C_INIT			(*pFIO_DIR |=  PF_SCL); asm("ssync;")
++#define I2C_ACTIVE			(*pFIO_DIR |=  PF_SDA); *pFIO_INEN &= ~PF_SDA; asm("ssync;")
++#define I2C_TRISTATE			(*pFIO_DIR &= ~PF_SDA); *pFIO_INEN |= PF_SDA; asm("ssync;")
++#define I2C_READ			((volatile)(*pFIO_FLAG_D & PF_SDA) != 0); asm("ssync;")
++#define I2C_SDA(bit)			if(bit) { \
++							*pFIO_FLAG_S = PF_SDA; \
++							asm("ssync;"); \
++						} \
++					else	{ \
++							*pFIO_FLAG_C = PF_SDA; \
++							asm("ssync;"); \
++						}
++#define I2C_SCL(bit)			if(bit) { \
++							*pFIO_FLAG_S = PF_SCL; \
++							asm("ssync;"); \
++						} \
++					else	{ \
++							*pFIO_FLAG_C = PF_SCL; \
++							asm("ssync;"); \
++						}
++#define I2C_DELAY			udelay(5)	/* 1/4 I2C clock duration */
++
++#define CFG_I2C_SPEED			50000
++#define CFG_I2C_SLAVE			0xFE
++
++/*
++ * Compact Flash settings
++ */
++
++/* Enabled below option for CF support */
++/* #define CONFIG_STAMP_CF		1 */
++
++#if defined(CONFIG_STAMP_CF) && (CONFIG_COMMANDS & CFG_CMD_IDE)
++
++#define CONFIG_MISC_INIT_R		1
++#define CONFIG_DOS_PARTITION		1
++
++/*
++ * IDE/ATA stuff
++ */
++#undef	CONFIG_IDE_8xx_DIRECT		/* no pcmcia interface required */
++#undef	CONFIG_IDE_LED			/* no led for ide supported */
++#undef	CONFIG_IDE_RESET		/* no reset for ide supported */
++
++#define CFG_IDE_MAXBUS	1		/* max. 1 IDE busses */
++#define CFG_IDE_MAXDEVICE		(CFG_IDE_MAXBUS*1) /* max. 1 drives per IDE bus */
++
++#define CFG_ATA_BASE_ADDR		0x20200000
++#define CFG_ATA_IDE0_OFFSET		0x0000
++
++#define CFG_ATA_DATA_OFFSET		0x0020	/* Offset for data I/O */
++#define CFG_ATA_REG_OFFSET		0x0020	/* Offset for normal register accesses */
++#define CFG_ATA_ALT_OFFSET		0x0007	/* Offset for alternate registers */
++
++#define CFG_ATA_STRIDE			2
++#endif
++
++#define CFG_MONITOR_LEN			(128 << 10)	/* Reserve 128 kB for Monitor	*/
++#define CFG_MONITOR_BASE		(CFG_MAX_RAM_SIZE - CFG_MONITOR_LEN)
++
++#if ( CONFIG_CLKIN_HALF == 0 )
++#define CONFIG_VCO_HZ			( CONFIG_CLKIN_HZ * CONFIG_VCO_MULT )
++#else
++#define CONFIG_VCO_HZ			(( CONFIG_CLKIN_HZ * CONFIG_VCO_MULT ) / 2 )
++#endif
++
++#if (CONFIG_PLL_BYPASS == 0)
++#define CONFIG_CCLK_HZ			( CONFIG_VCO_HZ / CONFIG_CCLK_DIV )
++#define CONFIG_SCLK_HZ			( CONFIG_VCO_HZ / CONFIG_SCLK_DIV )
++#else
++#define CONFIG_CCLK_HZ			CONFIG_CLKIN_HZ
++#define CONFIG_SCLK_HZ			CONFIG_CLKIN_HZ
++#endif
++
++/*
++ * Miscellaneous configurable options
++ */
++#define CFG_HZ				1000		/* 1ms time tick */
++
++#define CFG_MALLOC_LEN			(128 << 10)	/* Reserve 128 kB for malloc()	*/
++#define CFG_MALLOC_BASE			(CFG_MONITOR_BASE - CFG_MALLOC_LEN)
++#define CFG_GBL_DATA_SIZE		0x4000
++#define CFG_GBL_DATA_ADDR		(CFG_MALLOC_BASE - CFG_GBL_DATA_SIZE)
++#define CONFIG_STACKBASE		(CFG_GBL_DATA_ADDR  - 4)
++
++#define CFG_LARGE_IMAGE_LEN	0x4000000	/* Large Image Length, set to 64 Meg */
++
++#undef CONFIG_SHOW_BOOT_PROGRESS
++
++/*
++ * Stack sizes
++ */
++#define CONFIG_STACKSIZE		(128*1024)	/* regular stack */
++
++/*
++ * FLASH organization and environment definitions
++ */
++#define CFG_BOOTMAPSZ			(8 << 20)	/* Initial Memory map for Linux */
++
++/* 0xFF, 0xBBC3BBc3, 0x99B39983 */
++/*#define AMGCTLVAL		(AMBEN_P0 | AMBEN_P1 | AMBEN_P2 | AMCKEN)
++#define AMBCTL0VAL		(B1WAT_11 | B1RAT_11 | B1HT_3 | B1ST_4 | B1TT_4 | B1RDYPOL |	\
++				B1RDYEN | B0WAT_11 | B0RAT_11 | B0HT_3 | B0ST_4 | B0TT_4 | B0RDYPOL | B0RDYEN)
++#define AMBCTL1VAL		(B3WAT_9 | B3RAT_9 | B3HT_2 | B3ST_3 | B3TT_4 | B3RDYPOL |	\
++				B3RDYEN | B2WAT_9 | B2RAT_9 | B2HT_2 | B2ST_4 | B2TT_4 | B2RDYPOL | B2RDYEN)
++*/
++#define AMGCTLVAL		0xFF
++#define AMBCTL0VAL		0xffc2ffc2
++#define AMBCTL1VAL		0xffc2ffc2
++#define CF_AMBCTL1VAL		0xffc2ffc2
++
++#ifdef CONFIG_VDSP
++#define ET_EXEC_VDSP		0x8
++#define SHT_STRTAB_VDSP		0x1
++#define ELFSHDRSIZE_VDSP	0x2C
++#define VDSP_ENTRY_ADDR		0xFFA00000
++#endif
++
++#endif
+diff -ruN u-boot-1.1.5-bf1-orig/include/linux/mtd/compat.h u-boot-1.1.5-bf1/include/linux/mtd/compat.h
+--- u-boot-1.1.5-bf1-orig/include/linux/mtd/compat.h	2006-11-06 08:10:18.000000000 +1030
++++ u-boot-1.1.5-bf1/include/linux/mtd/compat.h	2007-05-04 11:14:40.000000000 +0930
+@@ -42,5 +42,7 @@
+ #define likely(x)	__builtin_expect(!!(x), 1)
+ #define unlikely(x)	__builtin_expect(!!(x), 0)
+ 
++#ifndef PAGE_SIZE
+ #define PAGE_SIZE	4096
+ #endif
++#endif
+diff -ruN u-boot-1.1.5-bf1-orig/lib_blackfin/board.c u-boot-1.1.5-bf1/lib_blackfin/board.c
+--- u-boot-1.1.5-bf1-orig/lib_blackfin/board.c	2006-12-11 06:11:27.000000000 +1030
++++ u-boot-1.1.5-bf1/lib_blackfin/board.c	2007-05-04 11:14:40.000000000 +0930
+@@ -39,6 +39,8 @@
+ 
+ extern flash_info_t flash_info[];
+ 
++void nand_init(void);
++
+ static inline u_long get_vco(void)
+ {
+ 	u_long msel;
+@@ -112,12 +114,14 @@
+ 	return (0);
+ }
+ 
++#if (!CONFIG_STAMP && !CONFIG_IP04)
+ static void display_flash_config(ulong size)
+ {
+ 	puts("FLASH:  ");
+ 	print_size(size, "\n");
+ 	return;
+ }
++#endif
+ 
+ static int init_baudrate(void)
+ {
+@@ -226,7 +230,9 @@
+ 
+ void board_init_r(gd_t * id, ulong dest_addr)
+ {
++#if (!CONFIG_STAMP && !CONFIG_IP04)
+ 	ulong size;
++#endif
+ 	extern void malloc_bin_reloc(void);
+ 	char *s, *e;
+ 	bd_t *bd;
+@@ -235,7 +241,7 @@
+ 	gd->flags |= GD_FLG_RELOC;	/* tell others: relocation done */
+ 	bd = gd->bd;
+ 
+-#if CONFIG_STAMP
++#if (!CONFIG_STAMP && !CONFIG_IP04)
+ 	/* There are some other pointer constants we must deal with */
+ 	/* configure available FLASH banks */
+ 	size = flash_init();
+@@ -305,6 +311,10 @@
+ 	misc_init_r();
+ #endif
+ 
++#if (CONFIG_COMMANDS & CFG_CMD_NAND)
++	nand_init();
++#endif
++
+ #ifdef CONFIG_DRIVER_SMC91111
+ #ifdef SHARED_RESOURCES
+ 	/* Switch to Ethernet */
+diff -ruN u-boot-1.1.5-bf1-orig/Makefile u-boot-1.1.5-bf1/Makefile
+--- u-boot-1.1.5-bf1-orig/Makefile	2006-12-06 07:36:17.000000000 +1030
++++ u-boot-1.1.5-bf1/Makefile	2007-05-04 11:14:40.000000000 +0930
+@@ -2221,6 +2221,9 @@
+ bf1_config	:	unconfig
+ 	@$(MKCONFIG) $(@:_config=) blackfin bf533 bf1
+ 
++ip04_config	:	unconfig
++	@$(MKCONFIG) $(@:_config=) blackfin bf533 ip04
++
+ stamp_config	:	unconfig
+ 	@$(MKCONFIG) $(@:_config=) blackfin bf533 stamp
+ 
