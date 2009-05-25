@@ -12,13 +12,13 @@ VIM_SITE=http://downloads.openwrt.org/sources
 VIM_VERSION=7.1
 VIM_SOURCE=vim-7.1.tar.bz2
 VIM_CROSS_COMPILE_SITE=\
-  http://svn.cross-lfs.org/svn/repos/cross-lfs/branches/clfs-sysroot/patches
+  http://ftp.osuosl.org/pub/clfs/clfs-packages/sysroot-0.0.1
 VIM_CROSS_COMPILE_PATCH=vim-7.1-cross_compile-1.patch
 VIM_UNZIP=bzcat
 VIM_DIR_BASENAME=vim71
 VIM_DIR=$(BUILD_DIR)/$(VIM_DIR_BASENAME)
 VIM_CONFIGURE_OPTS=--host=bfin-linux-uclibc --prefix=/usr \
-  --with-tlib=ncurses --with-features=small --without-x --disable-netbeans
+  --with-tlib=ncurses --with-features=normal --without-x --disable-netbeans
 
 TARGET_DIR=$(BUILD_DIR)/tmp/vim/ipkg/vim
 PKG_NAME:=vim
@@ -52,14 +52,17 @@ vim: $(VIM_DIR)/.configured
 	make -C $(VIM_DIR)/ STAGEDIR=$(STAGING_DIR)
 	rm -Rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
-	mkdir -p $(TARGET_DIR)/usr/share/vim
+	mkdir -p $(TARGET_DIR)/usr/share/vim/syntax
 	cp -f $(VIM_DIR)/src/vim $(TARGET_DIR)/bin/vim
-	echo set nocompatible > $(TARGET_DIR)/usr/share/vim/vimrc
+	cp -f $(VIM_DIR)/runtime/vimrc_example.vim $(TARGET_DIR)/usr/share/vim/vimrc
+	cp -f $(VIM_DIR)/runtime/filetype.vim $(TARGET_DIR)/usr/share/vim
+	cp -f $(VIM_DIR)/runtime/syntax/* $(TARGET_DIR)/usr/share/vim/syntax
+	cp -f $(BUILD_DIR)/files/asterisk.vim $(TARGET_DIR)/usr/share/vim/syntax
 	touch $(PKG_BUILD_DIR)/.built
 
 all: vim
 
-dirclean:
+vim-dirclean:
 	rm -rf $(VIM_DIR)
 
 define Package/$(PKG_NAME)
