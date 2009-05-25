@@ -15,7 +15,7 @@ LIBTIFF_SITE=http://dl.maptools.org/dl/libtiff
 LIBTIFF_VERSION=3.8.2
 LIBTIFF_SOURCE=tiff-3.8.2.tar.gz
 LIBTIFF_DIR=$(BUILD_DIR)/tiff-$(LIBTIFF_VERSION)
-LIBTIFF_CONFIGURE_OPTS=--host=bfin-linux-uclibc 
+LIBTIFF_CONFIGURE_OPTS=--host=bfin-linux-uclibc
 
 TARGET_DIR=$(BUILD_DIR)/tmp/libtiff/ipkg/libtiff
 PKG_NAME:=libtiff

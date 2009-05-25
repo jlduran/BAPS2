@@ -732,7 +732,7 @@ s,@PYTHON_INCLUDES@,|#_!!_#|,g
 s,@PYTHON_SITE_PACKAGES@,|#_!!_#|,g
 s,@M_LIBS@,|#_!!_#|-lm,g
 s,@RDL_LIBS@,|#_!!_#|,g
-s,@RELDATE@,|#_!!_#|Sun May 24 2009,g
+s,@RELDATE@,|#_!!_#|Mon May 25 2009,g
 s,@PYTHON_TESTS@,|#_!!_#|,g
 s,@LIBOBJS@,|#_!!_#|,g
 s,@LTLIBOBJS@,|#_!!_#|,g

@@ -20,22 +20,22 @@ $(OSLEC_DIR):
 	svn co $(OSLEC_SITE) $(OSLEC_NAME)
 	patch -p0 < patch/oslec.patch
 
-build_oslec: $(OSLEC_DIR)
+oslec: $(OSLEC_DIR)
 	make -C $(UCLINUX_DIST) SUBDIRS=$(OSLEC_DIR)/kernel modules
-	make -C $(OSLEC_DIR)/user
+#	make -C $(OSLEC_DIR)/user
 
-	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)
+	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 	cp -f $(OSLEC_DIR)/kernel/oslec.ko \
-        $(TARGET_DIR)/lib/modules/$(MOD_DIR)
+        $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 
-	mkdir -p $(TARGET_DIR)/bin
-	cp -f $(OSLEC_DIR)/user/sample $(TARGET_DIR)/bin
+#	mkdir -p $(TARGET_DIR)/bin
+#	cp -f $(OSLEC_DIR)/user/sample $(TARGET_DIR)/bin
 
 	touch $(PKG_BUILD_DIR)/.built
 
-all: build_oslec
+all: oslec
 
-dirclean:
+oslec-dirclean:
 	rm -Rf $(OSLEC_DIR)
 
 define Package/oslec
@@ -56,7 +56,7 @@ cd /lib/modules/$(MOD_DIR)
 cat modules.dep | sed '/.*oslec.ko:/ d' > modules.tmp
 cp -f modules.tmp modules.dep
 rm -r modules.tmp
-echo /lib/modules/$(MOD_DIR)/oslec.ko: >> modules.dep
+echo /lib/modules/$(MOD_DIR)/misc/oslec.ko: >> modules.dep
 
 # device node for sample util
 mknod -m 666 /dev/sample c 33 0
@@ -75,4 +75,4 @@ endef
 
 $(eval $(call BuildPackage,oslec))
 
-oslec-package: build_oslec $(PACKAGE_DIR)/oslec_$(VERSION)_$(PKGARCH).ipk
+oslec-package: oslec $(PACKAGE_DIR)/oslec_$(VERSION)_$(PKGARCH).ipk
