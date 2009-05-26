@@ -1,6 +1,6 @@
-diff -ruN u-boot-1.1.6-2008R1.5-orig/board/bf1/config.mk u-boot-1.1.6-2008R1.5/board/bf1/config.mk
---- u-boot-1.1.6-2008R1.5-orig/board/bf1/config.mk	2006-11-06 08:11:56.000000000 +1030
-+++ u-boot-1.1.6-2008R1.5/board/bf1/config.mk	2007-05-04 11:14:40.000000000 +0930
+diff -ruN u-boot-1.1.6-2008R1.5-orig/board/bf533-stamp/config.mk u-boot-1.1.6-2008R1.5/board/bf533-stamp/config.mk
+--- u-boot-1.1.6-2008R1.5-orig/board/bf533-stamp/config.mk	2006-11-06 08:11:56.000000000 +1030
++++ u-boot-1.1.6-2008R1.5/board/bf533-stamp/config.mk	2007-05-04 11:14:40.000000000 +0930
 @@ -21,5 +21,6 @@
  # MA 02111-1307 USA
  #
@@ -9,9 +9,9 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/board/bf1/config.mk u-boot-1.1.6-2008R1.5/b
 +#TEXT_BASE = 0x01FE0000
 +TEXT_BASE = 0x03fe0000
  PLATFORM_CPPFLAGS += -I$(TOPDIR) -Werror
-diff -ruN u-boot-1.1.6-2008R1.5-orig/board/bf1/spi.c.stamp u-boot-1.1.6-2008R1.5/board/bf1/spi.c.stamp
---- u-boot-1.1.6-2008R1.5-orig/board/bf1/spi.c.stamp	2006-12-11 02:59:42.000000000 +1030
-+++ u-boot-1.1.6-2008R1.5/board/bf1/spi.c.stamp	1970-01-01 09:30:00.000000000 +0930
+diff -ruN u-boot-1.1.6-2008R1.5-orig/board/bf533-stamp/spi.c.stamp u-boot-1.1.6-2008R1.5/board/bf533-stamp/spi.c.stamp
+--- u-boot-1.1.6-2008R1.5-orig/board/bf533-stamp/spi.c.stamp	2006-12-11 02:59:42.000000000 +1030
++++ u-boot-1.1.6-2008R1.5/board/bf533-stamp/spi.c.stamp	1970-01-01 09:30:00.000000000 +0930
 @@ -1,490 +0,0 @@
 -/****************************************************************************
 - *  SPI flash driver for M25P64
@@ -1755,9 +1755,9 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/include/cmd_confdefs.h u-boot-1.1.6-2008R1.
  
  /* Default configuration
   */
-diff -ruN u-boot-1.1.6-2008R1.5-orig/include/configs/bf1.h u-boot-1.1.6-2008R1.5/include/configs/bf1.h
---- u-boot-1.1.6-2008R1.5-orig/include/configs/bf1.h	2006-12-11 06:34:50.000000000 +1030
-+++ u-boot-1.1.6-2008R1.5/include/configs/bf1.h	2007-05-04 11:14:40.000000000 +0930
+diff -ruN u-boot-1.1.6-2008R1.5-orig/include/configs/bf533-stamp.h u-boot-1.1.6-2008R1.5/include/configs/bf533-stamp.h
+--- u-boot-1.1.6-2008R1.5-orig/include/configs/bf533-stamp.h	2006-12-11 06:34:50.000000000 +1030
++++ u-boot-1.1.6-2008R1.5/include/configs/bf533-stamp.h	2007-05-04 11:14:40.000000000 +0930
 @@ -88,10 +88,10 @@
   * Network Settings
   */
@@ -1770,7 +1770,7 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/include/configs/bf1.h u-boot-1.1.6-2008R1.5
 +#define CONFIG_GATEWAYIP	192.168.1.1
 +#define CONFIG_SERVERIP		192.168.1.2
  #define CONFIG_HOSTNAME		BF1
- #define CONFIG_ROOTPATH		/bf1/rootfs
+ #define CONFIG_ROOTPATH		/bf533-stamp/rootfs
  
 @@ -108,16 +108,24 @@
   *
@@ -1849,7 +1849,7 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/include/configs/ip04.h u-boot-1.1.6-2008R1.
 +++ u-boot-1.1.6-2008R1.5/include/configs/ip04.h	2007-05-04 11:14:40.000000000 +0930
 @@ -0,0 +1,468 @@
 +/*
-+ * U-boot - bf1.h  Configuration file for BlackfinOne board
++ * U-boot - bf533-stamp.h  Configuration file for BlackfinOne board
 + *			having BF532 processor
 + *
 + * Copyright (c) 2006 Intratrade Ltd., Ivan Danov, idanov@gmail.com
@@ -1948,7 +1948,7 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/include/configs/ip04.h u-boot-1.1.6-2008R1.
 +#define CONFIG_GATEWAYIP	192.168.1.1
 +#define CONFIG_SERVERIP		192.168.1.2
 +#define CONFIG_HOSTNAME		BF1
-+#define CONFIG_ROOTPATH		/bf1/rootfs
++#define CONFIG_ROOTPATH		/bf533-stamp/rootfs
 +
 +#define CONFIG_ENV_OVERWRITE	1
 +#undef CONFIG_HAS_ETH1		
@@ -2388,8 +2388,8 @@ diff -ruN u-boot-1.1.6-2008R1.5-orig/Makefile u-boot-1.1.6-2008R1.5/Makefile
 --- u-boot-1.1.6-2008R1.5-orig/Makefile	2006-12-06 07:36:17.000000000 +1030
 +++ u-boot-1.1.6-2008R1.5/Makefile	2007-05-04 11:14:40.000000000 +0930
 @@ -2221,6 +2221,9 @@
- bf1_config	:	unconfig
- 	@$(MKCONFIG) $(@:_config=) blackfin bf533 bf1
+ bf533-stamp_config	:	unconfig
+ 	@$(MKCONFIG) $(@:_config=) blackfin bf533 bf533-stamp
  
 +ip04_config	:	unconfig
 +	@$(MKCONFIG) $(@:_config=) blackfin bf533 ip04

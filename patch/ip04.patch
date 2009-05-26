@@ -7,7 +7,7 @@
 -	bool
 -	depends on (BFIN527_EZKIT)
 +        bool
-+        depends on (BFIN527_EZKIT || BFIN532_IP0X)
++        depends on (BFIN527_EZKIT || BFIN533_IP0X)
  	default y
 +	help
 +	  refresh period 64mS, 8192 row addresses, CAS Latency 3, 10 col addresses
@@ -19,7 +19,7 @@
  	default "25000000" if (BFIN537_STAMP || BFIN527_EZKIT || H8606_HVSISTEMAS)
  	default "30000000" if BFIN561_EZKIT
  	default "24576000" if PNAV10
-+	default "10000000" if BFIN532_IP0X
++	default "10000000" if BFIN533_IP0X
  	help
  	  The frequency of CLKIN crystal oscillator on the board in Hz.
  
@@ -27,7 +27,7 @@
  	default 128 if BFIN533_STAMP
  	default  64 if PNAV10
  	default  32 if H8606_HVSISTEMAS
-+	default  64 if BFIN532_IP0X
++	default  64 if BFIN533_IP0X
  
  config MEM_ADD_WIDTH
  	int "SDRAM Memory Address Width"
@@ -35,7 +35,7 @@
  	default 10 if BFIN537_STAMP
  	default 11 if BFIN533_STAMP
  	default 10 if PNAV10
-+	default 10 if BFIN532_IP0X
++	default 10 if BFIN533_IP0X
  
  
  choice
@@ -73,9 +73,9 @@
  	help
  	  HV Sistemas H8606 board support.
  
-+config BFIN532_IP0X
++config BFIN533_IP0X
 +	bool "IP04/IP08 IP-PBX"
-+	depends on (BF532)
++	depends on (BF533)
 +	help
 +	  Core support for IP04/IP04 open hardware IP-PBX.
 +
@@ -133,7 +133,7 @@
 +/*
 + * Name the Board for the /proc/cpuinfo
 + */
-+#if defined (CONFIG_BFIN532_IP0X)
++#if defined (CONFIG_BFIN533_IP0X)
 +const char bfin_board_name[] = "IP04/IP08";
 +#else
 +#error Unknown board
@@ -142,7 +142,7 @@
 +/*
 + *  Driver needs to know address, irq and flag pin.
 + */
-+#if defined (CONFIG_BFIN532_IP0X)
++#if defined (CONFIG_BFIN533_IP0X)
 +#if defined(CONFIG_DM9000) || defined(CONFIG_DM9000_MODULE)
 +
 +#include <linux/dm9000.h>
@@ -216,7 +216,7 @@
 +};
 +
 +#endif
-+#endif // #if defined (CONFIG_BF532_IP0X)
++#endif // #if defined (CONFIG_BF533_IP0X)
 +
 +
 +#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
@@ -330,7 +330,7 @@
 +
 +
 +static struct platform_device *ip0x_devices[] __initdata = {
-+#if defined (CONFIG_BFIN532_IP0X)
++#if defined (CONFIG_BFIN533_IP0X)
 +#if defined(CONFIG_DM9000) || defined(CONFIG_DM9000_MODULE)
 +	&dm9000_device1,
 +	&dm9000_device2,
@@ -412,7 +412,7 @@
  
  obj-$(CONFIG_GENERIC_BF533_BOARD)      += generic_board.o
  obj-$(CONFIG_BFIN533_STAMP)            += stamp.o
-+obj-$(CONFIG_BFIN532_IP0X)             += ip0x.o
++obj-$(CONFIG_BFIN533_IP0X)             += ip0x.o
  obj-$(CONFIG_BFIN533_EZKIT)            += ezkit.o
  obj-$(CONFIG_BFIN533_BLUETECHNIX_CM)   += cm_bf533.o
  obj-$(CONFIG_H8606_HVSISTEMAS)         += H8606.o
