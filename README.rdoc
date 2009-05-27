@@ -34,9 +34,9 @@ This process will <b>erase your IP04 root file system</b> so please backup anyth
 
 1. Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 
-   http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08[http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08]
+   http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08
 
-   NOTE: Despite it's name, uImage_r2.ip08 works fine on both the IP04 and IP08.
+   NOTE: Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
 
 2. Connect a RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
 
@@ -222,7 +222,7 @@ Then capture changes as above with:
 
 5. For more information on the IPKG format:
 
-   http://handhelds.org/moin/moin.cgi/Ipkg[http://handhelds.org/moin/moin.cgi/Ipkg]
+   http://handhelds.org/moin/moin.cgi/Ipkg
 
 6. On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
