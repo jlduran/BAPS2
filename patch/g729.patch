@@ -1,0 +1,11 @@
+--- g729/g729/src.fdpic/Makefile	2008-04-28 12:21:11.000000000 -0400
++++ g729/g729/src.fdpic/Makefile	2008-04-28 12:21:55.000000000 -0400
+@@ -88,7 +88,7 @@
+ 
+ $(LIBG729AB_SO): $(LIBG729AB_OBJS)
+ 	# partially link into one object file
+-	bfin-linux-uclibc-ld -r -o partial.o $(LIBG729AB_OBJS)
++	bfin-linux-uclibc-ld -r -m elf32bfinfd -o partial.o $(LIBG729AB_OBJS)
+ 
+ 	# now make most symbols local.  This ensures any calls
+ 	# don't use the PLT method which is not compatable with

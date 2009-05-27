@@ -15,6 +15,7 @@ PKG_BUILD_DIR:=$(TOPDIR)/tmp/g729
 $(G729_DIR):
 	mkdir -p $(TOPDIR)
 	svn co $(G729_SITE) $(G729_NAME)
+	patch -p0 < patch/g729.patch
 
 g729: $(G729_DIR)
 	make -C $(G729_DIR)
@@ -27,7 +28,7 @@ g729: $(G729_DIR)
 
 all: g729
 
-dirclean:
+g729-dirclean:
 	rm -Rf $(G729_DIR)
 
 define Package/g729
