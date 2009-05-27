@@ -21,8 +21,14 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem)
 there is a growing list of packages:
 
-*Name*:   *Description*
-asterisk:   Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware.
+*Name*::  *Description*
+asterisk::  Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware.
+libssl::  A toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography world-wide.
+libtiff::  Tiff image file format library
+libxml::  A library for manipulating XML and HTML resources.
+oslec::  Open Source Line Echo Canceller, a high quality free echo canceller for Asterisk.
+spandsp::  Telephony Algorithms and Digital Signal Processing Routines
+zaptel::  Telephony hardware drivers for IP04 SPI-over-SPORT1 version (later Atcom IP04s, IP08s).
 
 == Getting Started
 
