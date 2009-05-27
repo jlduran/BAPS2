@@ -1,5 +1,5 @@
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/Kconfig	2008-01-31 02:12:59.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2008-03-23 06:28:15.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/Kconfig	2008-04-30 09:07:03.000000000 -0500
++++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2009-05-26 02:24:47.000000000 -0500
 @@ -260,9 +260,12 @@
  	default y
  
@@ -22,16 +22,16 @@
 +	default "10000000" if BFIN533_IP0X
  	help
  	  The frequency of CLKIN crystal oscillator on the board in Hz.
- 
-@@ -425,6 +429,7 @@
- 	default 128 if BFIN533_STAMP
+ 	  Warning: This value should match the crystal on the board. Otherwise,
+@@ -428,6 +432,7 @@
  	default  64 if PNAV10
  	default  32 if H8606_HVSISTEMAS
+ 	default  64 if BFIN548_BLUETECHNIX_CM
 +	default  64 if BFIN533_IP0X
  
  config MEM_ADD_WIDTH
  	int "SDRAM Memory Address Width"
-@@ -436,6 +441,7 @@
+@@ -439,6 +444,7 @@
  	default 10 if BFIN537_STAMP
  	default 11 if BFIN533_STAMP
  	default 10 if PNAV10
@@ -39,7 +39,7 @@
  
  
  choice
-@@ -460,6 +466,27 @@
+@@ -463,6 +469,27 @@
  	  code.
  	  For example: PF0 --> 0,PF1 --> 1,PF2 --> 2, etc.
  
@@ -67,8 +67,8 @@
  config BOOT_LOAD
  	hex "Kernel load address for booting"
  	default "0x1000"
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2007-11-04 05:22:49.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2008-03-23 06:11:01.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2007-11-03 13:52:49.000000000 -0500
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2009-05-26 02:06:31.000000000 -0500
 @@ -26,6 +26,12 @@
  	help
  	  HV Sistemas H8606 board support.
@@ -82,8 +82,8 @@
  config GENERIC_BF533_BOARD
  	bool "Generic"
  	help
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	1970-01-01 09:30:00.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	2008-03-23 06:18:00.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	1969-12-31 19:00:00.000000000 -0500
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c	2009-05-26 02:08:01.000000000 -0500
 @@ -0,0 +1,288 @@
 +/*
 + * File:         arch/blackfin/mach-bf533/ip0x.c
@@ -373,8 +373,8 @@
 +}
 +
 +arch_initcall(ip0x_init);
---- uClinux-dist-orig/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2007-05-17 20:27:29.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2008-03-22 13:44:14.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2007-05-17 05:57:29.000000000 -0500
++++ uClinux-dist/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2009-05-24 01:19:49.000000000 -0500
 @@ -29,7 +29,15 @@
   * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
@@ -406,8 +406,8 @@
  #if (CONFIG_MEM_GENERIC_BOARD)
    /*SDRAM INFORMATION: Modify this for your board */
  #define SDRAM_Tref  64		/* Refresh period in milliseconds   */
---- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2007-11-04 05:22:49.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2008-03-23 05:48:03.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2007-11-03 13:52:49.000000000 -0500
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2009-05-26 02:11:17.000000000 -0500
 @@ -4,6 +4,7 @@
  
  obj-$(CONFIG_GENERIC_BF533_BOARD)      += generic_board.o
@@ -416,8 +416,8 @@
  obj-$(CONFIG_BFIN533_EZKIT)            += ezkit.o
  obj-$(CONFIG_BFIN533_BLUETECHNIX_CM)   += cm_bf533.o
  obj-$(CONFIG_H8606_HVSISTEMAS)         += H8606.o
---- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-01-16 17:52:34.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-03-22 13:44:14.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-01-16 02:22:34.000000000 -0500
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2009-05-24 01:19:49.000000000 -0500
 @@ -56,21 +56,13 @@
  	{
  		.name = "linux kernel",
@@ -443,8 +443,8 @@
  };
  
  /*
---- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/Kconfig	2007-11-04 06:09:40.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2008-03-22 13:44:14.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/drivers/mtd/nand/Kconfig	2008-06-22 05:03:00.000000000 -0500
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2009-05-24 01:19:49.000000000 -0500
 @@ -47,10 +47,20 @@
  config BFIN_NAND_BASE
  	hex "NAND Flash Base Address"
@@ -476,8 +476,8 @@
  	help
  	  NAND Flash Ready Strobe PF[x]
  
---- uClinux-dist-orig/linux-2.6.x/drivers/net/dm9000.c	2007-10-23 03:13:17.000000000 +0930
-+++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2008-03-22 13:44:14.000000000 +1030
+--- uClinux-dist-orig/linux-2.6.x/drivers/net/dm9000.c	2007-10-22 12:43:17.000000000 -0500
++++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2009-05-24 01:19:49.000000000 -0500
 @@ -392,6 +392,32 @@
  	}
  }
@@ -540,9 +540,9 @@
  	if (!is_valid_ether_addr(ndev->dev_addr)) {
  		/* try reading from mac */
  
---- uClinux-dist-orig/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-11 13:37:19.000000000 +1030
-+++ uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-22 13:44:14.000000000 +1030
-@@ -1021,7 +1021,7 @@
+--- uClinux-dist-orig/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-08-08 00:26:27.000000000 -0500
++++ uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx.c	2009-05-24 01:19:49.000000000 -0500
+@@ -1052,7 +1052,7 @@
  {
  	struct bfin_serial_port *uart;
  # ifdef CONFIG_SERIAL_BFIN_CONSOLE

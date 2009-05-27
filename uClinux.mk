@@ -86,15 +86,11 @@ UD = uClinux-dist
 
 uClinux-ip04-make-patch:
 
-        # untar original, to save time we check if the orig is already there
-
 	if [ ! -d $(UCLINUX_DIR)-orig ] ; then \
 		mkdir -p tmp; cd tmp; \
 	        tar xjf $(DL_DIR)/$(UCLINUX_SOURCE); \
 		mv uClinux-dist-2008R1.5-RC3 $(UCLINUX_DIR)-orig; \
 	fi
-
-	# TODO - work out a rule/macro to do all this with less typing
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/arch/blackfin/Kconfig \
@@ -151,13 +147,11 @@ uClinux-ip04-make-patch:
 	$(UD)/linux-2.6.x/drivers/serial/bfin_5xx.c \
 	>> $(PWD)/patch/ip04.patch
 
-	# capture all the .config files for the IP04
-
 	mkdir -p patch/vendors/Rowetel/IP04
 	cp -af $(UCLINUX_DIR)/vendors/Rowetel/IP04/* patch/vendors/Rowetel/IP04
-	cp $(UCLINUX_DIR)/.config patch/vendors/Rowetel/IP04/config.device
-	cp $(UCLINUX_DIR)/linux-2.6.x/.config patch/vendors/Rowetel/IP04/config.linux-2.6.x	
-	cp $(UCLINUX_DIR)/config/.config patch/vendors/Rowetel/IP04/config.vendor-2.6.x 
+	cp -f $(UCLINUX_DIR)/.config patch/vendors/Rowetel/IP04/config.device
+	cp -f $(UCLINUX_DIR)/linux-2.6.x/.config patch/vendors/Rowetel/IP04/config.linux-2.6.x	
+	cp -f $(UCLINUX_DIR)/config/.config patch/vendors/Rowetel/IP04/config.vendor-2.6.x 
 
 	# files needed for adding ipkg to busybox.  This was unchanged from 
 	# uClinux-dist 2007 so we use the same patch file
@@ -196,8 +190,6 @@ uClinux-ip04-make-patch:
 	$(UDO)/user/busybox/archival/libunarchive/Kbuild \
 	$(UD)/user/busybox/archival/libunarchive/Kbuild \
 	>> $(PWD)/patch/busybox.patch
-
-	# GOTCHA - this set up Blackfin busybox options, hard to find!
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/user/busybox/uclinux-configs/archival/Config.in \

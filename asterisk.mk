@@ -33,8 +33,11 @@ $(DL_DIR)/$(ASTERISK_SOURCE):
 $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE) 
 	$(ASTERISK_UNZIP) $(DL_DIR)/$(ASTERISK_SOURCE) | \
 	tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	$(PATCH_KERNEL) $(ASTERISK_DIR) patch dtmf-1.4.20.patch
+	$(PATCH_KERNEL) $(ASTERISK_DIR) patch gui-crash.patch
 	$(PATCH_KERNEL) $(ASTERISK_DIR) patch asterisk.patch
-	$(PATCH_KERNEL) $(ASTERISK_DIR) patch cid.patch
+#	$(PATCH_KERNEL) $(ASTERISK_DIR) patch asterisk.patch
+#	$(PATCH_KERNEL) $(ASTERISK_DIR) patch cid.patch
 	ln -sf $(BUILD_DIR)/src/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(BUILD_DIR)/src/g729ab_codec.h $(ASTERISK_DIR)/codecs
 	ln -sf $(BUILD_DIR)/src/codec_speex.c $(ASTERISK_DIR)/codecs
@@ -56,9 +59,9 @@ $(STAGING_LIB)/libgsm.a:
 
 asterisk: $(ASTERISK_DIR)/.configured $(ASTERISK_DIR) 
 
-	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" \
-	ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
-	$(MAKE) -C $(ASTERISK_DIR) codecs NOISY_BUILD=1
+#	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" \
+#	ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
+#	$(MAKE) -C $(ASTERISK_DIR) codecs NOISY_BUILD=1
 
 	OPTIMIZE="-Os" ASTCFLAGS="$(ASTERISK_CFLAGS)" \
 	ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
