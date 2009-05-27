@@ -26,7 +26,7 @@ X::     X
 
 == Getting Started
 
-The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the IP04 Wiki[http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX] or please post to the Blackfin Asterisk forum.
+The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the {IP04 Wiki}[http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX] or please post to the Blackfin Asterisk forum.
 
 However once the uImage is install life gets much easier!
 
@@ -34,7 +34,7 @@ This process will <b>erase your IP04 root file system</b> so please backup anyth
 
 1. Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 
-   http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08
+   http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08[http://www.rowetel.com/ucasterisk/downloads/uImage_r2.ip08]
 
    NOTE: Despite it's name, uImage_r2.ip08 works fine on both the IP04 and IP08.
 
@@ -222,7 +222,7 @@ Then capture changes as above with:
 
 5. For more information on the IPKG format:
 
-   http://handhelds.org/moin/moin.cgi/Ipkg
+   http://handhelds.org/moin/moin.cgi/Ipkg[http://handhelds.org/moin/moin.cgi/Ipkg]
 
 6. On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
