@@ -121,7 +121,7 @@ documentation files can also be browsed from BAPS2 git[http://svn.astfin.org/sof
      ip04>tftp 0x1000000 uImage
      ip04>bootm
  
-  Or you can flash the uImage as described in the Getting Started section above.
+   Or you can flash the uImage as described in the Getting Started section above.
 
 4. Check out ipkg.conf:
 
