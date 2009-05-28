@@ -1,6 +1,7 @@
 .DS_Store
 .svn/
 asterisk-1.4.21.2/*
+asterisk-1.4.21.2-orig/*
 dl/*
 dropbear-0.52/*
 g729/*
