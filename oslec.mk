@@ -52,7 +52,7 @@ endef
 
 define Package/oslec/postinst
 #!/bin/sh
-cd /lib/modules/$(MOD_DIR)/misc
+cd /lib/modules/$(MOD_DIR)
 cat modules.dep | sed '/.*oslec.ko:/ d' > modules.tmp
 cp -f modules.tmp modules.dep
 rm -r modules.tmp
@@ -71,6 +71,9 @@ cd /lib/modules/$(MOD_DIR)
 cat modules.dep | sed '/.*oslec.ko:/ d' > modules.tmp
 cp -f modules.tmp modules.dep
 rm -r modules.tmp
+
+rm -rf /dev/sample
+
 endef
 
 $(eval $(call BuildPackage,oslec))

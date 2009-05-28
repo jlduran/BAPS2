@@ -105,6 +105,7 @@ endef
 
 define Package/dropbear/prerm
 #!/bin/sh
+rm -rf /etc/dropbear
 rm -rf /bin/dropbear
 rm -rf /bin/dropbearkey
 rm -rf /bin/dropbearmulti

@@ -1,5 +1,5 @@
---- asterisk-1.4.4-orig/utils/Makefile	2007-03-23 01:10:53.000000000 +1030
-+++ asterisk-1.4.4/utils/Makefile	2008-03-22 10:21:27.000000000 +1030
+--- asterisk-1.4.21.2-orig/utils/Makefile	2008-03-11 06:04:29.000000000 -0500
++++ asterisk-1.4.21.2/utils/Makefile	2009-05-27 02:22:58.000000000 -0500
 @@ -16,7 +16,7 @@
  .PHONY: clean all uninstall
  
@@ -9,8 +9,8 @@
  UTILS:=$(ALL_UTILS)
  
  include $(ASTTOPDIR)/Makefile.rules
---- asterisk-1.4.4-orig/main/config.c	2007-04-26 10:57:18.000000000 +0930
-+++ asterisk-1.4.4/main/config.c	2008-03-22 10:21:27.000000000 +1030
+--- asterisk-1.4.21.2-orig/main/config.c	2008-06-03 17:15:33.000000000 -0500
++++ asterisk-1.4.21.2/main/config.c	2009-05-27 02:22:58.000000000 -0500
 @@ -37,7 +37,6 @@
  #include <errno.h>
  #include <time.h>
@@ -19,9 +19,9 @@
  #ifdef AST_INCLUDE_GLOB
  #if defined(__Darwin__) || defined(__CYGWIN__)
  #define GLOB_ABORTED GLOB_ABEND
---- asterisk-1.4.4-orig/configure	2007-04-07 06:28:43.000000000 +0930
-+++ asterisk-1.4.4/configure	2008-03-22 10:21:27.000000000 +1030
-@@ -12577,7 +12577,7 @@
+--- asterisk-1.4.21.2-orig/configure	2008-05-09 11:34:08.000000000 -0500
++++ asterisk-1.4.21.2/configure	2009-05-27 02:22:58.000000000 -0500
+@@ -11897,7 +11897,7 @@
  fi
  if test "x$ac_cv_func_fork_works" = xcross; then
    case $host in
@@ -30,9 +30,9 @@
        # Override, as these systems have only a dummy fork() stub
        ac_cv_func_fork_works=no
        ;;
---- asterisk-1.4.4-orig/main/frame.c	2007-01-20 04:19:38.000000000 +1030
-+++ asterisk-1.4.4/main/frame.c	2008-03-22 10:21:27.000000000 +1030
-@@ -113,7 +113,7 @@
+--- asterisk-1.4.21.2-orig/main/frame.c	2008-04-17 11:50:46.000000000 -0500
++++ asterisk-1.4.21.2/main/frame.c	2009-05-27 02:22:58.000000000 -0500
+@@ -115,7 +115,7 @@
  	{ 1, AST_FORMAT_SLINEAR, "slin", "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE },	/*!< 7 */
  	{ 1, AST_FORMAT_LPC10, "lpc10", "LPC10", 7, 20, 20, 20, 20 },		/*!<  8: codec_lpc10.c */ 
  	{ 1, AST_FORMAT_G729A, "g729", "G.729A", 10, 10, 230, 10, 20, AST_SMOOTHER_FLAG_G729 },	/*!<  9: Binary commercial distribution */
@@ -41,7 +41,7 @@
  	{ 1, AST_FORMAT_ILBC, "ilbc", "iLBC", 50, 30, 30, 30, 30 },		/*!< 11: codec_ilbc.c */ /* inc=30ms - workaround */
  	{ 1, AST_FORMAT_G726_AAL2, "g726aal2", "G.726 AAL2", 40, 10, 300, 10, 20 },	/*!<  12: codec_g726.c */
  	{ 1, AST_FORMAT_G722, "g722", "G722"},					/*!< 13 */
-@@ -1467,7 +1467,11 @@
+@@ -1498,7 +1498,11 @@
  	int samples=0;
  	switch(f->subclass) {
  	case AST_FORMAT_SPEEX:
@@ -54,16 +54,16 @@
  		break;
  	case AST_FORMAT_G723_1:
                  samples = g723_samples(f->data, f->datalen);
---- asterisk-1.4.4-orig/configs/modules.conf.sample	2006-08-25 23:44:27.000000000 +0930
-+++ asterisk-1.4.4//configs/modules.conf.sample	2008-03-22 10:21:27.000000000 +1030
-@@ -36,3 +36,5 @@
+--- asterisk-1.4.21.2-orig/configs/modules.conf.sample	2008-01-10 11:19:47.000000000 -0500
++++ asterisk-1.4.21.2//configs/modules.conf.sample	2009-05-27 02:22:58.000000000 -0500
+@@ -33,3 +33,5 @@
  ;
  noload => chan_alsa.so
  ;noload => chan_oss.so
 +
 +noload => codec_g729.so
---- asterisk-1.4.4-orig/main/callerid.c	2007-01-24 05:28:27.000000000 +1030
-+++ asterisk-1.4.4/main/callerid.c	2008-03-22 10:21:27.000000000 +1030
+--- asterisk-1.4.21.2-orig/main/callerid.c	2008-04-18 12:44:29.000000000 -0500
++++ asterisk-1.4.21.2/main/callerid.c	2009-05-27 02:22:58.000000000 -0500
 @@ -45,7 +45,32 @@
  #include "asterisk/options.h"
  #include "asterisk/utils.h"
@@ -181,7 +181,7 @@
  		res = fsk_serie(&cid->fskd, buf, &mylen, &b);
 +#endif
  		if (mylen < 0) {
- 			ast_log(LOG_ERROR, "fsk_serie made mylen < 0 (%d)\n", mylen);
+ 			ast_log(LOG_ERROR, "No start bit found in fsk data.\n");
  			free(obuf);
 @@ -572,6 +640,13 @@
  			return -1;
@@ -213,7 +213,7 @@
  		
  				cid->number[0] = '\0';
  				cid->name[0] = '\0';
-@@ -685,10 +762,16 @@
+@@ -692,10 +769,16 @@
  				}
  				free(obuf);
  				return 1;
@@ -230,7 +230,7 @@
  		}
  	}
  	if (mylen) {
-@@ -702,6 +785,11 @@
+@@ -709,6 +792,11 @@
  
  void callerid_free(struct callerid_state *cid)
  {
@@ -242,9 +242,9 @@
  	free(cid);
  }
  
---- asterisk-1.4.4-orig/res/res_agi.c	2007-02-16 22:09:55.000000000 +1030
-+++ asterisk-1.4.4/res/res_agi.c	2008-03-22 10:25:14.000000000 +1030
-@@ -286,7 +286,7 @@
+--- asterisk-1.4.21.2-orig/res/res_agi.c	2008-05-14 16:38:09.000000000 -0500
++++ asterisk-1.4.21.2/res/res_agi.c	2009-05-27 02:22:58.000000000 -0500
+@@ -291,7 +291,7 @@
  	/* Block SIGHUP during the fork - prevents a race */
  	sigfillset(&signal_set);
  	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
