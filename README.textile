@@ -169,16 +169,16 @@ root:~> ipkg list</pre>
 
 NOTES:
 
-# If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
-# To debug post/pre inst scripts <code>#!/bin/sh -x</code> is your friend!
-# To test ipkgs you can rcp down to the target:
+<ol><li>If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.</li>
+<li>To debug post/pre inst scripts <code>#!/bin/sh -x</code> is your friend!</li>
+<li>To test ipkgs you can rcp down to the target:
    
 <pre class="console">[host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
 [ip04]$ ipkg install asterisk_1.4.4-1_bfin.ipk</pre>
 
- If you get complaints about MD5 mismatch, then:
+If you get complaints about MD5 mismatch, then:
 
-<pre class="console">[ip04]$ rm /usr/lib/ipkg/lists/snapshots</pre>
+<pre class="console">[ip04]$ rm /usr/lib/ipkg/lists/snapshots</pre></li></ol>
 
 h2. HOWTO - uClinux Changes
 
