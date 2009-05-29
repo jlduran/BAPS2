@@ -4,7 +4,6 @@ h2. Introduction
 
 Package-based Build System for Blackfin Asterisk. Key differences compared to buildroot based systems like Astfin and uCasterisk:
 # End users do not need to compile any software, they just install them on a running Blackfin system, for example:
-
 <pre><code>
 root:~> ipkg install asterisk
 </code></pre>
