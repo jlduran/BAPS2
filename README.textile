@@ -31,12 +31,12 @@ This process will *erase your IP04 root file system* so please backup anything y
 # Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
 
-bq. NOTE: Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
+bq. *NOTE:* Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
 
 # Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
 Now we are going to write the new uImage to flash. You only need to configure ethaddr1 if you have two ethernet interfaces.
 
-bq. CAUTION: Do not cut/paste the steps below into your serial terminal program, as they often cannot respond fast enough and lose characters. Type each line carefully by hand.
+bq. <b>CAUTION:</b> Do not cut/paste the steps below into your serial terminal program, as they often cannot respond fast enough and lose characters. Type each line carefully by hand.
 
 Install the new uImage into NAND flash using u-boot:
 <pre class="console">ip04>set autostart
