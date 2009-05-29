@@ -28,12 +28,12 @@ In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is 
 |spandsp|Telephony Algorithms and Digital Signal Processing Routines.|
 |zaptel|Telephony hardware drivers for IP04 SPI-over-SPORT1 version (later Atcom IP04s, IP08s).|
 
-h2. Getting Started
+h2(#started). Getting Started
 
 The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS-232 console interface. For more information on this process please see the "IP04 Wiki":http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX or please post to the Blackfin Asterisk forum.
 However once the uImage is installed life gets much easier!
 
-p{background:#fefeb4;border:1px solid #dddddd;font-weight:bold;}. This process will <b>erase your IP04 root file system</b> so please backup anything you really need (like your asterisk conf files).
+p{background:#fefeb4;border:1px solid #dddddd;font-weight:bold;}. This process will erase your IP04 root file system so please backup anything you really need (like your asterisk conf files).
 
 <ol><li>Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
