@@ -33,7 +33,7 @@ h2. Getting Started
 
 The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the "IP04 Wiki":http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX or please post to the Blackfin Asterisk forum.
 
-However once the uImage is install life gets much easier!
+However once the uImage is installed life gets much easier!
 
 This process will *erase your IP04 root file system* so please backup anything you really need (like your asterisk conf files).
 
@@ -60,7 +60,7 @@ This process will *erase your IP04 root file system* so please backup anything y
      ip04>set bootargs ethaddr=$(ethaddr) ethaddr1=$(ethaddr1) $(con) root=/dev/mtdblock0 rw
      ip04>save
      ip04>bootm 0x1000000
-
+     
      (uClinux will boot.......)
 
    bq. TIP: If Linux doesn't boot or you experience other problems reboot into uboot, type "print", and carefully check bootargs
@@ -96,6 +96,7 @@ After installation many packages include documentation in the /usr/doc directory
 h2. HOWTO - Developer
 
 # Clone BAPS2
+
      $ git clone git://github.com/jlduran/BAPS2.git
      $ cd BAPS2
 
@@ -170,9 +171,7 @@ And try:
 NOTES:
 
 # If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
-
-# To debug post/pre inst scripts #!/bin/sh -x is your friend!
-
+# To debug post/pre inst scripts @#!/bin/sh -x@ is your friend!
 # To test ipkgs you can rcp down to the target:
    
      [host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
@@ -213,9 +212,7 @@ Then capture changes as above with:
 h3. Notes
 
 # Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.
-
 # See TODO.txt
-
 # To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
 
      #!/bin/sh -x 
