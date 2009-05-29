@@ -71,7 +71,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Network
   TITLE:=Spandsp
   DESCRIPTION:=\
-	Telephony Algorithms and Digital Signal Processing Routines
+	Telephony Algorithms and Digital Signal Processing Routines.
   URL:=http://soft-switch.org
 endef
 

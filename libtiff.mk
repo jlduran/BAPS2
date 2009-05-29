@@ -60,7 +60,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Network
   TITLE:=Libtiff
   DESCRIPTION:=\
-	Tiff image file format library
+	Tiff image file format library.
   URL:=http://www.libtiff.org
 endef
 
