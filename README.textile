@@ -71,9 +71,8 @@ bq. *TIP:* If Linux doesn't boot or you experience other problems reboot into ub
 On the IP04:
 
 <pre class="console">root:~> copy_rootfs.sh
-root:~> reboot</pre>
+root:~> reboot</pre></li>
 
-</li>
 <li>Now set up u-boot to mount root from yaffs (some of these env variables may be set already, use <code>print</code> to check):
 
 <pre class="console">ip04>set autostart yes
@@ -81,18 +80,15 @@ ip04>set bootargs ethaddr=$(ethaddr) ethaddr1=$(ethaddr1) $(con) $(root)
 ip04>set nandboot 'nboot 0x2000000 0x0'
 ip04>set bootcmd run nandboot
 ip04>save
-ip04>reset</pre>
+ip04>reset</pre></li>
 
-</li>
 <li>Boot IP04 to a uClinux root prompt.  Use mount to check that root is mounted on mtdblock2 (yaffs file system).
 
 Now we can install some packages using ipkg:
 
 <pre class="console">$root:~> ipkg update
 $root:~> ipkg install zaptel-spi asterisk native-sounds
-$root:~> reboot</pre>
-
-</li></ol>
+$root:~> reboot</pre></li></ol>
 
 h2. Documentation
 
@@ -148,7 +144,7 @@ root:~> hello</pre></li>
 <pre class="console">root:~> ls /etc/init.d
 root:~> /etc/init.d/hello
 root:~> /etc/init.d/hello enable
-root:~> ls -l /etc/rc.d/</pre></li>
+root:~> ls -l /etc/rc.d/</pre></li></ol>
 
 h2. HOWTO - IPKG
 
@@ -191,7 +187,7 @@ h2. HOWTO - uClinux Changes
 Say you have changed a busybox option, or modified some files in uClinux-dist.  To capture the changes to patches in SVN:
 
 <pre class="console">[BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
-  [BAPS2]$ git status</pre>
+[BAPS2]$ git status</pre>
 
 Tips:
 
@@ -216,7 +212,9 @@ Then capture changes as above with:
 h3. Notes
 
 <ol><li>Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.</li>
+
 <li>See TODO.txt</li>
+
 <li>To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
 
 <pre>#!/bin/sh -x</pre></li>
