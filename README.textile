@@ -5,6 +5,7 @@ h2. Introduction
 Package-based Build System for Blackfin Asterisk. Key differences compared to buildroot based systems like Astfin and uCasterisk:
 
 <ol><li>End users do not need to compile any software, they just install them on a running Blackfin system, for example:
+
 <pre class="console">root:~> ipkg install asterisk</pre>
 
 will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
@@ -36,8 +37,8 @@ However once the uImage is installed life gets much easier!
 
 This process will <b>erase your IP04 root file system</b> so please backup anything you really need (like your asterisk conf files).
 
-<ol>
-<li>Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
+<ol><li>Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
+
 <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
 
 bq. *NOTE:* Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
@@ -89,7 +90,9 @@ Now we can install some packages using ipkg:
 
 <pre class="console">$root:~> ipkg update
 $root:~> ipkg install zaptel-spi asterisk native-sounds
-$root:~> reboot</pre></li></ol>
+$root:~> reboot</pre>
+
+</li></ol>
 
 h2. Documentation
 
