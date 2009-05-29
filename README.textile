@@ -229,7 +229,7 @@ h3. Notes
 
 <pre>http://handhelds.org/moin/moin.cgi/Ipkg</pre></li>
 
-<li>On the target, the ipkg data is stored in /usr/lib/ipkg/info/</li>
+<li>On the target, the ipkg data is stored in /usr/lib/ipkg/info/</li></ol>
 
 h2. Directories
 
@@ -252,7 +252,7 @@ h2. BAPS2 TODO
 Some tasks that need doing...:
 
 # Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
-# Can we install kernels (uImage) using a package and no u-boot/RS232?
+# Can we install kernels (uImage) using a package and no u-boot/RS-232?
 # Should we separate kernel from baseline root file system install?
 # BAPS uImages for BF537
 # A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
