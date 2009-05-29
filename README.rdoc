@@ -214,7 +214,7 @@ Then capture changes as above with:
 
 1. Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.
 
-2. See TODO.txt
+2. See {TODO.txt}[link:TODO.txt]
 
 3. To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
 
