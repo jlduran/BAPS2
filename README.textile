@@ -57,7 +57,7 @@ bq. TIP: If Linux doesn't boot or you experience other problems reboot into uboo
 root:~> reboot</pre>
 
 # Now set up u-boot to mount root from yaffs (some of these env variables may be set already, use _print_ to check):
-<pre class"console">ip04>set autostart yes
+<pre class="console">ip04>set autostart yes
 ip04>set bootargs ethaddr=$(ethaddr) ethaddr1=$(ethaddr1) $(con) $(root)
 ip04>set nandboot 'nboot 0x2000000 0x0'
 ip04>set bootcmd run nandboot
@@ -86,63 +86,63 @@ $ cd BAPS2</pre>
 [BAPS2]$ wget http://download.analog.com/27516/frsrelease/5/0/7/5075/blackfin-toolchain-uclibc-default-08r1.5-14.i386.tar.bz2
 [BAPS2]$ tar xjf blackfin-toolchain-uclibc-default-08r1.5-14.i386.tar.bz2</pre>
 If you untar the toolchain and uClibc in the BAPS2 directory, it will be included in your path automatically. If you untar it somewhere else make sure the bin directories in this toolchain are in your path.
+
 # Make a BAPS2 uImage that supports ipkg. This also configures uClinux-dist to support compiling of other packages. You need to make uClinux before making any other packages.
+<pre class="console">[BAPS2]$ make -f uClinux.mk uClinux
+[BAPS2]$ cp uClinux-dist/images/uImage /tftpboot/uImage</pre>
 
-     [BAPS2]$ make -f uClinux.mk uClinux
-     [BAPS2]$ cp uClinux-dist/images/uImage /tftpboot/uImage
+You can then try booting from your uImage via tftp, in u-boot:
 
-   You can then try booting from your uImage via tftp, in u-boot:
+<pre class="console">ip04>set autostart
+ip04>set bootargs ethaddr=your:mac:address root=/dev/mtdblock0 rw
+ip04>save
+ip04>tftp 0x1000000 uImage
+ip04>bootm</pre>
 
-     ip04>set autostart
-     ip04>set bootargs ethaddr=your:mac:address root=/dev/mtdblock0 rw
-     ip04>save
-     ip04>tftp 0x1000000 uImage
-     ip04>bootm
- 
-   Or you can flash the uImage as described in the Getting Started section above.
+Or you can flash the uImage as described in the Getting Started section above.
 
 # Check out ipkg.conf:
 
-     root:~> cat /etc/ipkg.conf
-     src snapshots http://rowetel.com/ucasterisk/ipkg
-     dest root /
+<pre class="console">root:~> cat /etc/ipkg.conf
+src snapshots http://rowetel.com/ucasterisk/ipkg
+dest root /</pre>
 
-   Try installing a simple ipkgs:
+Try installing a simple ipkgs:
 
-     root:~> ipkg update
-     root:~> ipkg list
-     root:~> ipkg install hello
-     root:~> hello
+<pre class="console">root:~> ipkg update
+root:~> ipkg list
+root:~> ipkg install hello
+root:~> hello</pre>
 
 # BAPS uses init.d type start up scripts, for example:
 
-     root:~> ls /etc/init.d
-     root:~> /etc/init.d/hello
-     root:~> /etc/init.d/hello enable
-     root:~> ls -l /etc/rc.d/
+<pre class="console">root:~> ls /etc/init.d
+root:~> /etc/init.d/hello
+root:~> /etc/init.d/hello enable
+root:~> ls -l /etc/rc.d/</pre>
 
 h2. HOWTO - IPKG
 
 To build the ipkg:
 
-  [BAPS2]$ make -f hello.mk hello
-  [BAPS2]$ make -f hello.mk hello-package
-  [BAPS2]$ ls ipkg
+<pre class="console">[BAPS2]$ make -f hello.mk hello
+[BAPS2]$ make -f hello.mk hello-package
+[BAPS2]$ ls ipkg</pre>
 
 To create an index file:
 
-  [BAPS2]$ cd ipkg
-  [BAPS2]$ ../scripts/ipkg-make-index.sh . > Packages
-  [BAPS2]$ scp Packages /your/web/server
+<pre class="console">[BAPS2]$ cd ipkg
+[BAPS2]$ ../scripts/ipkg-make-index.sh . > Packages
+[BAPS2]$ scp Packages /your/web/server</pre>
 
 Then change the first line in /etc/ipkg.conf on your IP04:
 
-  src snapshots http://you.web.server
+<pre>src snapshots http://you.web.server</pre>
 
 And try:
 
-  root:~> ipkg update
-  root:~> ipkg list
+<pre class="console">root:~> ipkg update
+root:~> ipkg list</pre>
 
 NOTES:
 
@@ -150,12 +150,12 @@ NOTES:
 # To debug post/pre inst scripts @#!/bin/sh -x@ is your friend!
 # To test ipkgs you can rcp down to the target:
    
-   [host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
-   [ip04]$ ipkg install asterisk_1.4.4-1_bfin.ipk
+<pre class="console">[host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
+[ip04]$ ipkg install asterisk_1.4.4-1_bfin.ipk</pre>
 
  If you get complaints about MD5 mismatch, then:
 
-   [ip04]$ rm /usr/lib/ipkg/lists/snapshots
+<pre class="console">[ip04]$ rm /usr/lib/ipkg/lists/snapshots</pre>
 
 h2. HOWTO - uClinux Changes
 
