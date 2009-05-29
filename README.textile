@@ -211,11 +211,9 @@ h3. Notes
 # Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.
 # See TODO.txt
 # To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
-<pre>
-  #!/bin/sh -x
-</pre>
+<pre>#!/bin/sh -x</pre>
 # When writing init scripts your will find the busybox msh shell has some quirks, here is a link that explains them (all one line):
-  http://dslinux.org/cgi-bin/moin.cgi/DSLinuxMshScriptingGuide?action=show&redirect=DSLinux+msh+scripting+guide
+<pre>http://dslinux.org/cgi-bin/moin.cgi/DSLinuxMshScriptingGuide?action=show&redirect=DSLinux+msh+scripting+guide</pre>
 # For more information on the IPKG format:
   http://handhelds.org/moin/moin.cgi/Ipkg
 # On the target, the ipkg data is stored in /usr/lib/ipkg/info/
