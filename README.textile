@@ -28,16 +28,11 @@ In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is 
 h2. Getting Started
 
 The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the "IP04 Wiki":http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX or please post to the Blackfin Asterisk forum.
-
 However once the uImage is installed life gets much easier!
-
 This process will *erase your IP04 root file system* so please backup anything you really need (like your asterisk conf files).
-
 # Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
- <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
-
+<pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
 bq. NOTE: Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
-
 # Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
  Now we are going to write the new uImage to flash. You only need to configure ethaddr1 if you have two ethernet interfaces.
 
