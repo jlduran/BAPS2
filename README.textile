@@ -35,9 +35,9 @@ This process will *erase your IP04 root file system* so please backup anything y
 # Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
  <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
 
-bq.  NOTE: Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
+bq. NOTE: Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
 
-# Connect a RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
+# Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
  Now we are going to write the new uImage to flash. You only need to configure ethaddr1 if you have two ethernet interfaces.
 
 bq. CAUTION: Do not cut/paste the steps below into your serial terminal program, as they often cannot respond fast enough and lose characters. Type each line carefully by hand.
@@ -56,6 +56,7 @@ bq. CAUTION: Do not cut/paste the steps below into your serial terminal program,
 
  (uClinux will boot.......)
 </pre>
+
 bq. TIP: If Linux doesn't boot or you experience other problems reboot into uboot, type "print", and carefully check bootargs
 
 # Now we have uClinux running, but using a ram-based ext2 file system (mtdblock0) for root. So we need to copy /root into the yaffs file system:
@@ -75,12 +76,11 @@ bq. TIP: If Linux doesn't boot or you experience other problems reboot into uboo
      ip04>reset
 
 # Boot IP04 to a uClinux root prompt.  Use mount to check that root is mounted on mtdblock2 (yaffs file system).
+Now we can install some packages using ipkg:
 
-   Now we can install some packages using ipkg:
-
-      $root:~> ipkg update
-      $root:~> ipkg install zaptel-spi asterisk native-sounds
-      $root:~> reboot
+  $root:~> ipkg update
+  $root:~> ipkg install zaptel-spi asterisk native-sounds
+  $root:~> reboot
 
 h2. Documentation
 
