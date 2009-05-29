@@ -124,7 +124,7 @@ ip04>save
 ip04>tftp 0x1000000 uImage
 ip04>bootm</pre>
 
-Or you can flash the uImage as described in the Getting Started section above.</li>
+Or you can flash the uImage as described in the "Getting Started":#started section above.</li>
 
 <li>Check out ipkg.conf:
 
