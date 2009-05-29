@@ -30,20 +30,25 @@ In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is 
 
 h2. Getting Started
 
-The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS232 console interface. For more information on this process please see the "IP04 Wiki":http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX or please post to the Blackfin Asterisk forum.
+The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS-232 console interface. For more information on this process please see the "IP04 Wiki":http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX or please post to the Blackfin Asterisk forum.
 However once the uImage is installed life gets much easier!
-This process will *erase your IP04 root file system* so please backup anything you really need (like your asterisk conf files).
-# Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
+
+p{background:#fefeb4;border:1px solid #dddddd;font-weight:bold;}. This process will <b>erase your IP04 root file system</b> so please backup anything you really need (like your asterisk conf files).
+
+<ol><li>Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
 <pre>http://www.rowetel.com/ucasterisk/downloads/uImage_r3.ip08</pre>
 
 bq. *NOTE:* Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
+</li>
 
-# Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
+<li>Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
+
 Now we are going to write the new uImage to flash. You only need to configure ethaddr1 if you have two ethernet interfaces.
 
 bq. *CAUTION:* Do not cut/paste the steps below into your serial terminal program, as they often cannot respond fast enough and lose characters. Type each line carefully by hand.
 
 Install the new uImage into NAND flash using u-boot:
+
 <pre class="console">ip04>set autostart
 ip04>set serverip your.tftp.server
 ip04>tftp 0x1000000 uImage_r2.ip08
@@ -58,12 +63,17 @@ ip04>bootm 0x1000000</pre>
 
 bq. *TIP:* If Linux doesn't boot or you experience other problems reboot into uboot, type "print", and carefully check bootargs
 
-# Now we have uClinux running, but using a ram-based ext2 file system (mtdblock0) for root. So we need to copy /root into the yaffs file system:
- On the IP04:
+</li>
+<li>Now we have uClinux running, but using a ram-based ext2 file system (mtdblock0) for root. So we need to copy /root into the yaffs file system:
+
+On the IP04:
+
 <pre class="console">root:~> copy_rootfs.sh
 root:~> reboot</pre>
 
-# Now set up u-boot to mount root from yaffs (some of these env variables may be set already, use _print_ to check):
+</li>
+<li>Now set up u-boot to mount root from yaffs (some of these env variables may be set already, use <code>print</code> to check):
+
 <pre class="console">ip04>set autostart yes
 ip04>set bootargs ethaddr=$(ethaddr) ethaddr1=$(ethaddr1) $(con) $(root)
 ip04>set nandboot 'nboot 0x2000000 0x0'
@@ -71,11 +81,14 @@ ip04>set bootcmd run nandboot
 ip04>save
 ip04>reset</pre>
 
-# Boot IP04 to a uClinux root prompt.  Use mount to check that root is mounted on mtdblock2 (yaffs file system).
+</li>
+<li>Boot IP04 to a uClinux root prompt.  Use mount to check that root is mounted on mtdblock2 (yaffs file system).
+
 Now we can install some packages using ipkg:
+
 <pre class="console">$root:~> ipkg update
 $root:~> ipkg install zaptel-spi asterisk native-sounds
-$root:~> reboot</pre>
+$root:~> reboot</pre></li></ol>
 
 h2. Documentation
 
@@ -154,7 +167,7 @@ root:~> ipkg list</pre>
 NOTES:
 
 # If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
-# To debug post/pre inst scripts @#!/bin/sh -x@ is your friend!
+# To debug post/pre inst scripts <code>#!/bin/sh -x</code> is your friend!
 # To test ipkgs you can rcp down to the target:
    
 <pre class="console">[host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
