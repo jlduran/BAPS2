@@ -171,7 +171,7 @@ NOTES:
 
 1. If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
 
-2. To debug post/pre inst scripts +#!/bin/sh -x+ is your friend!
+2. To debug post/pre inst scripts <tt>#!/bin/sh -x</tt> is your friend!
 
 3. To test ipkgs you can rcp down to the target:
    
