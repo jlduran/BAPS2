@@ -34,7 +34,7 @@ The installation of the BAPs uImage is still a little complex (apologies). It re
 
 However once the uImage is installed life gets much easier!
 
-This process will *erase your IP04 root file system* so please backup anything you really need (like your asterisk conf files).
+This process will <b>erase your IP04 root file system</b> so please backup anything you really need (like your asterisk conf files).
 
 <ol>
 <li>Get the baseline BAPs uImage (contains kernel and basic root file system) and place it on your tftp server:
