@@ -63,7 +63,7 @@ ip04>bootm 0x1000000</pre>
 
 (uClinux will boot.......)
 
-bq. *TIP:* If Linux doesn't boot or you experience other problems reboot into uboot, type @print@, and carefully check bootargs
+bq. *TIP:* If Linux doesn't boot or you experience other problems reboot into uboot, type <code>print</code>, and carefully check bootargs
 
 </li>
 <li>Now we have uClinux running, but using a ram-based ext2 file system (mtdblock0) for root. So we need to copy /root into the yaffs file system:
