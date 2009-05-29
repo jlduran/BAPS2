@@ -78,7 +78,7 @@ After installation many packages include documentation in the /usr/doc directory
 
 h2. HOWTO - Developer
 
-# Clone BAPS2
+# Clone BAPS2:
 <pre class="console">$ git clone git://github.com/jlduran/BAPS2.git
 $ cd BAPS2</pre>
 # You need to install the toolchain and uClibc:
