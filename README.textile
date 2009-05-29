@@ -4,13 +4,17 @@ h2. Introduction
 
 Package-based Build System for Blackfin Asterisk. Key differences compared to buildroot based systems like Astfin and uCasterisk:
 # End users do not need to compile any software, they just install them on a running Blackfin system, for example:
+
 <pre><code>
 root:~> ipkg install asterisk
 </code></pre>
 
 will grab the latest Asterisk package from a web site and install it on a Blackfin based hardware platform. Use is not limited to Asterisk, it could be used to manage any Blackfin software, including the kernel. The use of ipkg is very common on the OpenWRT project, and similar package based systems are common on x86 Linux, e.g. apt-get, debs, rpms.
+
 Note that software is installed at run time rather than build time. Packages (via ipkg) are used to install applications like Asterisk, rather than placing everything in a uImage. The target hardware is initially booted with a basic kernel and root file system, then packages are installed as required. We assume availability of persistent (non ram) based file system like yaffs or jffs2.
+
 The goal is to make installing software on the Blackfin much easier for end-users, more like an x86 experience.
+
 # Compared to buildroot systems BAPS has a flat directory structure to ease development (less wear on your tab key). It is designed to allow modular compilation of packages, e.g. you can compile a single application without building the entire uImage. Faster and less output to wade through. Makefiles (e.g. asterisk.mk) and source (e.g. asterisk-1.4.4) are within one directory level of each other for easy navigation of the source tree. There is less chance of breaking the build system due to decoupling of modules (kernel, root fs, are separate from Asterisk).
 
 h2. Packages
