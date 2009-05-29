@@ -163,40 +163,45 @@ h2. HOWTO - uClinux Changes
 
 Say you have changed a busybox option, or modified some files in uClinux-dist.  To capture the changes to patches in SVN:
 
-  [BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
-  [BAPS2]$ svn status
+<pre class="console">[BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
+  [BAPS2]$ git status</pre>
 
 Tips:
 
 To change linux kernel options:
 
-  [BAPS2]$ cd uClinux-dist
-  [uClinux-dist]$ make linux_menuconfig (kernel changes)
+<pre class="console">[BAPS2]$ cd uClinux-dist
+[uClinux-dist]$ make linux_menuconfig</pre>
 
 To change user application and library settings:
 
-  [BAPS2]$ cd uClinux-dist
-  [uClinux-dist]$ make config_menuconfig
+<pre class="console">[BAPS2]$ cd uClinux-dist
+[uClinux-dist]$ make config_menuconfig</pre>
 
 To modify the IP04 rc, motd etc:
 
-  [BAPS2]$ cd uClinux-dist/vendors/Rowetel/IP04
-  (mess with files)
-  
+<pre class="console">[BAPS2]$ cd uClinux-dist/vendors/Rowetel/IP04</pre>
+
 Then capture changes as above with:
  
-  [BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
+<pre class="console">[BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch</pre>
 
 h3. Notes
 
 # Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.
 # See TODO.txt
 # To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
+
 <pre>#!/bin/sh -x</pre>
+
 # When writing init scripts your will find the busybox msh shell has some quirks, here is a link that explains them:
+
 <pre>http://dslinux.org/cgi-bin/moin.cgi/DSLinuxMshScriptingGuide?action=show&redirect=DSLinux+msh+scripting+guide</pre>
+
 # For more information on the IPKG format:
+
 <pre>http://handhelds.org/moin/moin.cgi/Ipkg</pre>
+
 # On the target, the ipkg data is stored in /usr/lib/ipkg/info/
 
 h2. Directories
