@@ -43,7 +43,7 @@ This process will <b>erase your IP04 root file system</b> so please backup anyth
 bq. *NOTE:* Despite it's name, uImage_r3.ip08 works fine on both the IP04 and IP08.
 
 </li>
-<li>Connect an RS232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
+<li>Connect an RS-232 cable to your IP04 (via the daughter board) and stop the boot process at the u-boot prompt.
 Now we are going to write the new uImage to flash. You only need to configure ethaddr1 if you have two ethernet interfaces.
 
 bq. *CAUTION:* Do not cut/paste the steps below into your serial terminal program, as they often cannot respond fast enough and lose characters. Type each line carefully by hand.
@@ -97,18 +97,23 @@ After installation many packages include documentation in the /usr/doc directory
 
 h2. HOWTO - Developer
 
-# Clone BAPS2:
+<ol><li>Clone BAPS2:
+
 <pre class="console">$ git clone git://github.com/jlduran/BAPS2.git
-$ cd BAPS2</pre>
-# You need to install the toolchain and uClibc:
+$ cd BAPS2</pre></li>
+
+<li>You need to install the toolchain and uClibc:
+
 <pre class="console">[BAPS2]$ wget http://download.analog.com/27516/frsrelease/5/0/8/5087/blackfin-toolchain-08r1.5-14.i386.tar.bz2
 [BAPS2]$ tar xjf blackfin-toolchain-08r1.5-14.i386.tar.bz2
 
 [BAPS2]$ wget http://download.analog.com/27516/frsrelease/5/0/7/5075/blackfin-toolchain-uclibc-default-08r1.5-14.i386.tar.bz2
 [BAPS2]$ tar xjf blackfin-toolchain-uclibc-default-08r1.5-14.i386.tar.bz2</pre>
-If you untar the toolchain and uClibc in the BAPS2 directory, it will be included in your path automatically. If you untar it somewhere else make sure the bin directories in this toolchain are in your path.
 
-# Make a BAPS2 uImage that supports ipkg. This also configures uClinux-dist to support compiling of other packages. You need to make uClinux before making any other packages.
+If you untar the toolchain and uClibc in the BAPS2 directory, it will be included in your path automatically. If you untar it somewhere else make sure the bin directories in this toolchain are in your path.</li>
+
+<li>Make a BAPS2 uImage that supports ipkg. This also configures uClinux-dist to support compiling of other packages. You need to make uClinux before making any other packages.
+
 <pre class="console">[BAPS2]$ make -f uClinux.mk uClinux
 [BAPS2]$ cp uClinux-dist/images/uImage /tftpboot/uImage</pre>
 
@@ -120,9 +125,9 @@ ip04>save
 ip04>tftp 0x1000000 uImage
 ip04>bootm</pre>
 
-Or you can flash the uImage as described in the Getting Started section above.
+Or you can flash the uImage as described in the Getting Started section above.</li>
 
-# Check out ipkg.conf:
+<li>Check out ipkg.conf:
 
 <pre class="console">root:~> cat /etc/ipkg.conf
 src snapshots http://rowetel.com/ucasterisk/ipkg
@@ -133,14 +138,14 @@ Try installing a simple ipkgs:
 <pre class="console">root:~> ipkg update
 root:~> ipkg list
 root:~> ipkg install hello
-root:~> hello</pre>
+root:~> hello</pre></li>
 
-# BAPS uses init.d type start up scripts, for example:
+<li>BAPS uses init.d type start up scripts, for example:
 
 <pre class="console">root:~> ls /etc/init.d
 root:~> /etc/init.d/hello
 root:~> /etc/init.d/hello enable
-root:~> ls -l /etc/rc.d/</pre>
+root:~> ls -l /etc/rc.d/</pre></li>
 
 h2. HOWTO - IPKG
 
