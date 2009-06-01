@@ -46,6 +46,7 @@ libssl: $(LIBSSL_DIR)/.configured
 	mkdir -p $(TARGET_DIR)/lib
 	cp -f $(LIBSSL_DIR)/libssl.so.0.9.8 $(TARGET_DIR)/lib
 	cp -f $(LIBSSL_DIR)/libcrypto.so.0.9.8 $(TARGET_DIR)/lib
+	cd $(TARGET_DIR)/lib/; ln -sf libssl.so.0.9.8 libssl.so; ln -sf libcrypto.so.0.9.8 libcrypto.so
 	touch $(PKG_BUILD_DIR)/.built
 
 all: libssl

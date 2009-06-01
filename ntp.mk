@@ -4,10 +4,10 @@
 
 include rules.mk
 
-NTP_VERSION=4.1.1
+NTP_VERSION=4.2.4p4
 NTP_NAME=ntp
-NTP_DIR=$(UCLINUX_DIST)/user/$(NTP_NAME)
-NTP_BUILD_DIR=$(UCLINUX_DIST)/user/$(NTP_NAME)/builddir
+NTP_DIR=$(UCLINUX_DIST)/user/ntp/$(NTP_NAME)-$(NTP_VERSION)
+NTP_BUILD_DIR=$(UCLINUX_DIST)/user/ntp/$(NTP_NAME)-$(NTP_VERSION)/builddir
 TARGET_DIR=$(TOPDIR)/tmp/ntp/ipkg/ntp
 
 PKG_NAME:=ntp
@@ -26,11 +26,7 @@ NTP_CONFIGURE_OPTS=--host=bfin-linux-uclibc \
                    --datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info \
                    --localstatedir=/var/lib
 
-#ifdef CONFIG_USER_NTPD_NTPDATE
 NTPDATE := with
-#else
-#NTPDATE := without
-#endif
 
 ifdef CONFIG_USER_NTPD_NTPDC
 NTPDC := with

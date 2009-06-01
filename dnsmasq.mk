@@ -1,5 +1,5 @@
 # dnsmasq.mk
-# Jose Luis Duran Apil 2009
+# Jose Luis Duran April 2009
 #
 # Dnsmasq is a lightweight, easy to configure DNS forwarder and DHCP
 # server. It is designed to provide DNS, and optionally DHCP, to a small

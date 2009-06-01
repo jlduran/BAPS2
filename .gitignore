@@ -5,6 +5,7 @@ asterisk-1.4.21.2-orig/*
 dl/*
 dropbear-0.52/*
 g729/*
+gmp-4.3.1/*
 ipkg/*
 libxml2-2.7.3/*
 opt/*
