@@ -70,7 +70,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Editor
   TITLE:=vim
   DESCRIPTION:=\
-	Vim is an almost compatible version of the UNIX editor Vi
+	Vim is an almost compatible version of the UNIX editor Vi.
   URL:=http://www.vim.org/
 endef
 

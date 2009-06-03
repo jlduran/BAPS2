@@ -22,7 +22,9 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/tmp/strongswan
 #                   Disable IPv6 & Read-only TFTP Server
 #--------------------------------------------------------------------------
 
-STRONGSWAN_COPTS=-DNO_IPV6 -DNO_TFTP -DNO_LARGEFILE
+STRONGSWAN_CONFIGURE_OPTS=--host=bfin-linux-uclibc --prefix=$(TARGET_DIR) \
+#		--libdir=$(STAGING_DIR)/usr/lib --includedir=$(STAGING_DIR)/usr/include \
+		--disable-ldap
 
 #--------------------------------------------------------------------------
 
@@ -35,20 +37,16 @@ $(STRONGSWAN_DIR)/.unpacked: $(DL_DIR)/$(STRONGSWAN_SOURCE)
 	touch $(STRONGSWAN_DIR)/.unpacked
 
 strongswan: $(STRONGSWAN_DIR)/.unpacked
-	make -C $(STRONGSWAN_DIR) CC=bfin-linux-uclibc-gcc CFLAGS="$(TARGET_CFLAGS)" AWK=gawk\
-                COPTS='$(STRONGSWAN_COPTS)' PREFIX=/usr BINDIR=/sbin MANDIR=/usr/share/man\
-                LOCALEDIR=/usr/share/locale DESTDIR=$(TARGET_DIR) install
-	mkdir -p $(TARGET_DIR)/var/lib/misc
-	mkdir -p $(TARGET_DIR)/etc/init.d
-	rm -rf $(TARGET_DIR)/usr
-	cp -f $(STRONGSWAN_DIR)/strongswan.conf.example $(TARGET_DIR)/etc/strongswan.conf
-	cp files/strongswan.init $(TARGET_DIR)/etc/init.d/strongswan
-	chmod u+x $(TARGET_DIR)/etc/init.d/strongswan
+	cd $(STRONGSWAN_DIR); ./configure $(STRONGSWAN_CONFIGURE_OPTS)
+	make -C $(STRONGSWAN_DIR)
+	make -C $(STRONGSWAN_DIR) install
+#	mkdir -p $(TARGET_DIR)/var/lib/misc
+#	mkdir -p $(TARGET_DIR)/etc/init.d
+#	rm -rf $(TARGET_DIR)/usr
+#	cp -f $(STRONGSWAN_DIR)/strongswan.conf.example $(TARGET_DIR)/etc/strongswan.conf
+#	cp files/strongswan.init $(TARGET_DIR)/etc/init.d/strongswan
+#	chmod u+x $(TARGET_DIR)/etc/init.d/strongswan
 	touch $(PKG_BUILD_DIR)/.built
-
-#--------------------------------------------------------------------------
-#                     USEFUL STRONGSWAN MAKEFILE TARGETS     
-#--------------------------------------------------------------------------
 
 all: strongswan
 

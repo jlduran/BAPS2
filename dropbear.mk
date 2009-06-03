@@ -59,8 +59,6 @@ dropbear: $(DROPBEAR_DIR)/.configured
 	cp -v $(DROPBEAR_BUILD_DIR)/ssh $(TARGET_DIR)/bin/
 	cp -v $(DROPBEAR_BUILD_DIR)/scp $(TARGET_DIR)/bin/
 	cp -v $(DROPBEAR_BUILD_DIR)/dbclient $(TARGET_DIR)/bin/
-	mkdir -p $(TARGET_DIR)/usr/doc
-	cp -v doc/dropbear.txt $(TARGET_DIR)/usr/doc
 
 	touch $(PKG_BUILD_DIR)/.built
 
@@ -79,7 +77,7 @@ define Package/dropbear
   CATEGORY:=Network
   TITLE:=Dropbear
   DESCRIPTION:=\
-        Dropbear is a relatively small SSH 2 server and client. \\\
+	Dropbear is a relatively small SSH 2 server and client.
   URL:=http://matt.ucc.asn.au/dropbear/dropbear.html
   ARCHITECTURE:=bfin-uclinux
 endef

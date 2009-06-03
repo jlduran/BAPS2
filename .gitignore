@@ -8,9 +8,11 @@ g729/*
 gmp-4.3.1/*
 ipkg/*
 libxml2-2.7.3/*
+openswan-2.6.21/*
 opt/*
 oslec/*
 spandsp-0.0.4/*
+strongswan-4.3.1/*
 tiff-3.8.2/*
 tmp/*
 u-boot-1.1.6-2008R1.5/*
