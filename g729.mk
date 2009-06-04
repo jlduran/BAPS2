@@ -36,7 +36,7 @@ define Package/g729
   CATEGORY:=Libraries
   TITLE:=G.729
   DESCRIPTION:=\
-        G.729 Codec
+        G.729 Codec.
   URL:=http://www.sipro.com
 endef
 

@@ -1,6 +1,6 @@
 h1. Blackfin Asterisk Package System (BAPs)
 
-h2. Introduction
+h2(#intro). Introduction
 
 Package-based Build System for Blackfin Asterisk. Key differences compared to buildroot based systems like Astfin and uCasterisk:
 
@@ -16,13 +16,15 @@ The goal is to make installing software on the Blackfin much easier for end-user
 
 <li>Compared to buildroot systems BAPS has a flat directory structure to ease development (less wear on your tab key). It is designed to allow modular compilation of packages, e.g. you can compile a single application without building the entire uImage. Faster and less output to wade through. Makefiles (e.g. asterisk.mk) and source (e.g. asterisk-1.4.4) are within one directory level of each other for easy navigation of the source tree. There is less chance of breaking the build system due to decoupling of modules (kernel, root fs, are separate from Asterisk).</li></ol>
 
-h2. Packages
+h2(#packages). Packages
 
 In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is a growing list of packages:
 
 |_. Name|_. Description|
 |asterisk|Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware.|
 |dropbear|Dropbear is a relatively small SSH 2 server and client.|
+|g729|G.729 Codec.|
+|libgmp|GNU MP is a portable library written in C for arbitrary precision arithmetic on integers, rational numbers, and floating-point numbers. It aims to provide the fastest possible arithmetic for all applications that need higher precision than is directly supported by the basic C types.|
 |libssl|A toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography world-wide.|
 |libtiff|Tiff image file format library.|
 |libxml|A library for manipulating XML and HTML resources.|
@@ -90,11 +92,11 @@ Now we can install some packages using ipkg:
 $root:~> ipkg install zaptel-spi asterisk native-sounds
 $root:~> reboot</pre></li></ol>
 
-h2. Documentation
+h2(#doco). Documentation
 
 After installation many packages include documentation in the /usr/doc directory of the IP04.  These are small files designed to capture Blackfin or IP04 specific information, for example simple tests and notes on differences from other versions of the same package. The documentation files can also be browsed from "BAPS2 git":http://svn.astfin.org/software/baps/trunk/doc.
 
-h2. HOWTO - Developer
+h2(#howto_developer). HOWTO - Developer
 
 <ol><li>Clone BAPS2:
 
@@ -146,7 +148,7 @@ root:~> /etc/init.d/hello
 root:~> /etc/init.d/hello enable
 root:~> ls -l /etc/rc.d/</pre></li></ol>
 
-h2. HOWTO - IPKG
+h2(#howto_ipkg). HOWTO - IPKG
 
 To build the ipkg:
 
@@ -182,7 +184,7 @@ If you get complaints about MD5 mismatch, then:
 
 <pre class="console">[ip04]$ rm /usr/lib/ipkg/lists/snapshots</pre></li></ol>
 
-h2. HOWTO - uClinux Changes
+h2(#howto_uclinux). HOWTO - uClinux Changes
 
 Say you have changed a busybox option, or modified some files in uClinux-dist.  To capture the changes to patches in SVN:
 
@@ -229,7 +231,7 @@ h3. Notes
 
 <li>On the target, the ipkg data is stored in /usr/lib/ipkg/info/</li></ol>
 
-h2. Directories
+h2(#directories). Directories
 
 ipkg - completed packages are placed here
 
@@ -241,11 +243,11 @@ patch - patches for all packages
 
 files - start up scripts for packages, get copied to /etc/init.d on target
 
-h2. Credits
+h2(#credits). Credits
 
 Thanks to: Jeff Knighton, Alex Tao, Ming C (Vincent) Li, Mike Taht, Keith Huang, Mark Hindess, Nick Basil, Michael O'Conner, Darryl Ross, Jose Luis Duran and Kelvin Chua for contributing.
 
-h2. BAPS2 TODO
+h2(#todo). BAPS2 TODO
 
 Some tasks that need doing...:
 
