@@ -1,0 +1,10 @@
+#!/bin/sh
+#cd ../
+#. scripts/build-common
+#cd uClinux/uClinux-dist
+#make image
+# Integrate MD5 sum into the image 
+scripts/package-image uClinux-dist/images/uImage uClinux-dist/images/uImage.flash
+
+#cp -v images/uImage /tftpboot
+
