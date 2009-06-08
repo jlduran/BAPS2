@@ -1,5 +1,5 @@
 # dnsmasq.mk
-# Jose Luis Duran April 2009
+# Jose Luis Duran June 2009
 #
 # Dnsmasq is a lightweight, easy to configure DNS forwarder and DHCP
 # server. It is designed to provide DNS, and optionally DHCP, to a small
@@ -15,7 +15,7 @@
 
 include rules.mk
 
-DNSMASQ_VERSION=2.47
+DNSMASQ_VERSION=2.48
 DNSMASQ_SITE=http://thekelleys.org.uk/dnsmasq
 DNSMASQ_SOURCE=dnsmasq-$(DNSMASQ_VERSION).tar.gz
 DNSMASQ_DIR=$(BUILD_DIR)/dnsmasq-$(DNSMASQ_VERSION)
@@ -26,14 +26,7 @@ PKG_VERSION:=$(DNSMASQ_VERSION)
 PKG_RELEASE:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/tmp/dnsmasq
 
-#--------------------------------------------------------------------------
-#                          DNSMASQ COMPILE OPTIONS
-#                   Disable IPv6 & Read-only TFTP Server
-#--------------------------------------------------------------------------
-
-DNSMASQ_COPTS=-DNO_IPV6 -DNO_TFTP -DNO_LARGEFILE
-
-#--------------------------------------------------------------------------
+DNSMASQ_COPTS=-DNO_IPV6 -DNO_TFTP -DNO_LARGEFILE -DHAVE_BROKEN_RTC
 
 $(DL_DIR)/$(DNSMASQ_SOURCE):
 	mkdir -p dl
@@ -44,9 +37,9 @@ $(DNSMASQ_DIR)/.unpacked: $(DL_DIR)/$(DNSMASQ_SOURCE)
 	touch $(DNSMASQ_DIR)/.unpacked
 
 dnsmasq: $(DNSMASQ_DIR)/.unpacked
-	make -C $(DNSMASQ_DIR) CC=bfin-linux-uclibc-gcc CFLAGS="$(TARGET_CFLAGS)" AWK=gawk\
-                COPTS='$(DNSMASQ_COPTS)' PREFIX=/usr BINDIR=/sbin MANDIR=/usr/share/man\
-                LOCALEDIR=/usr/share/locale DESTDIR=$(TARGET_DIR) install
+	make -C $(DNSMASQ_DIR) CC=bfin-linux-uclibc-gcc \
+		COPTS='$(DNSMASQ_COPTS)' \
+		BINDIR=/bin DESTDIR=$(TARGET_DIR) install
 	mkdir -p $(TARGET_DIR)/var/lib/misc
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	rm -rf $(TARGET_DIR)/usr
@@ -54,10 +47,6 @@ dnsmasq: $(DNSMASQ_DIR)/.unpacked
 	cp files/dnsmasq.init $(TARGET_DIR)/etc/init.d/dnsmasq
 	chmod u+x $(TARGET_DIR)/etc/init.d/dnsmasq
 	touch $(PKG_BUILD_DIR)/.built
-
-#--------------------------------------------------------------------------
-#                     USEFUL DNSMASQ MAKEFILE TARGETS     
-#--------------------------------------------------------------------------
 
 all: dnsmasq
 
