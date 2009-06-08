@@ -233,7 +233,7 @@ h3. Notes
 
 h2(#directories). Directories
 
-ipkg - completed packages are placed here
+- ipkg := completed packages are placed here
 
 include - from OpenWRT kamikaze, contains useful stuff for building packages
 
