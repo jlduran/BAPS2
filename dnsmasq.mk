@@ -7,7 +7,7 @@
 # global DNS. The DHCP server integrates with the DNS server and allows
 # machines with DHCP-allocated addresses to appear in the DNS with names
 # configured either in each host or in a central configuration file.
-# Dnsmasq supports static and dynamic DHCP leases and BOOTP/TFTP for
+# Dnsmasq supports static and dynamic DHCP leases and BOOTP/TFTP/PXE for
 # network booting of diskless machines.
 #
 # To make dnsmasq:
@@ -69,7 +69,7 @@ define Package/$(PKG_NAME)
 	the DNS server and allows machines with DHCP-allocated addresses \\\
 	to appear in the DNS with names configured either in each host \\\
 	or in a central configuration file. Dnsmasq supports static and \\\
-	dynamic DHCP leases and BOOTP/TFTP for network booting of \\\
+	dynamic DHCP leases and BOOTP/TFTP/PXE for network booting of \\\
 	diskless machines.
   URL:=http://thekelleys.org.uk/dnsmasq/doc.html
 endef
