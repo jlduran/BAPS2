@@ -1,6 +1,6 @@
 # zaptel.mk
 # Makefile for Zaptel with Astfin GSM module support
-# Jose Luis Duran April 2009
+# Jose Luis Duran June 2009
 #
 # make -f zaptel.mk zaptel-package
 #
@@ -25,7 +25,7 @@
 
 #ZAPTEL_SPI_INTERFACE=y
 ZAPTEL_SPORT_INTERFACE=y
-ZAPTEL_GSM_MODULE=n
+ZAPTEL_GSM_MODULE=y
 
 include rules.mk
 

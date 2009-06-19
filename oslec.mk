@@ -21,7 +21,7 @@ $(OSLEC_DIR):
 	patch -p0 < patch/oslec.patch
 
 oslec: $(OSLEC_DIR)
-	make -C $(UCLINUX_DIST) SUBDIRS=$(OSLEC_DIR)/kernel modules
+	make -C $(UCLINUX_DIST)/linux-2.6.x SUBDIRS=$(OSLEC_DIR)/kernel modules
 	make -C $(OSLEC_DIR)/user
 
 	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
@@ -34,6 +34,9 @@ oslec: $(OSLEC_DIR)
 	touch $(PKG_BUILD_DIR)/.built
 
 all: oslec
+
+oslec-clean:
+	rm -Rf $(OSLEC_DIR)
 
 oslec-dirclean:
 	rm -Rf $(OSLEC_DIR)
