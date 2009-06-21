@@ -19,6 +19,11 @@ UCLINUX_SITE=http://download.analog.com/27516/frsrelease/5/0/8/5088
 UCLINUX_UNZIP=bzcat
 TARGET_DIR=$(UCLINUX_DIR)/root
 
+PKG_NAME:=uclinux
+PKG_VERSION:=1.5
+PKG_RELEASE:=3
+PKG_BUILD_DIR:=$(TOPDIR)/tmp/uclinux
+
 #---------------------------------------------------------------------------
 #                    Downloaded source file Target
 #---------------------------------------------------------------------------
@@ -59,6 +64,10 @@ uClinux: $(UCLINUX_DEP) $(UCLINUX_DIR)/.configured
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
 	gcc src/zeropad.c -o src/zeropad -Wall
 	./src/zeropad uClinux-dist/images/uImage uClinux-dist/images/uImage_r3.ip08 0x20000
+	mkdir -p $(PKG_BUILD_DIR)/ipkg/uclinux/var/tmp
+	cp uClinux-dist/images/uImage_r3.ip08 $(PKG_BUILD_DIR)/ipkg/uclinux/var/tmp
+
+	touch $(PKG_BUILD_DIR)/.built
 
 uClinux-unpacked: $(UCLINUX_DIR)/.unpacked
 
@@ -215,4 +224,39 @@ uClinux-ip04-make-patch:
 	$(UDO)/user/busybox/Makefile \
 	$(UD)/user/busybox/Makefile \
 	>> $(PWD)/patch/busybox.patch
+
+#---------------------------------------------------------------------------
+#                              CREATING PACKAGE    
+#---------------------------------------------------------------------------
+
+define Package/uclinux
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=uclinux
+  DESCRIPTION:=\
+        This is the uClinux distribution project for the Blackfin \\\
+        processor.
+  URL:=http://blackfin.uclinux.org/gf/project/uclinux-dist
+  ARCHITECTURE:=bfin-uclinux
+endef
+
+# post installation
+
+define Package/uclinux/postinst
+#!/bin/sh
+eraseall /dev/mtd1
+cp /var/tmp/uImage_r3.ip08 /dev/mtd1
+reboot
+endef
+
+# pre-remove
+
+define Package/uclinux/prerm
+#!/bin/sh
+echo "This package cannot be removed"
+endef
+
+$(eval $(call BuildPackage,uclinux))
+
+uClinux-package: uClinux $(PACKAGE_DIR)/uclinux_$(VERSION)_$(PKGARCH).ipk
 

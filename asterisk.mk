@@ -111,7 +111,6 @@ asterisk: $(ASTERISK_DIR)/.configured $(ASTERISK_DIR)
 
 	touch $(PKG_BUILD_DIR)/.built
 
-
 all: asterisk
 
 asterisk-configure: $(ASTERISK_DIR)/.configured
