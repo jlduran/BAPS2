@@ -61,10 +61,9 @@ define Package/cron
   CATEGORY:=Applications
   TITLE:=CRON
   DESCRIPTION:=\
-        CRON is a small version of the cron daemon..
-  URL:=http://unknown.org/
+        CRON is a small version of the cron daemon.
+  URL:=http://www.gnu.org/software/gcron/main.html
   ARCHITECTURE:=bfin-uclinux
-
 endef
 
 # post installation - add the sym link for auto start

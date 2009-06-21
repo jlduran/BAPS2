@@ -68,7 +68,7 @@
  	hex "Kernel load address for booting"
  	default "0x1000"
 --- uClinux-dist-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2007-11-03 13:52:49.000000000 -0500
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2009-05-26 02:06:31.000000000 -0500
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2009-06-21 14:13:48.000000000 -0500
 @@ -26,6 +26,12 @@
  	help
  	  HV Sistemas H8606 board support.
@@ -77,7 +77,7 @@
 +	bool "IP04/IP08 IP-PBX"
 +	depends on (BF533)
 +	help
-+	  Core support for IP04/IP04 open hardware IP-PBX.
++	  Core support for IP04/IP08 open hardware IP-PBX.
 +
  config GENERIC_BF533_BOARD
  	bool "Generic"

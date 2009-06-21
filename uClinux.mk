@@ -8,6 +8,13 @@
 #   (ii) blackfin-toolchain-uclibc-default-08r1.5-14.i386.tar.bz2
 #
 # The output is a bootable uImage in images/uImage.
+#
+# Supported vendors: Rowetel
+# Supported products: IP04, IP08
+#
+
+VENDOR=Rowetel
+PRODUCT=IP08
 
 include rules.mk
 
@@ -32,25 +39,25 @@ $(DL_DIR)/$(UCLINUX_SOURCE):
 	$(WGET) -P $(DL_DIR) $(UCLINUX_SITE)/$(UCLINUX_SOURCE)
 
 #---------------------------------------------------------------------------
-#                    Unpack and patch to support IP04 & ipkg
+#                    Unpack and patch to support product & ipkg
 #---------------------------------------------------------------------------
 
 $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR)
 	mv uClinux-dist-2008R1.5-RC3 uClinux-dist
-	patch -d $(BUILD_DIR) -uN -p0 < patch/ip04.patch
+	patch -d $(BUILD_DIR) -uN -p0 < patch/$(PRODUCT).patch
 	patch -d $(BUILD_DIR) -uN -p0 < patch/busybox.patch
 	touch $(UCLINUX_DIR)/.unpacked
 
 #---------------------------------------------------------------------------
-#                    Configure for IP04
+#                    Configure for product
 #---------------------------------------------------------------------------
 
 $(UCLINUX_DIR)/.configured: $(UCLINUX_DIR)/.unpacked
-	mkdir -p $(UCLINUX_DIR)/vendors/Rowetel/IP04/
-	cp -af patch/vendors/Rowetel/IP04/* $(UCLINUX_DIR)/vendors/Rowetel/IP04
-	cp -af patch/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel
-	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP04_config
+	mkdir -p $(UCLINUX_DIR)/vendors/$(VENDOR)/$(PRODUCT)/
+	cp -af patch/vendors/$(VENDOR)/$(PRODUCT)/* $(UCLINUX_DIR)/vendors/$(VENDOR)/$(PRODUCT)
+	cp -af patch/vendors/$(VENDOR)/vendor.mak $(UCLINUX_DIR)/vendors/$(VENDOR)
+	$(MAKE) -C $(UCLINUX_DIR) $(VENDOR)/$(PRODUCT)_config
 	touch $(UCLINUX_DIR)/.configured
 
 #---------------------------------------------------------------------------
@@ -58,14 +65,11 @@ $(UCLINUX_DIR)/.configured: $(UCLINUX_DIR)/.unpacked
 #---------------------------------------------------------------------------
 
 uClinux: $(UCLINUX_DEP) $(UCLINUX_DIR)/.configured
-	mkdir -p $(TARGET_DIR)/usr/doc
-	cp -f doc/uImage.txt $(TARGET_DIR)/usr/doc
-
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
 	gcc src/zeropad.c -o src/zeropad -Wall
-	./src/zeropad uClinux-dist/images/uImage uClinux-dist/images/uImage_r3.ip08 0x20000
+	./src/zeropad uClinux-dist/images/uImage uClinux-dist/images/uImage_r3.$(PRODUCT) 0x20000
 	mkdir -p $(PKG_BUILD_DIR)/ipkg/uclinux/var/tmp
-	cp uClinux-dist/images/uImage_r3.ip08 $(PKG_BUILD_DIR)/ipkg/uclinux/var/tmp
+	cp uClinux-dist/images/uImage_r3.$(PRODUCT) $(PKG_BUILD_DIR)/ipkg/uclinux/var/tmp
 
 	touch $(PKG_BUILD_DIR)/.built
 
@@ -82,18 +86,18 @@ all: uClinux
 #                              CREATING PATCHES     
 #---------------------------------------------------------------------------
 
-# Generate patches between vanilla uClinux-dist tar ball and IP04
-# version (IP04 only at this stage, pending approval by the astfin
+# Generate patches between vanilla uClinux-dist tar ball and $(PRODUCT)
+# version ($(PRODUCT) only at this stage, pending approval by the astfin
 # team). Run this target after you have made any changes to
 # uClinux-dist to capture them to the patch and conf files.  This
-# target captures the changes required to get the IP04 to boot
+# target captures the changes required to get the $(PRODUCT) to boot
 # uClinux, but doesn't capture any of the Asterisk/Zaptel stuff (see
 # below for that).
 
 UDO = uClinux-dist-orig
 UD = uClinux-dist
 
-uClinux-ip04-make-patch:
+uClinux-make-patch:
 
 	if [ ! -d $(UCLINUX_DIR)-orig ] ; then \
 		mkdir -p tmp; cd tmp; \
@@ -104,65 +108,65 @@ uClinux-ip04-make-patch:
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/arch/blackfin/Kconfig \
 	$(UD)/linux-2.6.x/arch/blackfin/Kconfig \
-	> $(PWD)/patch/ip04.patch
+	> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig \
 	$(UD)/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c \
 	$(UD)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h \
 	$(UD)/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile \
 	$(UD)/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/mtd/maps/Kconfig \
 	$(UD)/linux-2.6.x/drivers/mtd/maps/Kconfig \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/mtd/maps/bf5xx-flash.c \
 	$(UD)/linux-2.6.x/drivers/mtd/maps/bf5xx-flash.c  \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/mtd/nand/bfin_nand.c \
 	$(UD)/linux-2.6.x/drivers/mtd/nand/bfin_nand.c \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/mtd/nand/Kconfig \
 	$(UD)/linux-2.6.x/drivers/mtd/nand/Kconfig \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/net/dm9000.c \
 	$(UD)/linux-2.6.x/drivers/net/dm9000.c \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
 	-cd $(BUILD_DIR); diff -uN \
 	$(UDO)/linux-2.6.x/drivers/serial/bfin_5xx.c \
 	$(UD)/linux-2.6.x/drivers/serial/bfin_5xx.c \
-	>> $(PWD)/patch/ip04.patch
+	>> $(PWD)/patch/$(PRODUCT).patch
 
-	mkdir -p patch/vendors/Rowetel/IP04
-	cp -af $(UCLINUX_DIR)/vendors/Rowetel/IP04/* patch/vendors/Rowetel/IP04
-	cp -f $(UCLINUX_DIR)/.config patch/vendors/Rowetel/IP04/config.device
-	cp -f $(UCLINUX_DIR)/linux-2.6.x/.config patch/vendors/Rowetel/IP04/config.linux-2.6.x	
-	cp -f $(UCLINUX_DIR)/config/.config patch/vendors/Rowetel/IP04/config.vendor-2.6.x 
+	mkdir -p patch/vendors/$(VENDOR)/$(PRODUCT)
+	cp -af $(UCLINUX_DIR)/vendors/$(VENDOR)/$(PRODUCT)/* patch/vendors/$(VENDOR)/$(PRODUCT)
+	cp -f $(UCLINUX_DIR)/.config patch/vendors/$(VENDOR)/$(PRODUCT)/config.device
+	cp -f $(UCLINUX_DIR)/linux-2.6.x/.config patch/vendors/$(VENDOR)/$(PRODUCT)/config.linux-2.6.x	
+	cp -f $(UCLINUX_DIR)/config/.config patch/vendors/$(VENDOR)/$(PRODUCT)/config.vendor-2.6.x 
 
-	# files needed for adding ipkg to busybox.  This was unchanged from 
+	# files needed for adding ipkg to busybox.  This was unchanged from
 	# uClinux-dist 2007 so we use the same patch file
 
 	-cd $(BUILD_DIR); diff -uN -x *.o -x *cmd -x *.a \
@@ -245,7 +249,7 @@ endef
 define Package/uclinux/postinst
 #!/bin/sh
 eraseall /dev/mtd1
-cp /var/tmp/uImage_r3.ip08 /dev/mtd1
+cp /var/tmp/uImage_r3.$(PRODUCT) /dev/mtd1
 reboot
 endef
 

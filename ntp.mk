@@ -116,7 +116,7 @@ define Package/ntp/postinst
 #!/bin/sh
 echo "ntp             123/tcp"  >> /etc/services
 echo "ntp             123/udp"  >> /etc/services
-echo UTC > /etc/TZ
+echo EST5 > /etc/TZ
 echo "export TZ=`cat /etc/TZ`" > /etc/profile
 /etc/init.d/ntp enable
 endef

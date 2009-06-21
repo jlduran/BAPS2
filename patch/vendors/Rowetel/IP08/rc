@@ -1,4 +1,4 @@
-hostname ip04
+hostname ip08
 mount -t proc proc /proc
 [ ! -d /var/tmp ] && mkdir /var/tmp
 mount -t ramfs ramfs /var/tmp
