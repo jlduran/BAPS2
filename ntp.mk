@@ -61,12 +61,12 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 	$(MAKE) -C $(NTP_BUILD_DIR) CFLAGS='$(NTP_CFLAGS) -DCONFIG_FILE=\"/etc/config/ntp.conf\"'
 
 	rm -Rf $(TARGET_DIR)
-	mkdir -p $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
 	cp -v $(NTP_BUILD_DIR)/ntpd/ntpd $(TARGET_DIR)/bin/
 	mkdir -p $(TARGET_DIR)/etc/init.d/
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp
+	cp files/localtime $(TARGET_DIR)/etc
 	touch $(PKG_BUILD_DIR)/.built
 
 all: ntp
@@ -107,9 +107,7 @@ define Package/ntpd/prerm
 cd /etc
 cat services | sed '/ntp/ d' > services.tmp
 mv services.tmp services
-rm -rf /bin/ntpd
 /etc/init.d/ntp disable
-rm -rf /etc/init.d/ntp
 endef
 
 $(eval $(call BuildPackage,ntp))
