@@ -18,7 +18,10 @@ PKG_BUILD_DIR:=$(TOPDIR)/tmp/ntp
 STAGING_INC=$(STAGING_DIR)/usr/include
 STAGING_LIB=$(STAGING_DIR)/usr/lib
 NTP_CFLAGS=-pipe -Wall -g -O2
-NTP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --build=i686-pc-linux-gnu --sysconfdir=/etc --datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info --localstatedir=/var/lib
+NTP_CONFIGURE_OPTS=--host=bfin-linux-uclibc \
+		--build=i686-pc-linux-gnu --sysconfdir=/etc \
+		--datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info \
+		--localstatedir=/var/lib
 
 NTP_CONFOPTIONS=								   \
 	--disable-debugging	\
