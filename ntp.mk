@@ -66,7 +66,10 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 	mkdir -p $(TARGET_DIR)/etc/init.d/
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp
+
+	# Replace localtime with your current localtime file
 	cp files/localtime $(TARGET_DIR)/etc
+
 	touch $(PKG_BUILD_DIR)/.built
 
 all: ntp
@@ -89,7 +92,7 @@ define Package/ntp
   ARCHITECTURE:=bfin-uclinux
 endef
 
-# post installation - add the sym link for auto start
+# post installation - replace with your current time zone
 
 define Package/ntp/postinst
 #!/bin/sh
@@ -100,7 +103,7 @@ echo "export TZ=`cat /etc/TZ`" > /etc/profile
 /etc/init.d/ntp enable
 endef
 
-# pre-remove - remove sym link
+# pre-remove
 
 define Package/ntpd/prerm
 #!/bin/sh
