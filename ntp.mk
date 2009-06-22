@@ -5,8 +5,8 @@
 include rules.mk
 
 NTP_VERSION=4.2.4p4
-NTP_NAME=ntp
-NTP_DIR=$(UCLINUX_DIST)/user/ntp/$(NTP_NAME)-$(NTP_VERSION)
+NTP_NAME=ntp-$(NTP_VERSION)
+NTP_DIR=$(UCLINUX_DIST)/user/ntp
 NTP_BUILD_DIR=$(UCLINUX_DIST)/user/ntp/builddir
 TARGET_DIR=$(TOPDIR)/tmp/ntp/ipkg/ntp
 
@@ -18,34 +18,7 @@ PKG_BUILD_DIR:=$(TOPDIR)/tmp/ntp
 STAGING_INC=$(STAGING_DIR)/usr/include
 STAGING_LIB=$(STAGING_DIR)/usr/lib
 NTP_CFLAGS=-pipe -Wall -g -O2
-#   	-mcpu=bf533-0.5
-#-O2 -Wall -D__uClinux__ -DEMBED -fno-builtin -mfdpic \
-#-I$(UCLINUX_DIST) -isystem  $(STAGING_INC)
-#NTP_LDFLAGS=-mfdpic -B$(STAGING_INC) -L$(STAGING_INC)
-NTP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --build=i686-pc-linux-gnu --prefix=/usr --sysconfdir=/etc --datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info --localstatedir=/var/lib
-#--host=bfin-linux-uclibc \
-#--build=i686-pc-linux-gnu \
-#--target=bfin-linux-uclibc --sysconfdir=/etc \
-#--datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info \
-#--localstatedir=/var/lib
-
-#ifdef CONFIG_USER_NTPD_NTPDATE
-#NTPDATE := with
-#else
-NTPDATE := without
-#endif
-
-#ifdef CONFIG_USER_NTPD_NTPDC
-#NTPDC := with
-#else
-NTPDC := without
-#endif
-
-#ifdef CONFIG_USER_NTPD_NTPQ
-#NTPQ := with
-#else
-NTPQ := without
-#endif
+NTP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --build=i686-pc-linux-gnu --sysconfdir=/etc --datadir=/usr/share --mandir=/usr/share/man --infodir=/usr/share/info --localstatedir=/var/lib
 
 NTP_CONFOPTIONS=								   \
 	--disable-debugging	\
@@ -66,18 +39,18 @@ NTP_CONFOPTIONS=								   \
 	--disable-SCHMID --disable-TRIMTAIP --disable-TRIMTSIP             \
 	--disable-WHARTON --disable-VARITEXT --disable-kmem                \
 	--without-openssl-libdir --without-openssl-incdir --without-crypto \
-	--without-electricfence --without-sntp --$(NTPDATE)-ntpdate \
-	--$(NTPDC)-ntpdc --$(NTPQ)-ntpq
+	--without-electricfence --without-sntp --without-ntpdate \
+	--without-ntpdc --without-ntpq
 
-$(NTP_BUILD_DIR)/Makefile: $(NTP_DIR)/../makefile
-	cd $(NTP_DIR)
-	find $(NTP_DIR) -type f -print0 | xargs -0 touch -r $(NTP_DIR)/configure
+$(NTP_BUILD_DIR)/Makefile: $(NTP_DIR)/makefile
+	cd $(NTP_DIR); \
+	find $(NTP_NAME) -type f -print0 | xargs -0 touch -r $(NTP_NAME)/configure
 	rm -rf $(NTP_BUILD_DIR)
 	mkdir $(NTP_BUILD_DIR)
 	cd $(NTP_BUILD_DIR); \
 	CC="bfin-linux-uclibc-gcc $(NTP_CFLAGS)" LDFLAGS="" LIBS="" \
 	MISSING="true" \
-		../$(NTP_NAME)-$(NTP_VERSION)/configure --prefix= \
+		../$(NTP_NAME)/configure --prefix= \
 		--with-headers=$(UCLINUX_DIST)/linux-2.6.x/include \
 		$(NTP_CONFIGURE_OPTS) $(NTP_CONFOPTIONS)
 
@@ -88,7 +61,6 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 	mkdir -p $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
 	cp -v $(NTP_BUILD_DIR)/ntpd/ntpd $(TARGET_DIR)/bin/
-	#cp -v $(NTP_BUILD_DIR)/ntpdate/ntpdate $(TARGET_DIR)/bin/
 	mkdir -p $(TARGET_DIR)/etc/init.d/
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp
@@ -96,7 +68,7 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 
 all: ntp
 
-distclean:
+ntp-dirclean:
 	rm -rf $(NTP_BUILD_DIR)
 
 #---------------------------------------------------------------------------
@@ -133,7 +105,6 @@ cd /etc
 cat services | sed '/ntp/ d' > services.tmp
 mv services.tmp services
 rm -rf /bin/ntpd
-#rm -rf /bin/ntpdate
 /etc/init.d/ntp disable
 rm -rf /etc/init.d/ntp
 endef
