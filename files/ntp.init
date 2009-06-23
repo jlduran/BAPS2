@@ -1,22 +1,15 @@
 #!/bin/sh
 # Start up file for ntp
-# David Rowe 7 Feb 2008
-
-# To change your timezone set /etc/TZ for your timezone and reboot, e.g.
-# $ echo PST8PDT7 > /etc/TZ
-# $ reboot
-
-# NOTE: for reasons beyond my meagre comprehension ntpdate
-# needs to be started in the background (with &) when run
-# as script from /etc/rc, otherwise you get:
-#
-# ntpdate[45]: cannot find family compatible socket to send ntp packet
 
 case $1 in
-	start) ntpdate pool.ntp.org&
+	start) ntpdate -4 pool.ntp.org &
 	       date;
-               echo "export TZ=`cat /etc/TZ`" > /etc/profile;;
-	stop) ;;
+               echo "export TZ=`cat /etc/TZ`" > /etc/profile;
+               sleep 5;
+               ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
+	stop) killall -9 ntpd;;
+	restart) killall -9 ntpd;
+                 ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
 	enable) rm -f /etc/rc.d/S30ntp; 
 	        ln -s /etc/init.d/ntp /etc/rc.d/S30ntp;;
 	disable) rm -f /etc/rc.d/S30ntp;;
@@ -26,6 +19,7 @@ Syntax: /etc/init.d/ntp [command]
 Available commands:
         start   Start the service
         stop    Stop the service
+	restart	Restart the service
         enable  Enable service autostart
         disable Disable service autostart
 EOF
