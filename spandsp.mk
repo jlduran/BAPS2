@@ -44,17 +44,17 @@ $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
 	cd $(SPANDSP_DIR); LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) ./configure $(SPANDSP_CONFIGURE_OPTS)
 	touch $(SPANDSP_DIR)/.configured
 
-	# setup directories for package
-	rm -Rf $(TARGET_DIR)
-	mkdir -p $(TARGET_DIR)/lib
-
-
 spandsp: $(SPANDSP_DIR)/.configured
 	make LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) STAGEDIR=$(STAGING_DIR) -C $(SPANDSP_DIR)/
 	#copy header files to staging directory
 	mkdir -p $(STAGING_DIR)/usr/include/spandsp
 	cp -f $(SPANDSP_DIR)/src/spandsp/* $(STAGING_DIR)/usr/include/spandsp
 	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp* $(STAGING_DIR)/usr/lib/
+
+	# setup directories for package
+	rm -Rf $(TARGET_DIR)
+	mkdir -p $(TARGET_DIR)/lib
+
 	#copy to the package location
 	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp.so.0 $(TARGET_DIR)/lib
 	cd $(TARGET_DIR)/lib; ln -sf libspandsp.so.0 libspandsp.so

@@ -66,6 +66,7 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 	mkdir -p $(TARGET_DIR)/etc/init.d/
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp
+	cp files/ntp.conf $(TARGET_DIR)/etc/ntp.conf
 
 	# Replace localtime with your current localtime file
 	cp files/localtime $(TARGET_DIR)/etc

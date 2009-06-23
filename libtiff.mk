@@ -35,15 +35,15 @@ $(LIBTIFF_DIR)/.unpacked: $(DL_DIR)/$(LIBTIFF_SOURCE)
 $(LIBTIFF_DIR)/.configured: $(LIBTIFF_DIR)/.unpacked
 	cd $(LIBTIFF_DIR); ./configure $(LIBTIFF_CONFIGURE_OPTS)
 	#setup directories for package
-	rm -Rf $(TARGET_DIR)
-	mkdir -p $(TARGET_DIR)/lib
 	touch $(LIBTIFF_DIR)/.configured
 
 libtiff: $(LIBTIFF_DIR)/.configured
 	make -C $(LIBTIFF_DIR)/ STAGEDIR=$(STAGING_DIR)
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff* $(STAGING_DIR)/usr/lib/
 
-	#copy tp package location
+	#copy to package location
+	rm -Rf $(TARGET_DIR)
+	mkdir -p $(TARGET_DIR)/lib
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff.so.3 $(TARGET_DIR)/lib
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtiff.so.3
 	cd $(TARGET_DIR)/lib/; ln -sf libtiff.so.3 libtiff.so
