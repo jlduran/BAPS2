@@ -13,34 +13,20 @@
 
 include rules.mk
 
-UBOOT_DIRNAME=u-boot-1.1.6-2008R1.5
-UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
-UBOOT_SOURCE=u-boot-1.1.6-2008R1.5.tar.bz2
-UBOOT_SITE=http://download.analog.com/27516/frsrelease/4/8/7/4876
-UBOOT_UNZIP=bzcat
-UCONFIG=ip04
-
-ifeq ($(strip $(ASTFIN_SDRAM_128)),y)
-MEM_FLAGS=SDRAM_128MB
-endif
-ifeq ($(strip $(ASTFIN_SDRAM_64)),y)
-ifeq ($(strip $(ASTFIN_CAS_3)),y)
-MEM_FLAGS=SDRAM_64MB_SLOW
-endif
-ifeq ($(strip $(ASTFIN_CAS_2)),y)
-MEM_FLAGS=SDRAM_64MB_FAST
-endif
-endif
-
-ifeq ($(strip $(ASTFIN_CPU_300)),y)
+SOURCES_DIR=$(TOP_DIR)/src
+PRODUCT=IP08
 CPU_FLAGS=CPU_300
-endif
-ifeq ($(strip $(ASTFIN_CPU_500)),y)
-CPU_FLAGS=CPU_500
-endif
-ifeq ($(strip $(ASTFIN_CPU_600)),y)
-CPU_FLAGS=CPU_600
-endif
+MEM_FLAGS=SDRAM_64MB_SLOW
+UCONFIG=ip08
+
+UBOOT_DIRNAME=u-boot-1.1.5-bf1
+UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
+UBOOT_SOURCE=u-boot-1.1.5-bf1-061210.tar.bz2
+UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/330/2208/
+UBOOT_UNZIP=bzcat
+PATCHNAME=uBoot-$(PRODUCT)
+
+TARGET_DIR=$(UBOOT_DIR)/images
 
 $(DL_DIR)/$(UBOOT_SOURCE):
 	mkdir -p $(DL_DIR)
@@ -51,19 +37,17 @@ uBoot-source: $(DL_DIR)/$(UBOOT_SOURCE)
 $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	$(PATCH_KERNEL) $(UBOOT_DIR) patch uBoot.patch
+	$(PATCH_KERNEL) $(UBOOT_DIR) patch $(PATCHNAME).patch
 	touch $(UBOOT_DIR)/.unpacked
 
 $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked
 
-	-$(MAKE) -C $(UBOOT_DIR) UBOOT_FLAGS="$(MEM_FLAGS)" UBOOT_FLAGS2="$(CPU_FLAGS)" $(UCONFIG)_config
+	$(MAKE) -C $(UBOOT_DIR) UBOOT_FLAGS="$(MEM_FLAGS)" UBOOT_FLAGS2="$(CPU_FLAGS)" $(UCONFIG)_config
 	touch $(UBOOT_DIR)/.configured
 
 uBoot: $(UBOOT_DIR)/.configured
-	mkdir -p $(IMAGE_DIR)
-	$(MAKE)  -C $(UBOOT_DIR)
+	$(MAKE) -C $(UBOOT_DIR)
 	cd $(UBOOT_DIR)/tools/bin2ldr; ./runme.sh
-	cp -v $(UBOOT_DIR)/u-boot.ldr $(IMAGE_DIR)
 
 uBoot-configure: $(UBOOT_DIR)/.configured
 
@@ -78,3 +62,4 @@ uBoot-dirclean:
 	rm -rf $(UBOOT_DIR)
 
 all: uBoot
+

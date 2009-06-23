@@ -65,7 +65,7 @@ dropbear: $(DROPBEAR_DIR)/.configured
 all: dropbear
 
 dropbear-dirclean:
-	rm -rf $(DROPBEAR_BUILD_DIR)
+	rm -rf $(DROPBEAR_DIR)
 
 
 #---------------------------------------------------------------------------

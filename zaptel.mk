@@ -23,7 +23,6 @@
 # method, if your IP04 won't detect modules this is a sign you may
 # have the wrong CPLD firmware and/or driver.
 
-#ZAPTEL_SPI_INTERFACE=y
 ZAPTEL_SPORT_INTERFACE=y
 ZAPTEL_GSM_MODULE=y
 

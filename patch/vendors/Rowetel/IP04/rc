@@ -19,8 +19,6 @@ fi
 ifconfig lo 127.0.0.1
 inetd &
 
-echo 30 >  /proc/sys/vm/pagecache_ratio
-
 # start up services
 
 for i in /etc/rc.d/S*; do

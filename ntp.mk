@@ -62,8 +62,8 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 
 	rm -Rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
-	cp -v $(NTP_BUILD_DIR)/ntpd/ntpd $(TARGET_DIR)/bin/
-	mkdir -p $(TARGET_DIR)/etc/init.d/
+	cp -v $(NTP_BUILD_DIR)/ntpd/ntpd $(TARGET_DIR)/bin
+	mkdir -p $(TARGET_DIR)/etc/init.d
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp
 	cp files/ntp.conf $(TARGET_DIR)/etc/ntp.conf
