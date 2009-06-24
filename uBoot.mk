@@ -38,6 +38,10 @@ $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(PATCH_KERNEL) $(UBOOT_DIR) patch $(PATCHNAME).patch
+
+	# Brute-force disable git versioning
+	rm -f $(UBOOT_DIR)/tools/setlocalversion
+
 	touch $(UBOOT_DIR)/.unpacked
 
 $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked
