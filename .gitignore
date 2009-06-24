@@ -16,10 +16,9 @@ spandsp-0.0.4/*
 strongswan-4.3.1/*
 tiff-3.8.2/*
 tmp/*
-u-boot-1.1.5-bf1/*
-u-boot-1.1.6-2008R1.5/*
-uClinux-dist/*
-uClinux-dist-orig/*
+u-boot-1.1.5-bf1
+uClinux-dist
+uClinux-dist-orig
 vim71/*
 zaptel-1.4.3/*
 zaptel-1.4.9.2/*
