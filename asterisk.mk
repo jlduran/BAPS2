@@ -51,7 +51,7 @@ $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked $(STAGING_LIB)/libgsm.a
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
-#	-patch -f -p0 < patch/blackfin-gsm.patch
+	-patch -f -p0 < patch/blackfin-gsm.patch
 	make -C $(UCLINUX_DIST)/lib/blackfin-gsm \
 	CC=bfin-linux-uclibc-gcc AR=bfin-linux-uclibc-ar
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/lib/libgsm.a $(STAGING_LIB)

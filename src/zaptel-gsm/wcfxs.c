@@ -376,7 +376,7 @@ struct wcfxs {
 static int debug = 0;
 
 //YN =>from here
-void wait_just_a_bit(int foo);
+static void wait_just_a_bit(int foo);
 inline void __wcfxs_setcard(struct wcfxs *wc, int card);
 
 static char *SIM_pin="3700";
@@ -1377,7 +1377,7 @@ static int wcfxs_proslic_calibrate(struct wcfxs *wc, int card)
    long times (e.g. seconds), at least on non-preemptable kernels.
 */
 
-void wait_just_a_bit(int foo)
+static void wait_just_a_bit(int foo)
 {
 	set_current_state(TASK_INTERRUPTIBLE);
 	schedule_timeout(foo);

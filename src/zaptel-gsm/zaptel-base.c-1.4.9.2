@@ -1,4 +1,5 @@
-/* Zapata Telephony Interface Driver
+/*
+ * Zapata Telephony Interface Driver
  *
  * Written by Mark Spencer <markster@digium.com>
  * Based on previous works, designs, and architectures conceived and
@@ -2854,7 +2855,7 @@ static void __do_dtmf(struct zt_chan *chan)
 				}
 			} else {
 				chan->curtone = zt_dtmf_tone(chan, c);
-					chan->tonep = 0;
+				chan->tonep = 0;
 				if (chan->curtone) {
 					zt_init_tone_state(&chan->ts, chan->curtone);
 					return;

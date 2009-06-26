@@ -126,6 +126,7 @@ zaptel: $(ZAPTEL_DIR)/.configured
 	cp $(ZAPTEL_DIR)/kernel/zaptel.h $(STAGING_INC)/zaptel
 	cp $(ZAPTEL_DIR)/libtonezone.so $(STAGING_LIB)
 	cp $(ZAPTEL_DIR)/libtonezone.so $(TARGET_DIR)/lib
+	cd $(TARGET_DIR)/lib/; ln -sf libtonezone.so libtonezone.so.1.0
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtonezone.so
 	cp $(OSLEC_DIR)/kernel/Module.symvers $(ZAPTEL_DIR)/kernel
 
@@ -150,7 +151,6 @@ zaptel: $(ZAPTEL_DIR)/.configured
 
 	# set up dir structure for package
 
-	rm -Rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 	mkdir -p $(TARGET_DIR)/bin
 	mkdir -p $(TARGET_DIR)/etc/init.d 
