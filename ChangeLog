@@ -1,0 +1,1158 @@
+commit 51ceea849173dca2363c9184b8891cccee1299e4
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri Jun 26 02:54:26 2009 -0500
+
+    Revert oslec.mk to BAPS original.
+
+commit 04cb16d29750e67230cbeb97aada085cce1d9920
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri Jun 26 02:52:45 2009 -0500
+
+    Regression.
+
+commit ea1adc235e5026294e5a7cadf2980f6ca85233ac
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 23 19:39:24 2009 -0500
+
+    Ugly fix to prevent git's local version in the name.
+
+commit 3907d175591bef1177564cc39c839fdb3e92b3cd
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 23 19:17:20 2009 -0500
+
+    Minor uBoot Fixes.
+
+commit 570d88f0a90f67d26ab6695590b6f720f2b9deba
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 23 18:35:28 2009 -0500
+
+    Fixed uBoot.mk
+
+commit 9b8d5b415605e5d6250ce3de61b6a7200d240f37
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 23 18:33:48 2009 -0500
+
+    Fixed uBoot.mk
+
+commit 14f45b22753f23a08713cb63ce7e20cb878d2428
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 23 00:06:00 2009 -0500
+
+    Small bump.
+
+commit 9e2045e5dd27cb80c95be105d1ec6b262a6b4050
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 22:45:05 2009 -0500
+
+    Testing
+
+commit 4eec09f6c23f6ca825e55879c4d360f48b0f3335
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 02:15:23 2009 -0500
+
+    Minor NTP fix.
+
+commit 858856482f6b968fb9e602868de63660c8f01d1b
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 02:04:56 2009 -0500
+
+    Minor NTP fix.
+
+commit 081b498726f88a8d602f2bf9a7b7cc13aaccd847
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 01:40:51 2009 -0500
+
+    Minor NTP fix.
+
+commit d0e55e7286f9844116f940313db6bf691baa896c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 01:36:19 2009 -0500
+
+    Minor NTP fix.
+
+commit dec382d97413a72c39e994660e8a746170afb591
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 22 00:34:14 2009 -0500
+
+    Minor ntp fix.
+
+commit 312cf2401d7327911664370b2ba92951d96d7621
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun Jun 21 15:32:12 2009 -0500
+
+    Minor fixes.
+
+commit 337ef1e942d75d268f2c923dfe683fcc6c1de1ce
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun Jun 21 12:52:35 2009 -0500
+
+    Fixed localtime. Real patch soon.
+
+commit 5104e8417277c7ba85557aa64d6082d92646e751
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun Jun 21 12:48:38 2009 -0500
+
+    Minor fixes.
+
+commit 5182cd1e136134e6ff4a0b1e5ff167f265d3d527
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat Jun 20 11:59:05 2009 -0500
+
+    Fixed oslec's sample utility.
+
+commit 7b9bc743373dd34b884f8b04b3acfa376c81d5ac
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri Jun 19 14:36:31 2009 -0500
+
+    Fixed oslec sample utility.
+
+commit 04845ecf10f0823d351e32520a685b640abbe516
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue Jun 16 04:36:58 2009 -0500
+
+    Unified zaptel package.
+
+commit 51fda9d0a7c5a8346599c4c83cf5902abcb8cc2c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed Jun 10 15:21:02 2009 -0500
+
+    Fixed Dnsmasq.
+
+commit 65e387d1164a620f3bc26595f8b90aead7ded407
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 8 10:35:59 2009 -0500
+
+    Minor dnsmasq fix. Waiting for 2.48 patch.
+
+commit 68c3c6aa5fda93331a5b53d4ae47170370f16bb1
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 8 01:19:17 2009 -0500
+
+    Fixed Readme.
+
+commit 6eb65cb67aff66e6a4b88b0a1c06fd564010a28f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 8 01:17:23 2009 -0500
+
+    Fixed Readme.
+
+commit d61e968131843f832efd101dffd7a25ef0a26701
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun Jun 7 23:24:30 2009 -0500
+
+    Updated Dnsmasq. Waiting for patch to be applied.
+
+commit 80dfb9cbce10b1bc65de7fa62b229cc4ee6d257c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Thu Jun 4 11:54:03 2009 -0500
+
+    Fixed README
+
+commit 7926322ef1d34953ae18e541a88e580b5dc80e66
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Thu Jun 4 08:58:41 2009 -0500
+
+    uClinux patch
+
+commit 6f7077152fa2f8fbdfd4c2a363c7116097aee550
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed Jun 3 10:16:17 2009 -0500
+
+    Fixed README.
+
+commit e443e41cb1721b46e1d93b97f795f1ba2f6a4b97
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon Jun 1 14:44:27 2009 -0500
+
+    Added a few things.
+
+commit f54fb80f44ea68259fcc3b13c330fcdf108ba07f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:54:16 2009 -0500
+
+    Fixed README
+
+commit 0ecfb4c7260f9841288946f0df4e34da06a2e074
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:50:23 2009 -0500
+
+    Fixed README
+
+commit a7713377ae3b7dbba4a4c4cfe141fab7b0518ac5
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:47:21 2009 -0500
+
+    Fixed README
+
+commit 89d54d2260ab5a804508bdda4368090062a385c8
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:46:32 2009 -0500
+
+    Fixed README
+
+commit 67f65ad016b0d416ae5a813a9b744127418e346c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:45:08 2009 -0500
+
+    Fixed README
+
+commit 31ec0435eb6e898cb83bc7e9e093f8347c16b1ae
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:39:41 2009 -0500
+
+    Fixed README
+
+commit 0587aa956eee50a97e229b443ad357324abdd5b8
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:35:04 2009 -0500
+
+    Fixed README
+
+commit 0d140a0ea707ce185f050d7fc22453f547283621
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:29:23 2009 -0500
+
+    Fixed README
+
+commit 80a2e4b204a27b69a556041ae3c47e1413047ba7
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:26:28 2009 -0500
+
+    Fixed README
+
+commit 3f1fcc9d6b4667641a3a7c77c8366c14eb3f692d
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:19:56 2009 -0500
+
+    Fixed README
+
+commit 215bfe1e1076b0496e6f4541e1eed5e29f4d3c97
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:19:02 2009 -0500
+
+    Fixed README
+
+commit dd373d89864f5a07d5cde41ad025c5f5eaa112a8
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 18:16:57 2009 -0500
+
+    Fixed README
+
+commit affab722b868f8adbdd8d87bda411615181a394c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:58:44 2009 -0500
+
+    Fixed README
+
+commit cf23222826758be58ba56fa55b3805f46736b7ad
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:52:25 2009 -0500
+
+    Fixed README
+
+commit 5cfbe93a97c4766e90f8e0e49ea83930404ef85f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:51:25 2009 -0500
+
+    Fixed README
+
+commit c6648577afe4a2c36410cd0a49448c046f7d6630
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:49:26 2009 -0500
+
+    Fixed README
+
+commit 965610e3d9f852c8e4eec9e00df54102e57646d7
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:43:28 2009 -0500
+
+    Fixed README
+
+commit f509ad9b75c555c2909e9ffa5e1e503ff75509f4
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:40:05 2009 -0500
+
+    Fixed README
+
+commit 47e65b11d87e4fb700e74660796bf36c74f432db
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:30:38 2009 -0500
+
+    Fixed README
+
+commit f7664b3b85bd0c890f0526ef8f0b2aae8c73ab38
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:29:28 2009 -0500
+
+    Fixed README
+
+commit 9fa2da3a22ebde23ff131f5ebe938e16d0ce3c42
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:28:12 2009 -0500
+
+    Fixed README
+
+commit 3b0d915d82ccc0c0eb4434c656374101f77bc352
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:22:29 2009 -0500
+
+    Fixed README
+
+commit 151e85757cac34d9f3dc24e7f40e013a5c279bb2
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:19:07 2009 -0500
+
+    Fixed README
+
+commit 1aa955d3cf9531e4ba6acd290edaf89c9a59958d
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:13:06 2009 -0500
+
+    Fixed README
+
+commit 5d3045e768a4aa8770ace5a00ecce53aecafbab5
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:11:43 2009 -0500
+
+    Fixed README
+
+commit decfc71852b35bc51a56141a7f2c84c50e838d62
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:09:54 2009 -0500
+
+    Fixed README
+
+commit 840945167537b32070956c979056273cbc273cb2
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 07:00:16 2009 -0500
+
+    Fixed README
+
+commit 71d9fca05d0da3abd1024c02edbab084bb44d296
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:54:55 2009 -0500
+
+    Fixed README
+
+commit 61c1533521c75250f5a7e59c1abee3794af1c208
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:51:03 2009 -0500
+
+    Fixed README
+
+commit ffb4527093e126ac34693eb0f39651ddb1071d1e
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:48:59 2009 -0500
+
+    Fixed README
+
+commit cd0d46c4082ab8a010d4df4d26f5216a88509985
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:46:12 2009 -0500
+
+    Fixed README
+
+commit 9e91a7eb6d8160524bab269795900a21864130fe
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:44:54 2009 -0500
+
+    Fixed README
+
+commit 99263ab16eff31cc21fb4c500a0edd8ce7c7d311
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:40:43 2009 -0500
+
+    Fixed README
+
+commit 39c8fbfa0bc0a122d57e9a850c2de76dc94fcc47
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:39:33 2009 -0500
+
+    Fixed README
+
+commit b9c794e5eb589b5b6bb8ad2b12319c1dba49ce23
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:38:18 2009 -0500
+
+    Fixed README
+
+commit 1f7dcc12e54037b7d9bc7717d0ae6594bb9e73d0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:37:29 2009 -0500
+
+    Fixed README
+
+commit c43b8211130f1bb5b6b645e95db4c5162a9ddf5a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:31:14 2009 -0500
+
+    Fixed README
+
+commit 489e2bec272c631c5f5fcb813965865698c7624e
+Merge: e20d019... bbb1b65...
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:30:26 2009 -0500
+
+    Fixed README
+
+commit e20d0191f904057bf85935392403d4f9103e640b
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:28:01 2009 -0500
+
+    Fixed README
+
+commit d8a4d1ccfb7831fe41973ac1cd469f260b00d70a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:23:49 2009 -0500
+
+    Fixed README
+
+commit d6b24ab054f6b1dfd5212eafe06dd3a31aca54a6
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:21:26 2009 -0500
+
+    Fixed README
+
+commit bbb1b654829ef20fca2bba624871fb26d1161be1
+Author: jlduran <jlduran@gmail.com>
+Date:   Fri May 29 04:15:09 2009 -0700
+
+    Fixed README
+
+commit ba916c92b8856e96ca96582e6bf83b8bb9d2364a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:14:06 2009 -0500
+
+    Fixed README
+
+commit ca6acb61e4c472b27496fc77057528f3c228a208
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:11:33 2009 -0500
+
+    Fixed README
+
+commit 80fc291f7703773531def5fd5904d672c828512f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:10:34 2009 -0500
+
+    Fixed README
+
+commit de52b4d7e3741d5e10612cbc99981e3bb71af7ec
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 06:04:07 2009 -0500
+
+    Fixed README
+
+commit 74bec1e184bc5a73bf91705ec9df5f30bcd10ac1
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:55:15 2009 -0500
+
+    Fixed README
+
+commit 2cdc4cc06bb41af79b9f8cf41b281d0d053c1e28
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:52:22 2009 -0500
+
+    Fixed README
+
+commit 08ff182764f3773de91b9018624c9d902ed2b9ec
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:50:09 2009 -0500
+
+    Fixed README
+
+commit 5a32a17312fc29a10822dc11d4e530df3cd704e6
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:47:40 2009 -0500
+
+    Fixed README
+
+commit 28402c5ce8de29f9779f4cd9b6a8621c2af17798
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:46:21 2009 -0500
+
+    Fixed README
+
+commit 573d880cc601867e276a791b619d825edaeb2000
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:44:07 2009 -0500
+
+    Fixed README
+
+commit d9da4f1d92eab91c7d05aaa2448c74ee3cfa41ef
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:37:35 2009 -0500
+
+    Fixed README
+
+commit 9abc9e75502a28761819279f64073b77f5677990
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:33:50 2009 -0500
+
+    Fixed README
+
+commit bc9f661573ea4cc7c963ce64344df990fee04f53
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:32:48 2009 -0500
+
+    Fixed README
+
+commit 762f7dc03708d6fd38d15dacb4b4f5869da53bc0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:31:48 2009 -0500
+
+    Fixed README
+
+commit 17def726de78025fa7cb349493593d91e2b96274
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:15:52 2009 -0500
+
+    Fixed README
+
+commit e102475ae7049d42feda39f45c745cdcfd328315
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:12:32 2009 -0500
+
+    Fixed README
+
+commit f6a8d4191ba9b5a8f0f1251738010d94359c8348
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:10:55 2009 -0500
+
+    Fixed README
+
+commit 36536133cc744e7c7a25bbf98f76bbaba3a1aaf0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:07:30 2009 -0500
+
+    Fixed README
+
+commit 4d19f48bc7816737a7182c5c6e82392dbd1b3b62
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 05:02:18 2009 -0500
+
+    Fixed README
+
+commit c882a162f457b22c55283d50ec6db3b1f8315d6f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 04:55:21 2009 -0500
+
+    Changed README to textile format
+
+commit 86f35aeb331c4008db0b1b2a451b55a1f749b824
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 04:38:07 2009 -0500
+
+    Fixed Dnsmasq
+
+commit e25adbca5e1e339147403ece5e2daca4219abaf3
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Fri May 29 04:34:06 2009 -0500
+
+    Fixed Dnsmasq
+
+commit 0dc59b74e38da7ad1ed75c2d96fc1a2ab4467dbf
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Thu May 28 06:57:15 2009 -0500
+
+    Minor Fixes
+
+commit d7cd1d8c8aedfc3d5aba6e590c05e07020b80a60
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Thu May 28 06:56:13 2009 -0500
+
+    Minor Fixes
+
+commit b7224403d32aae9b6f49eed8c67e4ecfc80e6838
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:24:00 2009 -0500
+
+    Fixed README
+
+commit e29498a8d630e585a31ced9556348568d63c320c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:22:41 2009 -0500
+
+    Fixed README
+
+commit 568099c88fa42bc892d973127e18e86dc2fefc77
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:19:41 2009 -0500
+
+    Fixed README
+
+commit 14c54efbf2e262f35d6f4d93b65ad2e4bb6a24c9
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:18:53 2009 -0500
+
+    Fixed README
+
+commit f9e60c5141b05a1d2a881ccef9d79882ebfb12cd
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:16:09 2009 -0500
+
+    Fixed README
+
+commit 379ffe5b61081ba7c91594c6ff7a86a5c6b91d1b
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:15:12 2009 -0500
+
+    Fixed README
+
+commit 8fa3b024bda92756be842156fbc1c2b9983eaef1
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 08:14:17 2009 -0500
+
+    Fixed README
+
+commit cdf209e8bef3ce1d4c0878d8360450f68e1de82d
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:55:12 2009 -0500
+
+    Fixed README
+
+commit 3b85125b922646ab2549ce02dc64ebfbc1cff6a5
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:51:12 2009 -0500
+
+    Fixed README
+
+commit e20230932095306d4135e9184f12b71fbcad2b3c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:49:47 2009 -0500
+
+    Fixed README
+
+commit db6fcb86ba388e9a1e6ac5a882ad62cfe1d6d693
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:48:43 2009 -0500
+
+    Fixed README
+
+commit 377d6bdce4c1db583010c1345186506a26c2e4a1
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:43:05 2009 -0500
+
+    Fixed README
+
+commit 9d6d2ade2264b8b5f9024a9f2f5b1a9d3fe21b91
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:41:01 2009 -0500
+
+    Fixed README
+
+commit 756062b8c2aac034b815fad85896ea7396716fde
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:36:33 2009 -0500
+
+    Fixed README
+
+commit 4fa9e24a3a1be4b892fa2c00681c721ab82dd3ae
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:15:33 2009 -0500
+
+    Fixed README
+
+commit cfab6bc6bb39397e011334ea4be1f24d885d3f88
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 07:13:23 2009 -0500
+
+    Fixed README
+
+commit db43ce0cae6cd9ed3cdebf766c6e851094e6ff66
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 06:58:44 2009 -0500
+
+    Fixed README
+
+commit e37ce67859fcce2ee77780664a4b0a3217acb6ed
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 06:42:17 2009 -0500
+
+    Added patch for G.729 aupport
+
+commit 61d47e82f5bc6668108807ce45b9b17b6c12d261
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Wed May 27 06:13:16 2009 -0500
+
+    Minor Fixes
+
+commit 9d16498d46ca1edf2323862961ffe8f40bb87842
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue May 26 06:49:18 2009 -0500
+
+    Fixed details
+
+commit ef3eb5ec72269fbf9f28b5c686a8e6c9ada33d51
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Tue May 26 03:56:10 2009 -0500
+
+    Fixed uClinux
+
+commit f649638cc8e04d98a62944174d57a4220c31d3f6
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 10:37:19 2009 -0500
+
+    Fixed uBoot
+
+commit 326a49132bb0e959e7b84ec622487543603bcd27
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 10:31:39 2009 -0500
+
+    Added uBoot
+
+commit 0948e01559f167d4191d26c9fee8927a8c1f049a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 06:03:34 2009 -0500
+
+    Fixed dropbear
+
+commit 985fba286a61c197e3df57fcc15afcb4f612b8bc
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:54:24 2009 -0500
+
+    Fixed vim
+
+commit 072e342d97546e9b7265ebb9656c2856e299bb32
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:51:36 2009 -0500
+
+    Fixed vim
+
+commit 9ae4365dbf999a0ec0902480d26128e80b59c890
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:50:56 2009 -0500
+
+    Fixed vim
+
+commit e494187513e0879a4bf4ccf0a2fbeaf7c33eafb0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:38:00 2009 -0500
+
+    Fixed asterisk
+
+commit d5d80f8e9113b41ebb27cf8ffdecaab317825690
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:33:05 2009 -0500
+
+    Fixed asterisk
+
+commit 54d9649f80da2881163b634ecd7a5c2bff9ec540
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 05:30:56 2009 -0500
+
+    Fixed asterisk
+
+commit b34f24a8d2bab72425a56afc38db6509e7ab6bbf
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 03:49:06 2009 -0500
+
+    Fixed oslec
+
+commit 4d628e2e26d4863997a62d08f0ae0b1b990d259e
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Mon May 25 02:21:12 2009 -0500
+
+    Fixed block size
+
+commit 258d687567640a7e962e5e2637f59020ee0020a0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 07:40:16 2009 -0500
+
+    asterisk.mk needs to be fixed
+
+commit c773d8cd397a0321c34d513f2ed8a5cb8b86be44
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 04:56:25 2009 -0500
+
+    Fixed spandsp
+
+commit f70305c1ad9ce04be49a170c89cd91d773473f6a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 04:41:06 2009 -0500
+
+    Fixed libxml
+
+commit bea680837e45d6f2c767a5a348f7ea596dde61a2
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 04:40:28 2009 -0500
+
+    Fixed libxml
+
+commit 8093332ee4069eafa3fcf16d4a8c720b9e86b41b
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 04:19:03 2009 -0500
+
+    Fixed libtiff
+
+commit 3fad454cd8aae5112c938a5547c6fc323b54ee91
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 04:08:22 2009 -0500
+
+    Fixed libssl
+
+commit 4a70970af187ed8735a08c66588946eccee7f130
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sun May 24 02:26:54 2009 -0500
+
+    Trying patches for uClinux
+
+commit 62667c2660c1f97868102c6f35d819c7163bb1eb
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 19:54:20 2009 -0500
+
+    Trying patches for uClinux
+
+commit b7288691ac9419eaa38e97587f0789be5baf3b57
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 19:52:31 2009 -0500
+
+    Fixed README
+
+commit dc9802cc58c25b6e27fa5aa64fc10e382e8d9880
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:48:36 2009 -0500
+
+    Fixed README
+
+commit ac1c1f7eecc44dc5adfe3973c403c8bfae95177e
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:45:31 2009 -0500
+
+    Fixed README
+
+commit 06133ee3b94fcd8a0f699b151f8b98b7d2023bec
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:33:42 2009 -0500
+
+    Fixed README
+
+commit 3bb57b4b7c0dc28cb7edc8d2f7c2633ce39c9e89
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:31:37 2009 -0500
+
+    Fixed README
+
+commit 9139812259f31b0e532a1fd5b2de45bfa688413f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:29:45 2009 -0500
+
+    Fixed README
+
+commit 1a776bbe5ee14e7823380d05bcb28f87cc1280d4
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:28:06 2009 -0500
+
+    Fixed README
+
+commit 465feac6ae1385405df2c4350e80cb6ff29e4d39
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:26:13 2009 -0500
+
+    Fixed README
+
+commit 7ebb10404dfa80aadbc7e9a8be6bd1a010d53876
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:24:49 2009 -0500
+
+    Fixed README
+
+commit 7449847e887b5c5840933656833ae7b104eac487
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:23:37 2009 -0500
+
+    Fixed README
+
+commit 292c143bc2d0d04052274735bdefa8d28cba3543
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:20:59 2009 -0500
+
+    Fixed README
+
+commit 536a1ae56c889f7405cc44947d22ce7976a8abc5
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:19:02 2009 -0500
+
+    Fixed README
+
+commit 2cce931262273e10154906042f461ab2e921d442
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:15:10 2009 -0500
+
+    Fixed README
+
+commit 6c19f39674e30b8581d7dca103c8b83fabd1b9e0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:13:45 2009 -0500
+
+    Fixed README
+
+commit 533f0f3cf244697eaf1eb77ff009172955769fc6
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 07:07:50 2009 -0500
+
+    Fixed README
+
+commit b7d35ee5b97e63d2856ac9a31989b87502e65722
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:58:57 2009 -0500
+
+    Fixed README
+
+commit 1f04749526511bc247f0a4314209cba25eb64d6a
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:54:44 2009 -0500
+
+    Fixed README
+
+commit 286dc3c2805c2e00ab180b14b01d462bb63392e2
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:53:19 2009 -0500
+
+    Fixed README
+
+commit 98e4b6b941a6beabd8efcf79d67df4179c44e790
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:41:02 2009 -0500
+
+    Fixed README
+
+commit ed64e53c63391ed4dc2fdec1d863a9461e7aea96
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:38:44 2009 -0500
+
+    Fixed README
+
+commit 7cb51d64e9251fd0342aa30e30b6614ad64523bc
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:34:22 2009 -0500
+
+    Fixed README
+
+commit 345533aec8d1b0c2fc38de33247c62967c7d7827
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:29:59 2009 -0500
+
+    Fixed README
+
+commit 101e701038203d09faf194c2bb4c8ec708eb0767
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:27:17 2009 -0500
+
+    Fixed README
+
+commit 38ffec2a357990e4673f0ddde2416ed7a17b43a3
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:25:18 2009 -0500
+
+    Fixed README
+
+commit 00b86d89c6ed6e6b8f34b912c4d721b892c105e7
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:20:01 2009 -0500
+
+    Fixed README
+
+commit 7aff68e659810a7900ec0bc3e03948bef37c2802
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:18:27 2009 -0500
+
+    Fixed README
+
+commit 258de02ff1b28feb26b94af01b64b1994a1c8aea
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:16:59 2009 -0500
+
+    Fixed README
+
+commit 1464dd4a5f05d6df1a59dac3f2b167cff26d68ff
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:12:14 2009 -0500
+
+    Fixed README
+
+commit 9dd6eb0a19e63e3a5ae1d94fe03df06d98953361
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:07:03 2009 -0500
+
+    Fixed README
+
+commit 8fa708e0323b8d1dd6b9e5088d55551e93345711
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:02:47 2009 -0500
+
+    Fixed README
+
+commit 80975e0cb2f0080a1fa87a8ce27d3abd307f20c4
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 06:00:07 2009 -0500
+
+    Fixed README
+
+commit 0415cd368a0223104e63dfc5968939a9a678faa7
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:57:47 2009 -0500
+
+    Fixed README
+
+commit 0137925522edb326e8c78e3f2b067c0029bb64e9
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:55:13 2009 -0500
+
+    Fixed README
+
+commit c1d2146355da02752c823a3ffad403841b030f91
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:53:12 2009 -0500
+
+    Fixed README
+
+commit 1dac271954f885ab4347b13dbebdac34c83a1beb
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:52:09 2009 -0500
+
+    Fixed README
+
+commit b288dbfe1436ffb5466f50dab1f03796e81f75d3
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:49:01 2009 -0500
+
+    Fixed README
+
+commit f47930fbbe36888336db08ed10d8b15d24826a32
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:45:50 2009 -0500
+
+    Fixed README
+
+commit 82c53e7cb6d6558cc617b60fc1ca13dd6fd17162
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:41:05 2009 -0500
+
+    Fixed README
+
+commit 6b59446a6ea8d17ff864866d2d6730bf1b177889
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:38:12 2009 -0500
+
+    Fixed README
+
+commit 2b103d56b3fa17711a25403596a3e4ba3fda1d18
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:31:27 2009 -0500
+
+    Fixed README
+
+commit ec7fb0ca2d5c6e9396a497c77b37a437bdd209db
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 05:13:16 2009 -0500
+
+    Fixed README
+
+commit f046396a57fab2c17f0020c0f6b0739495e5ba67
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:36:50 2009 -0500
+
+    Fixed README
+
+commit 7fdac892b081e02fa194b27c2619d590e6a0615f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:31:27 2009 -0500
+
+    Fixed README
+
+commit dffa5bb143896023eec7c7c4af3519f9d34ca43c
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:15:26 2009 -0500
+
+    Fixed README
+
+commit be3979591176bad23949ae5b8f2f9ec60cb9fa65
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:13:41 2009 -0500
+
+    Fixed README
+
+commit 819b7ac0bb0755dc3c00b17baefdde2a662ed9f3
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:09:39 2009 -0500
+
+    Fixed README
+
+commit 865a0bcb53d7d6374d81c061e4a022628a5f93e0
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:06:13 2009 -0500
+
+    Fixed README
+
+commit 166629d2f00ebde1f777de7afd49265b2bcbaeeb
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 04:03:53 2009 -0500
+
+    Fixed README
+
+commit e773a232cccc8a954fa84b8514a3137e09ea3898
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:57:35 2009 -0500
+
+    Fixed README
+
+commit 3c300ec06e1ea182044cd33f07bce02a654f05a2
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:54:53 2009 -0500
+
+    Fixed README
+
+commit 6b28aedd30994376307843d058f24800f6bf27e7
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:50:38 2009 -0500
+
+    Fixed README
+
+commit 54d23bd6f453a9a3282e51a4c4882e3d7173dd94
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:39:15 2009 -0500
+
+    Fixed README
+
+commit 44ce4a01ba66f6602a669537725843791ac7f7f8
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:29:25 2009 -0500
+
+    Fixed README
+
+commit ca63945e240a7c96dbfdc36baead57d407bf2f0b
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:22:40 2009 -0500
+
+    Fixed README
+
+commit 381c37929aa1ddd680651dff34bbb83f922cc39f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:17:40 2009 -0500
+
+    Fixed README
+
+commit ac714e4ef435dfa3b66b3b046a3a68194d766d43
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:09:28 2009 -0500
+
+    Fixed README
+
+commit 0188a10c2523bd6735a54b8662e6199db6e2755f
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 03:06:42 2009 -0500
+
+    fixed README
+
+commit 567d84f29f9a0a4e685c5ff41b9e545eb4e43f22
+Author: Jose Luis Duran <jlduran@gmail.com>
+Date:   Sat May 23 02:55:43 2009 -0500
+
+    first commit
+
+commit 0d1c3ab93361780e91ce6be2eaf6702c4bc74e0b
+Author: root <root@localhost.localdomain>
+Date:   Sat May 23 02:40:33 2009 -0500
+
+    initial import
