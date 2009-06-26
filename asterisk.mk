@@ -21,7 +21,7 @@ STAGING_LIB=$(STAGING_DIR)/usr/lib
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ \
 -D__BLACKFIN__ -I$(STAGING_INC) -fno-jump-tables \
 -DUSE_SPANDSP_CALLERID
-ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -lspandsp -ltiff
+ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lspandsp -ltiff
 ASTERISK_CONFIGURE_OPTS=--host=bfin-linux-uclibc --disable-largefile \
 --without-pwlib --without-curl CFLAGS="$(ASTERISK_CFLAGS)" \
 LDFLAGS="$(ASTERISK_LDFLAGS)"
@@ -33,11 +33,11 @@ $(DL_DIR)/$(ASTERISK_SOURCE):
 $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE) 
 	$(ASTERISK_UNZIP) $(DL_DIR)/$(ASTERISK_SOURCE) | \
 	tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	$(PATCH_KERNEL) $(ASTERISK_DIR) patch dtmf-1.4.20.patch
-	$(PATCH_KERNEL) $(ASTERISK_DIR) patch gui-crash.patch
-	$(PATCH_KERNEL) $(ASTERISK_DIR) patch asterisk.patch
+#	$(PATCH_KERNEL) $(ASTERISK_DIR) patch dtmf-1.4.20.patch
+#	$(PATCH_KERNEL) $(ASTERISK_DIR) patch gui-crash.patch
 #	$(PATCH_KERNEL) $(ASTERISK_DIR) patch asterisk.patch
-#	$(PATCH_KERNEL) $(ASTERISK_DIR) patch cid.patch
+	$(PATCH_KERNEL) $(ASTERISK_DIR) patch asterisk.patch
+	$(PATCH_KERNEL) $(ASTERISK_DIR) patch cid.patch
 	ln -sf $(BUILD_DIR)/src/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(BUILD_DIR)/src/g729ab_codec.h $(ASTERISK_DIR)/codecs
 	ln -sf $(BUILD_DIR)/src/codec_speex.c $(ASTERISK_DIR)/codecs
@@ -51,7 +51,7 @@ $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked $(STAGING_LIB)/libgsm.a
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
-	-patch -f -p0 < patch/blackfin-gsm.patch
+#	-patch -f -p0 < patch/blackfin-gsm.patch
 	make -C $(UCLINUX_DIST)/lib/blackfin-gsm \
 	CC=bfin-linux-uclibc-gcc AR=bfin-linux-uclibc-ar
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/lib/libgsm.a $(STAGING_LIB)
@@ -120,6 +120,7 @@ asterisk-config: $(ASTERISK_DIR)/.configured
 
 asterisk-dirclean:
 	rm -rf $(ASTERISK_DIR)
+	rm -rf $(PKG_BUILD_DIR)
 
 #---------------------------------------------------------------------------
 #                              CREATING PATCHES     
