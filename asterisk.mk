@@ -90,8 +90,8 @@ asterisk: $(ASTERISK_DIR)/.configured $(ASTERISK_DIR)
 
 	mkdir -p $(TARGET_DIR)/etc/asterisk
 	cp -Rf files/asterisk-defaults/etc/asterisk/* $(TARGET_DIR)/etc/asterisk
-	#mkdir -p $(TARGET_DIR)/etc/asterisk/tools
-	#cp files/asterisk-defaults/etc/asterisk/tools/* $(TARGET_DIR)/etc/asterisk/tools
+	mkdir -p $(TARGET_DIR)/etc/asterisk/tools
+	cp files/asterisk-defaults/etc/asterisk/tools/* $(TARGET_DIR)/etc/asterisk/tools
 	#mkdir -p $(TARGET_DIR)/etc/asterisk/scripts
 	#cp files/asterisk-defaults/etc/asterisk/scripts/* $(TARGET_DIR)/etc/asterisk/scripts
 	#mkdir -p $(TARGET_DIR)/var/lib/asterisk/sounds

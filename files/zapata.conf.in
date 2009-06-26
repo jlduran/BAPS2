@@ -1,11 +1,8 @@
-[trunkgroups]
-
 [channels]
 context=default
 usecallerid=yes
-hidecallerid=no
 callwaiting=yes
-callwaitingcallerid=yes
+callwaitingcallerid=no
 useincomingcalleridonzaptransfer=yes
 threewaycalling=yes
 transfer=yes
@@ -13,9 +10,11 @@ canpark=yes
 cancallforward=yes
 callreturn=yes
 echocancel=yes
-echocancelwhenbridged=yes
+echocancelwhenbridged=no
 callerid=asreceived
+busydetect=yes
 answeronpolarityswitch=yes
+txgain=2.2
 group=1
 callgroup=1
 pickupgroup=1

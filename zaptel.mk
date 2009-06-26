@@ -88,7 +88,7 @@ ifeq ($(strip $(ZAPTEL_GSM_MODULE)),y)
 	ln -sf $(BUILD_DIR)/src/zaptel-gsm/bfsi.c $(ZAPTEL_DIR)/kernel/bfsi.c
 	ln -sf $(BUILD_DIR)/src/zaptel-gsm/gsm_module.c $(ZAPTEL_DIR)/kernel/gsm_module.c
 	ln -sf $(BUILD_DIR)/src/zaptel-gsm/GSM_module_SPI.h $(ZAPTEL_DIR)/kernel/GSM_module_SPI.h
-	ln -sf $(BUILD_DIR)/src/zaptel-gsm/zaptel-base.c-1.4.9.2 $(ZAPTEL_DIR)/kernel/zaptel-base.c
+	cp -f $(BUILD_DIR)/src/zaptel-gsm/zaptel-base.c-1.4.9.2 $(ZAPTEL_DIR)/kernel/zaptel-base.c
 else
 	ln -sf $(BUILD_DIR)/src/sport_interface.c $(ZAPTEL_DIR)/kernel/sport_interface.c
 	ln -sf $(BUILD_DIR)/src/wcfxs.c $(ZAPTEL_DIR)/kernel/wcfxs.c
@@ -154,7 +154,7 @@ zaptel: $(ZAPTEL_DIR)/.configured
 	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc
 	mkdir -p $(TARGET_DIR)/bin
 	mkdir -p $(TARGET_DIR)/etc/init.d 
-	#mkdir -p $(TARGET_DIR)/etc/asterisk
+	mkdir -p $(TARGET_DIR)/etc/asterisk
 
 	# install
 
@@ -167,7 +167,7 @@ zaptel: $(ZAPTEL_DIR)/.configured
 	cp files/zaptel.init $(TARGET_DIR)/etc/init.d/zaptel
 	chmod a+x $(TARGET_DIR)/etc/init.d/zaptel
 	cp -f files/zaptel.conf.in $(TARGET_DIR)/etc/zaptel.conf
-	#cp -f files/zapata.conf.in $(TARGET_DIR)/etc/asterisk
+	cp -f files/zapata.conf.in $(TARGET_DIR)/etc/asterisk
 
 	touch $(PKG_BUILD_DIR)/.built
 
@@ -178,6 +178,7 @@ zaptel-clean:
 
 zaptel-dirclean:
 	rm -Rf $(ZAPTEL_DIR)
+	rm -Rf $(TOPDIR)/tmp/$(PKG_NAME)
 
 ZO = zaptel-$(ZAPTEL_VERSION)-orig
 Z = zaptel-$(ZAPTEL_VERSION)

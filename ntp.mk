@@ -42,7 +42,7 @@ NTP_CONFOPTIONS=								   \
 	--disable-SCHMID --disable-TRIMTAIP --disable-TRIMTSIP             \
 	--disable-WHARTON --disable-VARITEXT --disable-kmem                \
 	--without-openssl-libdir --without-openssl-incdir --without-crypto \
-	--without-electricfence --without-sntp --without-ntpdate \
+	--without-electricfence --without-sntp --with-ntpdate \
 	--without-ntpdc --without-ntpq
 
 $(NTP_BUILD_DIR)/Makefile: $(NTP_DIR)/makefile
@@ -63,6 +63,7 @@ ntp: $(NTP_BUILD_DIR)/Makefile
 	rm -Rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
 	cp -v $(NTP_BUILD_DIR)/ntpd/ntpd $(TARGET_DIR)/bin
+	cp -v $(NTP_BUILD_DIR)/ntpdate/ntpdate $(TARGET_DIR)/bin
 	mkdir -p $(TARGET_DIR)/etc/init.d
 	cp files/ntp.init $(TARGET_DIR)/etc/init.d/ntp
 	chmod a+x $(TARGET_DIR)/etc/init.d/ntp

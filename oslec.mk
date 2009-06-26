@@ -21,7 +21,7 @@ $(OSLEC_DIR):
 	patch -p0 < patch/oslec.patch
 
 oslec: $(OSLEC_DIR)
-	make -C $(UCLINUX_DIST) SUBDIRS=$(OSLEC_DIR)/kernel modules
+	make -C $(UCLINUX_DIST)/linux-2.6.x SUBDIRS=$(OSLEC_DIR)/kernel modules
 	bfin-linux-uclibc-gcc $(OSLEC_DIR)/user/sample.c -o $(OSLEC_DIR)/user/sample -Wall
 
 	mkdir -p $(TARGET_DIR)/lib/modules/$(MOD_DIR)/misc

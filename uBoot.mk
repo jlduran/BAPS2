@@ -9,11 +9,13 @@
 # GNU General Public License for more details.
 # Copyright @ 2008 Astfin <mark@astfin.org>
 # Primary Authors: mark@astfin.org, pawel@astfin.org
+#
+# Supported products: ip04, ip08
+#
 #########################################################################
 
 include rules.mk
 
-SOURCES_DIR=$(TOP_DIR)/src
 PRODUCT=ip08
 CPU_FLAGS=CPU_400
 MEM_FLAGS=SDRAM_64MB_SLOW

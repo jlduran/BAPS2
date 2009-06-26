@@ -1,5 +1,5 @@
 #
-#	Makefile -- Build instructions for IP04
+#	Makefile -- Build instructions for IP08
 #
 
 .EXPORT_ALL_VARIABLES:
