@@ -501,7 +501,7 @@ static void init_sport0(void)
 
 	/* external tx clk, not data dependant, MSB first */
 	bfin_write_SPORT0_TCR2(7);      /* 8 bit word length      */
-	bfin_write_SPORT0_TCR1(0);//YN was 0 TCKFE
+	bfin_write_SPORT0_TCR1(0);
 
 	/* rx enabled, MSB first, internal frame sync     */
 	bfin_write_SPORT0_RCR2(7);      /* 8 bit word length      */
@@ -509,7 +509,7 @@ static void init_sport0(void)
 		bfin_write_SPORT0_RCR1(IRFS | IRCLK);
 	}
 	else {
-		bfin_write_SPORT0_RCR1(IRFS );//YN was IRFS only | RCKFE 
+		bfin_write_SPORT0_RCR1(IRFS);
 	}
 
 	/* Enable MCM 8 transmit & receive channels       */
