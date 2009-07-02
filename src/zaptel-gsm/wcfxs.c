@@ -965,7 +965,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 			}
 			if (!wc->mod.fxs.oldrxhook[card] && wc->mod.fxs.debouncehook[card]) {
 				/* Off hook */
-				if (debug>=2)			
+				if (debug>=2)
 					printk("wcfxs: Card %d Going off hook\n", card);
 				zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
 				if (robust)
@@ -974,7 +974,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 			
 			} else if (wc->mod.fxs.oldrxhook[card] && !wc->mod.fxs.debouncehook[card]) {
 				/* On hook */
-				if (debug>=2)		
+				if (debug>=2)
 					printk("wcfxs: Card %d Going on hook\n", card);
 				zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
 				wc->mod.fxs.oldrxhook[card] = 0;
@@ -1021,7 +1021,7 @@ void regular_interrupt_processing(u8 *read_samples, u8 *write_samples) {
 	wc->intcount++;
 	x = wc->intcount % NUM_CARDS;
 
-	/* as ISR is started before chips initialised we nee this test
+	/* as ISR is started before chips initialised we need this test
            to ensure we don't test the hook switch and ring detect
            before chips initialised */
 
