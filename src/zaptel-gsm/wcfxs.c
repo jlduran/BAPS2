@@ -377,7 +377,7 @@ static int debug = 0;
 
 //YN =>from here
 static void wait_just_a_bit(int foo);
-inline void __wcfxs_setcard(struct wcfxs *wc, int card);
+static inline void __wcfxs_setcard(struct wcfxs *wc, int card);
 
 static char *SIM_pin="3700";
 static char SIM_Enter_string[20]="at+cpin=\"";
@@ -586,7 +586,7 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 }
 
 /* we have only one card at the moment */
-inline void __wcfxs_setcard(struct wcfxs *wc, int card)// YN There was the "static" declaration here!
+static inline void __wcfxs_setcard(struct wcfxs *wc, int card)
 {
 	if(wc->curcard != card) {
 	//  printk("wc->curcard: %d card: %d\n", wc->curcard, card);
