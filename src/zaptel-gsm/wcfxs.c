@@ -334,7 +334,7 @@ struct wcfxs {
 		struct {
 #ifdef AUDIO_RINGCHECK
 			unsigned int pegtimer[NUM_CARDS];
-			hint pegcount[NUM_CARDS];
+			int pegcount[NUM_CARDS];
 			int peg[NUM_CARDS];
 			int ring[NUM_CARDS];
 #else			
