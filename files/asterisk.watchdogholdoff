@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#  This script provides a means of killing off asterisk while preventing 
+#  the watchdog from restarting the appliance (due to the script's name 
+#  starting with "asterisk".)  The intent is to hold the watchdog 
+#  off while debugging situations where asterisk cannot run.
+killall -9 asterisk 
+
+sleep 100000	# Sleep for longer than 1 day. 

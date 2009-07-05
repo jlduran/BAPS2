@@ -53,6 +53,7 @@ all: dnsmasq
 
 dnsmasq-dirclean:
 	rm -rf $(DNSMASQ_DIR)
+	rm -rf $(TOPDIR)/tmp/$(PKG_NAME)
 
 #--------------------------------------------------------------------------
 #                              CREATING PACKAGE    

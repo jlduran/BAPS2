@@ -66,7 +66,7 @@ all: dropbear
 
 dropbear-dirclean:
 	rm -rf $(DROPBEAR_DIR)
-
+	rm -rf $(TOPDIR)/tmp/$(PKG_NAME)
 
 #---------------------------------------------------------------------------
 #                              CREATING PACKAGE

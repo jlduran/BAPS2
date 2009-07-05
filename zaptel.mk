@@ -173,9 +173,6 @@ zaptel: $(ZAPTEL_DIR)/.configured
 
 all: zaptel
 
-zaptel-clean:
-	make -C $(ZAPTEL_DIR) clean
-
 zaptel-dirclean:
 	rm -Rf $(ZAPTEL_DIR)
 	rm -Rf $(TOPDIR)/tmp/$(PKG_NAME)

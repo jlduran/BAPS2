@@ -1,0 +1,22 @@
+#!/bin/sh
+# Start up file for ez-ipupdate
+
+case $1 in
+	start) ez-ipupdate -c /etc/ez-ipupdate.conf;;
+	stop) killall -9 ez-ipupdate;;
+	restart) killall -9 ez-ipupdate;
+		ez-ipupdate -c /etc/ez-ipupdate.conf;;
+	enable) rm -f /etc/rc.d/S85ez-ipupdate;
+		ln -s /etc/init.d/ez-ipupdate /etc/rc.d/S85ez-ipupdate;;
+	disable) rm -f /etc/rc.d/S85ez-ipupdate;;
+	*) cat <<EOF;;
+Syntax: /etc/init.d/dnsmasq [command]
+
+Available commands:
+	start	Start the service
+	stop	Stop the service
+	restart	Restart the service
+	enable	Enable service autostart
+	disable	Disable service autostart
+EOF
+esac
