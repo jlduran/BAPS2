@@ -10,7 +10,7 @@
 # The output is a bootable uImage in images/uImage.
 #
 # Supported vendors: Rowetel
-# Supported products: IP04, IP08
+# Supported products: IP01, IP04, IP08
 #
 
 VENDOR=Rowetel
