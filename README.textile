@@ -18,7 +18,7 @@ The goal is to make installing software on the Blackfin much easier for end-user
 
 h2(#packages). Packages
 
-In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is a growing list of packages:
+In addition to an IP08/IP04/IP01 uImage (kernel plus basic root filesystem) there is a growing list of packages:
 
 |_. Name|_. Description|
 |asterisk|Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware.|
@@ -28,6 +28,7 @@ In addition to an IP04/IP08 uImage (kernel plus basic root filesystem) there is 
 |libssl|A toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography world-wide.|
 |libtiff|Tiff image file format library.|
 |libxml|A library for manipulating XML and HTML resources.|
+|openvpn|A web-scale networking platform enabling the next wave of VPN services.|
 |oslec|Open Source Line Echo Canceller, a high quality free echo canceller for Asterisk.|
 |spandsp|Telephony Algorithms and Digital Signal Processing Routines.|
 |vim|Vim is an almost compatible version of the UNIX editor Vi.|
