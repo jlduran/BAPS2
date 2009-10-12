@@ -205,7 +205,3 @@
 #/dev/mcd	b	640	0	0	23	0	0	0	-
 #/dev/optcd	b	640	0	0	17	0	0	0	-
 
-# Tun devices (for OpenVPN)
-/dev/net	d	755	0	0	-	-	-	-	-
-/dev/net/tun	c	640	0	0	10	200	0	0	-
-

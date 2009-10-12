@@ -93,15 +93,21 @@ endef
 
 # post installation - add the sym link for auto start
 
-define Package/openvpn/postinst
+define Package/$(PKG_NAME)/postinst
 #!/bin/sh
+rm -rf /dev/net
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+chmod 755 /dev/net
+chmod 640 /dev/net/tun
 endef
 
 # pre-remove - remove sym link
 
-define Package/openvpn/prerm
+define Package/$(PKG_NAME)/prerm
 #!/bin/sh
 rm -rf /bin/openvpn
+rm -rf /dev/net
 endef
 
 $(eval $(call BuildPackage,openvpn))
