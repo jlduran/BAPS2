@@ -71,7 +71,7 @@ $(SQUID_DIR)/.unpacked: $(DL_DIR)/$(SQUID_SOURCE)
 
 $(SQUID_DIR)/.configured: $(SQUID_DIR)/.unpacked
 	cd $(SQUID_DIR); ./configure $(SQUID_CONFIGURE_OPTS)
-	touch $(NETSNMP_DIR)/.configured
+	touch $(SQUID_DIR)/.configured
 
 squid: $(SQUID_DIR)/.configured
 	cd $(SQUID_DIR); make
