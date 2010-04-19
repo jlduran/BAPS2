@@ -1,0 +1,416 @@
+globals.o globals.o: globals.c squid.h ../include/config.h \
+  ../include/autoconf.h ../include/version.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/features.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_config.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_arch_features.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/cdefs.h \
+  ../include/squid_types.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdlib.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/stddef.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/waitflags.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/waitstatus.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/endian.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/endian.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/types.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/types.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/wordsize.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/kernel_types.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/typesizes.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/pthreadtypes.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sched.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/time.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/select.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/select.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigset.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/time.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/sysmacros.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/alloca.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/inttypes.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdint.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/bitypes.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/unistd.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix_opt.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/environments.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/confname.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/getopt.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdio.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_stdio.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_mutex.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/pthread.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sched.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_clk_tck.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/signal.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/initspin.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigthread.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_pthread.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/stdarg.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/stdio_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/ctype.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_touplow.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/errno.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/errno.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/errno_values.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/fcntl.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/fcntl.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uio.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/stat.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/stat.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/grp.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/malloc.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/memory.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/string.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/netdb.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/netinet/in.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/socket.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/uio.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/socket.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/limits.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/syslimits.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/limits.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix1_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/local_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/linux/limits.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_local_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix2_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/xopen_lim.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sockaddr.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/socket.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/sockios.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/in.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/byteswap.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/rpc/netdb.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/siginfo.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/netdb.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/paths.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/pwd.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/signum.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigaction.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigcontext.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/sigcontext.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigstack.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/ucontext.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ucontext.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/param.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/linux/param.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/param.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/time.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/resource.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/resource.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/arpa/inet.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/un.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/wait.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/syscall.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sysnum.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/strings.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/getopt.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/dirent.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/dirent.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/mount.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ioctl.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/ioctls.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/ioctls.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/ioctl.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm-generic/ioctl.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/ioctl-types.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ttydefaults.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/syslog.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/syslog.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/math.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_val.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_valf.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_vall.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/inf.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/nan.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/mathdef.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/mathcalls.h \
+  /usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/regex.h \
+  ../include/squid_md5.h ../include/squid_types.h ../include/Stack.h \
+  ../include/Array.h ../include/hash.h ../include/rfc1035.h \
+  ../include/config.h defines.h enums.h typedefs.h structs.h \
+  ../include/splay.h protos.h globals.h ../include/util.h
+
+squid.h:
+
+../include/config.h:
+
+../include/autoconf.h:
+
+../include/version.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/features.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_config.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_arch_features.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/cdefs.h:
+
+../include/squid_types.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdlib.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/stddef.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/waitflags.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/waitstatus.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/endian.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/endian.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/types.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/types.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/wordsize.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/kernel_types.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/typesizes.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/pthreadtypes.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sched.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/time.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/select.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/select.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigset.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/time.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/sysmacros.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/alloca.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/inttypes.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdint.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/bitypes.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/unistd.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix_opt.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/environments.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/confname.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/getopt.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/stdio.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_stdio.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_mutex.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/pthread.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sched.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_clk_tck.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/signal.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/initspin.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigthread.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_pthread.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/stdarg.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/stdio_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/ctype.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_touplow.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/errno.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/errno.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/errno_values.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/fcntl.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/fcntl.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uio.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/stat.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/stat.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/grp.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/malloc.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/memory.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/string.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/netdb.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/netinet/in.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/socket.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/uio.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/socket.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/limits.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../lib/gcc/bfin-linux-uclibc/4.1.2/include/syslimits.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/limits.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix1_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/local_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/linux/limits.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/uClibc_local_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/posix2_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/xopen_lim.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sockaddr.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/socket.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/sockios.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/in.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/byteswap.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/rpc/netdb.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/siginfo.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/netdb.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/paths.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/pwd.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/signum.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigaction.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigcontext.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/sigcontext.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sigstack.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/ucontext.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ucontext.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/param.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/linux/param.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/param.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/time.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/resource.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/resource.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/arpa/inet.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/un.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/wait.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/syscall.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/sysnum.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/strings.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/getopt.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/dirent.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/dirent.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/mount.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ioctl.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/ioctls.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/ioctls.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm/ioctl.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/asm-generic/ioctl.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/ioctl-types.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/ttydefaults.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/syslog.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/sys/syslog.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/math.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_val.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_valf.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/huge_vall.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/inf.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/nan.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/mathdef.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/bits/mathcalls.h:
+
+/usr/local/src/BAPS2/opt/uClinux/bfin-linux-uclibc/bin/../bfin-linux-uclibc/runtime/usr/include/regex.h:
+
+../include/squid_md5.h:
+
+../include/squid_types.h:
+
+../include/Stack.h:
+
+../include/Array.h:
+
+../include/hash.h:
+
+../include/rfc1035.h:
+
+../include/config.h:
+
+defines.h:
+
+enums.h:
+
+typedefs.h:
+
+structs.h:
+
+../include/splay.h:
+
+protos.h:
+
+globals.h:
+
+../include/util.h:
