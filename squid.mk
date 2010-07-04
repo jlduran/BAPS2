@@ -22,44 +22,12 @@ PKG_VERSION:=$(SQUID_VERSION)
 PKG_RELEASE:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/tmp/squid
 
-SQUID_CONFIGURE_OPTS=--host=bfin-linux-uclibc
-SQUID_CPPFLAGS=
-SQUID_LDFLAGS=
-SQUID_EPOLL ?= $(strip \
-	$(if $(filter syno-e500, $(OPTWARE_TARGET)),--disable-epoll, \
-	$(if $(filter module-init-tools, $(PACKAGES)),--enable-epoll, \
-	--disable-epoll)))
-
-SQUID_INST_DIR=/opt
-SQUID_BIN_DIR=$(SQUID_INST_DIR)/bin
-SQUID_SBIN_DIR=$(SQUID_INST_DIR)/sbin
-SQUID_LIBEXEC_DIR=$(SQUID_INST_DIR)/libexec
-SQUID_DATA_DIR=$(SQUID_INST_DIR)/share/squid
-SQUID_SYSCONF_DIR=$(SQUID_INST_DIR)/etc/squid
-SQUID_SHAREDSTATE_DIR=$(SQUID_INST_DIR)/com/squid
-SQUID_LOCALSTATE_DIR=$(SQUID_INST_DIR)/var/squid
-SQUID_LIB_DIR=$(SQUID_INST_DIR)/lib
-SQUID_INCLUDE_DIR=$(SQUID_INST_DIR)/include
-SQUID_INFO_DIR=$(SQUID_INST_DIR)/info
-SQUID_MAN_DIR=$(SQUID_INST_DIR)/man
-SQUID_CROSS_CONFIG_ENVS=\
-	ac_cv_sizeof_int8_t=1 \
-	ac_cv_sizeof_uint8_t=1 \
-	ac_cv_sizeof_u_int8_t=1 \
-	ac_cv_sizeof_int16_t=2 \
-	ac_cv_sizeof_uint16_t=2 \
-	ac_cv_sizeof_u_int16_t=2 \
-	ac_cv_sizeof_int32_t=4 \
-	ac_cv_sizeof_uint32_t=4 \
-	ac_cv_sizeof_u_int32_t=4 \
-	ac_cv_sizeof_int64_t=8 \
-	ac_cv_sizeof_uint64_t=8 \
-	ac_cv_sizeof_u_int64_t=8 \
-	ac_cv_sizeof___int64=0 \
-	ac_cv_af_unix_large_dgram=yes \
-	ac_cv_func_setresuid=yes \
-	ac_cv_func_va_copy=yes \
-	ac_cv_func___va_copy=yes
+STAGING_INC=$(STAGING_DIR)/usr/include
+SQUID_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ \
+-D__BLACKFIN__ -I$(STAGING_INC)
+SQUID_LDFLAGS=-mfdpic
+SQUID_CONFIGURE_OPTS=--host=bfin-linux-uclibc --prefix=$(STAGING_DIR) \
+CFLAGS="$(SQUID_CFLAGS)" LDFLAGS="$(SQUID_LDFLAGS)"
 
 $(DL_DIR)/$(SQUID_SOURCE):
 	mkdir -p dl

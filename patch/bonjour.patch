@@ -1,0 +1,44 @@
+--- Clients/Makefile	2010-03-09 18:03:45.000000000 +0200
++++ Clients/Makefile	2010-03-09 18:04:55.000000000 +0200
+@@ -66,4 +66,4 @@
+ 	mkdir build
+ 
+ build/dns-sd: build dns-sd.c
+-	cc $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared -o $@
++	bfin-linux-uclibc-gcc $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared -o $@
+--- mDNSPosix/Makefile	2006-06-21 02:07:04.000000000 +0300
++++ mDNSPosix/Makefile	2010-03-09 22:34:16.000000000 +0200
+@@ -473,7 +473,7 @@
+ CLIENTLIBOBJS = $(OBJDIR)/dnssd_clientlib.c.so.o $(OBJDIR)/dnssd_clientstub.c.so.o $(OBJDIR)/dnssd_ipc.c.so.o
+ 
+ $(BUILDDIR)/libdns_sd.$(LDSUFFIX): $(CLIENTLIBOBJS)
+-	@$(LD) $(LINKOPTS) -o $@ $+
++	@$(LD) $(LINKOPTS) -shared -o $@ $+
+ 	@$(STRIP) $@
+ 
+ Clients: setup libdns_sd ../Clients/build/dns-sd
+@@ -487,7 +487,7 @@
+ 	@echo "Name Service Switch module done"
+ 
+ $(BUILDDIR)/$(NSSLIBFILE): $(CLIENTLIBOBJS) $(OBJDIR)/nss_mdns.c.so.o
+-	@$(LD) $(LINKOPTS) -o $@ $+
++	@$(LD) $(LINKOPTS) -shared -o $@ $+
+ 	@$(STRIP) $@
+ 
+ #############################################################################
+@@ -679,6 +679,9 @@
+ $(BUILDDIR)/dnsextd:                 $(SPECIALOBJ) $(OBJDIR)/dnsextd.c.threadsafe.o
+ 	$(CC) $+ -o $@ $(LINKOPTS) $(LINKOPTS_PTHREAD)
+ 
++$(OBJDIR)/nss_mdns.c.so.o: nss_mdns.c
++	$(CC) $(CFLAGS) -c -o $@ $< -I$(STAG_INC)
++
+ #############################################################################
+ 
+ # Implicit rules
+@@ -698,4 +701,4 @@
+ 	$(CC) $(CFLAGS) -c -fPIC -o $@ $<
+ 
+ $(OBJDIR)/%.c.so.o:	$(SHAREDDIR)/%.c
+-	$(CC) $(CFLAGS) -c -fPIC -o $@ $<
++	$(CC) $(CFLAGS) -c -shared -o $@ $<
