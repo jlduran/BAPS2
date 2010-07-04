@@ -10,6 +10,7 @@ freeradius-server-2.1.8/*
 g729/*
 gmp-4.3.1/*
 libxml2-2.7.3/*
+mDNSResponder-107.6/*
 openvpn/*
 opt/*
 oslec/*
