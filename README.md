@@ -199,7 +199,7 @@ And try:
     root:~> ipkg update
     root:~> ipkg list
 
-NOTES:
+### Notes
 
 1. If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
 
