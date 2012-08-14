@@ -62,7 +62,7 @@ In addition to an IP08/IP04/IP01 uImage (kernel plus basic root filesystem) ther
   </tr>
 </table>
 
-## Getting Started
+## <a id="started"></a>Getting Started
 
 The installation of the BAPs uImage is still a little complex (apologies). It requires working with u-boot using the RS-232 console interface. For more information on this process please see the [IP04 Wiki](http://www.voip-info.org/wiki/view/IP04+Open+Hardware+IP-PBX) or please post to the Blackfin Asterisk forum.
 
