@@ -172,3 +172,117 @@ After installation many packages include documentation in the /usr/doc directory
 5. BAPS uses init.d type start up scripts, for example:
 
         root:~> ls /etc/init.d
+        root:~> /etc/init.d/hello
+        root:~> /etc/init.d/hello enable
+        root:~> ls -l /etc/rc.d/
+
+## HOWTO - IPKG
+
+To build the ipkg:
+
+    [BAPS2]$ make -f hello.mk hello
+    [BAPS2]$ make -f hello.mk hello-package
+    [BAPS2]$ ls ipkg
+
+To create an index file:
+
+    [BAPS2]$ cd ipkg
+    [BAPS2]$ ../scripts/ipkg-make-index.sh . > Packages
+    [BAPS2]$ scp Packages /your/web/server
+
+Then change the first line in /etc/ipkg.conf on your IP04:
+
+    src snapshots http://you.web.server
+
+And try:
+
+    root:~> ipkg update
+    root:~> ipkg list
+
+NOTES:
+
+1. If you change the post or pre inst scripts, it is a good idea to rm the existing $(TARGET_DIR) (see Makefile for your package), as the package make scripts don't seem to recognise when post/pre scripts have been changed.
+
+2. To debug post/pre inst scripts `#!/bin/sh -x` is your friend!
+3. To test ipkgs you can rcp down to the target:
+   
+        [host]$ rcp ipkg/asterisk_1.4.4-1_bfin.ipk root@ip04:/root
+        [ip04]$ ipkg install asterisk_1.4.4-1_bfin.ipk
+
+  If you get complaints about MD5 mismatch, then:
+
+        [ip04]$ rm /usr/lib/ipkg/lists/snapshots
+
+## HOWTO - uClinux Changes
+
+Say you have changed a busybox option, or modified some files in uClinux-dist.  To capture the changes to patches in git:
+
+    [BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
+    [BAPS2]$ git status
+
+Tips:
+
+To change linux kernel options:
+
+    [BAPS2]$ cd uClinux-dist
+    [uClinux-dist]$ make linux_menuconfig
+
+To change user application and library settings:
+
+    [BAPS2]$ cd uClinux-dist
+    [uClinux-dist]$ make config_menuconfig
+
+To modify the IP04 rc, motd etc:
+
+    [BAPS2]$ cd uClinux-dist/vendors/Rowetel/IP04
+
+Then capture changes as above with:
+ 
+    [BAPS2]$ make -f uClinux.mk uClinux-ip04-make-patch
+
+### Notes
+
+1. Patch files are compatible with Astfin, so hopefully it's possible to move patches back and forth between BAPS2 and Astfin.
+
+2. See TODO.txt
+
+3. To debug init shell scripts, e.g. files/hello.init, add a -x to the first line if the script using vi on the IP04:
+
+        #!/bin/sh -x
+
+4. When writing init scripts your will find the busybox msh shell has some quirks, here is a link that explains them:
+
+        http://dslinux.org/cgi-bin/moin.cgi/DSLinuxMshScriptingGuide?action=show&redirect=DSLinux+msh+scripting+guide
+
+5. For more information on the IPKG format:
+
+        http://handhelds.org/moin/moin.cgi/Ipkg
+
+6. On the target, the ipkg data is stored in /usr/lib/ipkg/info/
+
+## Directories
+
+ipkg - completed packages are placed here
+
+include - from OpenWRT kamikaze, contains useful stuff for building packages
+
+scripts - useful scripts from OpenWRT kamikaze
+
+patch - patches for all packages
+
+files - start up scripts for packages, get copied to /etc/init.d on target
+
+## Credits
+
+Thanks to: Jeff Knighton, Alex Tao, Ming C (Vincent) Li, Mike Taht, Keith Huang, Mark Hindess, Nick Basil, Michael O'Conner, Darryl Ross, Jose Luis Duran and Kelvin Chua for contributing.
+
+## BAPS2 TODO
+
+Some tasks that need doing...:
+
+1. Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
+2. Can we install kernels (uImage) using a package and no u-boot/RS-232?
+3. Should we separate kernel from baseline root file system install?
+4. BAPS uImages for BF537
+5. A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
+6. Fix the Maintainer Field in packages (e.g. specific entries for each package).
