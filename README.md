@@ -278,11 +278,10 @@ Thanks to: Jeff Knighton, Alex Tao, Ming C (Vincent) Li, Mike Taht, Keith Huang,
 
 ## BAPS2 TODO
 
-Some tasks that need doing...:
+Some tasks that need doing:
 
-1. Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages.
-2. Can we install kernels (uImage) using a package and no u-boot/RS-232?
-3. Should we separate kernel from baseline root file system install?
-4. BAPS uImages for BF537
-5. A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
-6. Fix the Maintainer Field in packages (e.g. specific entries for each package).
+[ ] Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages  [ ] Can we install kernels (uImage) using a package and no u-boot/RS-232?
+[ ] Should we separate kernel from baseline root file system install?
+[ ] BAPS uImages for BF537
+[ ] A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
+[ ] Fix the Maintainer Field in packages (e.g. specific entries for each package).
