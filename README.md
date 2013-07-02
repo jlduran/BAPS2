@@ -20,47 +20,20 @@ Package-based Build System for Blackfin Asterisk. Key differences compared to bu
 
 In addition to an IP08/IP04/IP01 uImage (kernel plus basic root filesystem) there is a growing list of packages:
 
-<table>
-  <tr>
-    <th>Name</th><th>Description</th>
-  </tr>
-  <tr>
-    <td>asterisk</td><td>Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware.</td>
-  </tr>
-  <tr>
-    <td>dropbear</td><td>Dropbear is a relatively small SSH 2 server and client.</td>
-  </tr>
-  <tr>
-    <td>g729</td><td>G.729 Codec.</td>
-  </tr>
-  <tr>
-    <td>libgmp</td><td>GNU MP is a portable library written in C for arbitrary precision arithmetic on integers, rational numbers, and floating-point numbers. It aims to provide the fastest possible arithmetic for all applications that need higher precision than is directly supported by the basic C types.</td>
-  </tr>
-  <tr>
-    <td>libssl</td><td>A toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography world-wide.</td>
-  </tr>
-  <tr>
-    <td>libtiff</td><td>Tiff image file format library.</td>
-  </tr>
-  <tr>
-    <td>libxml</td><td>A library for manipulating XML and HTML resources.</td>
-  </tr>
-  <tr>
-    <td>openvpn</td><td>A web-scale networking platform enabling the next wave of VPN services.</td>
-  </tr>
-  <tr>
-    <td>oslec</td><td>Open Source Line Echo Canceller, a high quality free echo canceller for Asterisk.</td>
-  </tr>
-  <tr>
-    <td>spandsp</td><td>Telephony Algorithms and Digital Signal Processing Routines.</td>
-  </tr>
-  <tr>
-    <td>vim</td><td>Vim is an almost compatible version of the UNIX editor Vi.</td>
-  </tr>
-  <tr>
-    <td>zaptel</td><td>Telephony hardware drivers for IP04 SPI-over-SPORT1 version (later Atcom IP04s, IP08s).</td>
-  </tr>
-</table>
+| Name     | Description                                                                                    |
+|:--------:|:-----------------------------------------------------------------------------------------------|
+| asterisk | Asterisk is a complete PBX in software. It provides all of the features you would expect from a PBX and more. Asterisk does voice over IP in three protocols, and can interoperate with almost all standards-based telephone equipment using relatively inexpensive hardware. |
+| dropbear | Dropbear is a relatively small SSH 2 server and client.                                        |
+| g729     | G.729 Codec.                                                                                   |
+| libgmp   | GNU MP is a portable library written in C for arbitrary precision arithmetic on integers, rational numbers, and floating-point numbers. It aims to provide the fastest possible arithmetic for all applications that need higher precision than is directly supported by the basic C types. |
+| libssl   | A toolkit implementing SSL v2/v3 and TLS protocols with full-strength cryptography world-wide. |
+| libtiff  | Tiff image file format library.                                                                |
+| libxml   | A library for manipulating XML and HTML resources.                                             |
+| openvpn  | A web-scale networking platform enabling the next wave of VPN services.                        |
+| oslec    | Open Source Line Echo Canceller, a high quality free echo canceller for Asterisk.              |
+| spandsp  | Telephony Algorithms and Digital Signal Processing Routines.                                   |
+| vim      | Vim is an almost compatible version of the UNIX editor Vi.                                     |
+| zaptel   | Telephony hardware drivers for IP04 SPI-over-SPORT1 version (later Atcom IP04s, IP08s).        |
 
 ## Getting Started
 
@@ -280,8 +253,9 @@ Thanks to: Jeff Knighton, Alex Tao, Ming C (Vincent) Li, Mike Taht, Keith Huang,
 
 Some tasks that need doing:
 
-- [ ] Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt.  This will take much of the pain away, kernels can then be treated like packages  [ ] Can we install kernels (uImage) using a package and no u-boot/RS-232?
+- [ ] Work out a way to install uImage.ip08 without u-boot, i.e. from a uClinux root prompt. This will take much of the pain away, kernels can then be treated like packages.
+- [ ] Can we install kernels (uImage) using a package and no u-boot/RS-232?
 - [ ] Should we separate kernel from baseline root file system install?
-- [ ] BAPS uImages for BF537
+- [x] BAPS uImages for BF537
 - [ ] A way to build all packages needed for development, like ip08.mk, or maybe set up dependencies in existing Makefile, e.g. so that libssl.mk is called when making asterisk. Not sure about the best way to go here - the idea behind BAPs is to modularise compilation so I am sensitive to having many dependencies and all the extra output that would generate on the command line.
 - [ ] Fix the Maintainer Field in packages (e.g. specific entries for each package).
